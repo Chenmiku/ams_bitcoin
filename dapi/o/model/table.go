@@ -2,7 +2,7 @@ package model
 
 import (
 	"db/mgo"
-	"ams_system/dapi/config/cons"
+	"ams_api/dapi/config/cons"
 )
 
 func NewTable(name string) *mgo.Table {

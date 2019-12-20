@@ -1,7 +1,7 @@
 package address
 
 import (
-	"ams_system/dapi/o/model"
+	"ams_api/dapi/o/model"
 	"time"
 )
 

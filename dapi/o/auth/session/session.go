@@ -3,7 +3,7 @@ package session
 import (
 	"db/mgo"
 	"encoding/json"
-	"ams_system/dapi/o/org/user"
+	"ams_api/dapi/o/org/user"
 )
 
 // Session

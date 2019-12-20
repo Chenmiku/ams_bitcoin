@@ -1,15 +1,24 @@
 package address
 
 import (
-	"ams_system/dapi/o/address"
-	"ams_system/dapi/o/addresskey"
+	"ams_api/dapi/o/address"
+	"ams_api/dapi/o/addresskey"
 	"http/web"
 	"net/http"
 	"strconv"
-	"github.com/blockcypher/gobcy"
-	"ams_system/dapi/config"
+	"github.com/ethereum/go-ethereum/ethclient"
+	"github.com/ethereum/go-ethereum/crypto"
+	"github.com/ethereum/go-ethereum/common/hexutil"
+	"crypto/ecdsa"
+	"github.com/ethereum/go-ethereum/common"
+	"ams_api/dapi/config"
 	"fmt"
 	"time"
+	"regexp"
+	"context"
+	//"golang.org/x/net/context"
+	"math"
+	"math/big"
 )
 
 type AddressServer struct {
@@ -17,14 +26,14 @@ type AddressServer struct {
 	*http.ServeMux
 }
 
+// address response
 type AddressResult struct {
-	Id					   string `json:"id"`
 	Addr                   string `json:"addr"`
-	TotalRevceived         float64    `json:"total_revceived"`
-	TotalSent              float64    `json:"total_sent"`
-	Balance                float64    `json:"balance"`
-	UnconfirmedBalance     float64   `json:"unconfirmed_balance"`
-	FinalBalance           float64    `json:"final_balance"`
+	TotalRevceived         string    `json:"total_revceived"`
+	TotalSent              string    `json:"total_sent"`
+	Balance                string    `json:"balance"`
+	UnconfirmedBalance     string   `json:"unconfirmed_balance"`
+	FinalBalance           string    `json:"final_balance"`
 	CoinType               string `json:"coin_type"`
 	ConfirmedTransaction   int    `json:"confirmed_transaction"`
 	UnconfirmedTransaction int   `json:"unconfirmed_transaction"`
@@ -79,6 +88,7 @@ func(s *AddressServer) HandleCreate(w http.ResponseWriter, r *http.Request) {
 	var u = &address.Address{}
 	var uKey = &addresskey.AddressKey{}
 
+	// check coin type
 	switch coinType {
 	case "btc":
 		config.CoinType = "btc"
@@ -88,51 +98,70 @@ func(s *AddressServer) HandleCreate(w http.ResponseWriter, r *http.Request) {
 		config.CoinType = "btc"
 	}
 
-	btc := gobcy.API{config.UserToken, config.CoinType, config.Chain}
-	addrKeys, err := btc.GenAddrKeychain()
+	// connect to node
+	_, err = ethclient.Dial(config.EndPoint)
 	if err != nil {
 		s.ErrorMessage(w, err.Error())
 		return
 	}
 
-	uKey.Addr = addrKeys.Address
-	uKey.PublicKey = addrKeys.Public
-	uKey.PrivateKey = addrKeys.Private
-	uKey.Wif = addrKeys.Wif
+	// generate address and private key
+	key, err := crypto.GenerateKey()
+	if err != nil {
+		s.ErrorMessage(w, err.Error())
+		return
+	}
+
+	privateKeyBytes := crypto.FromECDSA(key)
+	publicKey := key.Public()
+	publicKeyECDSA, _ := publicKey.(*ecdsa.PublicKey)
+	publicKeyBytes := crypto.FromECDSAPub(publicKeyECDSA)
+
+	priKey := hexutil.Encode(privateKeyBytes)[2:] // private key
+	pubKey := hexutil.Encode(publicKeyBytes)[4:] // public key
+	address := crypto.PubkeyToAddress(key.PublicKey).Hex() // address
+
+	// check valid address
+	re := regexp.MustCompile("^0x[0-9a-fA-F]{40}$")
+	if re.MatchString(address) == false {
+		s.ErrorMessage(w, "invalid_address")
+		return
+	}
+
+	// save address to db
+	uKey.Addr = address
+	uKey.PrivateKey = priKey
+	uKey.PublicKey = pubKey
 	err = uKey.Create()
 	if err != nil {
 		s.ErrorMessage(w, err.Error())
 		return
 	}
 
-	u.Addr = addrKeys.Address
+	u.Addr = address
 	u.CoinType = config.CoinType
 	u.UserID = userid
 	err = u.Create()
 	if err != nil {
 		s.ErrorMessage(w, err.Error())
 	} else {
-		fmt.Println("create address success")
-		ad, err := address.GetByAddress(addrKeys.Address)
-		if err != nil {
-			s.ErrorMessage(w, err.Error())
-			return
-		}
+		fmt.Println("address was created: ", address)
 		addressResult := &AddressResult{}
-		addressResult.Id = ad.ID
-		addressResult.Addr = addrKeys.Address
-		addressResult.UserID = ad.UserID
-		addressResult.CoinType = ad.CoinType
+		addressResult.Addr = address
+		addressResult.UserID = userid
+		addressResult.CoinType = config.CoinType
 		addressResult.CTime = time.Now().Format("2006-01-02 15:04:05")
 		addressResult.MTime = time.Now().Format("2006-01-02 15:04:05")
-		addressResult.TotalRevceived = ConvertToCoin(coinType, ad.TotalRevceived)
-		addressResult.TotalSent = ConvertToCoin(coinType, ad.TotalSent) 
-		addressResult.Balance = ConvertToCoin(coinType, ad.Balance) 
-		addressResult.UnconfirmedBalance = 0
-		addressResult.FinalBalance = ConvertToCoin(coinType, ad.FinalBalance) 
-		addressResult.ConfirmedTransaction = ad.ConfirmedTransaction
+		addressResult.TotalRevceived = "0"
+		addressResult.TotalSent = "0"
+		addressResult.Balance = "0"
+		addressResult.UnconfirmedBalance = "0"
+		addressResult.FinalBalance = "0"
+		addressResult.ConfirmedTransaction = 0
 		addressResult.UnconfirmedTransaction = 0 
-		addressResult.FinalTransaction = ad.FinalTransaction
+		addressResult.FinalTransaction = 0
+		
+		// send response
 		s.SendDataSuccess(w, addressResult)
 	}
 }
@@ -152,44 +181,57 @@ func (s *AddressServer) HandleGetByAddress(w http.ResponseWriter, r *http.Reques
 		config.CoinType = "btc"
 	}
 
-	btc := gobcy.API{config.UserToken, config.CoinType, config.Chain}
-	addre, err := btc.GetAddrBal(addr, nil)
-	if err != nil {
-		s.ErrorMessage(w, err.Error())
-		return
-	}
-
+	// check address on db
 	ad, err := address.GetByAddress(addr)
 	if err != nil { 
 		s.ErrorMessage(w, "address_not_found")
 		return
 	}
-	add, err := address.GetByAddress(addr)
 
-	ad.TotalRevceived = addre.TotalReceived
-	ad.TotalSent = addre.TotalSent
-	ad.Balance = addre.Balance
-	ad.UnconfirmedBalance = &addre.UnconfirmedBalance
-	ad.FinalBalance = addre.FinalBalance
-	ad.ConfirmedTransaction = addre.NumTX
-	ad.UnconfirmedTransaction = &addre.UnconfirmedNumTX
-	ad.FinalTransaction = addre.FinalNumTX
+	// connect to node
+	client, err := ethclient.Dial(config.EndPoint)
+	if err != nil {
+		s.ErrorMessage(w, err.Error())
+		return
+	}
 
-	err = add.UpdateById(ad)
+	// get address info on node
+	account := common.HexToAddress(addr)
+	fmt.Println(account)
+	balance, err := client.BalanceAt(context.Background(), account, nil)
+	if err != nil {
+		s.ErrorMessage(w, err.Error())
+		return
+	}
+	pendingBalance, err := client.PendingBalanceAt(context.Background(), account)
+	if err != nil {
+		s.ErrorMessage(w, err.Error())
+		return
+	}
+
+	//ad.TotalRevceived = 0
+	//ad.TotalSent = 0
+	ad.Balance = balance
+	ad.UnconfirmedBalance = pendingBalance
+	//ad.FinalBalance = 0
+	ad.ConfirmedTransaction = 0
+	// ad.UnconfirmedTransaction = 0
+	ad.FinalTransaction = 0
+
+	err = ad.UpdateById(ad)
 	if err != nil {
 		s.ErrorMessage(w, err.Error())
 	} else {
 		addressResult := &AddressResult{}
-		addressResult.Id = ad.ID
 		addressResult.Addr = addr
 		addressResult.UserID = ad.UserID
 		addressResult.CoinType = ad.CoinType
-		addressResult.CTime = ConvertDateTime(add.CTime)
+		addressResult.CTime = ConvertDateTime(ad.CTime)
 		addressResult.MTime = time.Now().Format("2006-01-02 15:04:05")
 		addressResult.TotalRevceived = ConvertToCoin(coinType, ad.TotalRevceived)
 		addressResult.TotalSent = ConvertToCoin(coinType, ad.TotalSent) 
 		addressResult.Balance = ConvertToCoin(coinType, ad.Balance) 
-		addressResult.UnconfirmedBalance = ConvertToCoin(coinType, *ad.UnconfirmedBalance) 
+		addressResult.UnconfirmedBalance = ConvertToCoin(coinType, ad.UnconfirmedBalance) 
 		addressResult.FinalBalance = ConvertToCoin(coinType, ad.FinalBalance)
 		addressResult.ConfirmedTransaction = ad.ConfirmedTransaction
 		addressResult.UnconfirmedTransaction = *ad.UnconfirmedTransaction
@@ -250,15 +292,18 @@ func StrToInt(s string) int {
 	return int(i)
 } 
 
-func ConvertToCoin(coinType string, value int) float64 {
-	var result float64
+func ConvertToCoin(coinType string, value *big.Int) string {
+	fbalance := new(big.Float)
+	fbalance.SetString(value.String())
+
+	var result string
 	switch coinType {
 	case "btc":
-		result = (float64(value) /100000000)
+		result = fmt.Sprintf("%f", new(big.Float).Quo(fbalance, big.NewFloat(math.Pow10(8)))) //(float64(value) /100000000)
 	case "eth":
-		result = (float64(value) /1000000000000000000)
+		result = fmt.Sprintf("%f", new(big.Float).Quo(fbalance, big.NewFloat(math.Pow10(18)))) //(float64(value) /1000000000000000000)
 	case "":
-		result = (float64(value) /100000000)
+		result = fmt.Sprintf("%f", new(big.Float).Quo(fbalance, big.NewFloat(math.Pow10(8)))) //(float64(value) /100000000)
 	}
 
 	return result

@@ -1,7 +1,7 @@
 package worker
 
 import (
-	"ams_system/dapi/x/mlog"
+	"ams_api/dapi/x/mlog"
 	"time"
 )
 

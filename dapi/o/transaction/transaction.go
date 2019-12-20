@@ -1,9 +1,9 @@
 package transaction
 
 import (
-	"ams_system/dapi/o/transaction_input"
-	"ams_system/dapi/o/transaction_output"
-	"ams_system/dapi/x/mlog"
+	"ams_api/dapi/o/transaction_input"
+	"ams_api/dapi/o/transaction_output"
+	"ams_api/dapi/x/mlog"
 	"db/mgo"
 )
 

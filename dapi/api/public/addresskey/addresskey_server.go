@@ -1,7 +1,7 @@
 package addresskey
 
 import (
-	"ams_system/dapi/o/addresskey"
+	"ams_api/dapi/o/addresskey"
 	"http/web"
 	"net/http"
 	"strconv"

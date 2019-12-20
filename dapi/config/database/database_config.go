@@ -1,7 +1,7 @@
 package database
 
 import (
-	"ams_system/dapi/config/shared"
+	"ams_api/dapi/config/shared"
 )
 
 var logger = shared.ConfigLog

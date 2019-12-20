@@ -1,7 +1,7 @@
 package initialize
 
 import (
-	"ams_system/dapi/config"
+	"ams_api/dapi/config"
 	"os"
 	"runtime/pprof"
 )

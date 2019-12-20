@@ -2,8 +2,8 @@ package main
 
 import (
 	"context"
-	"ams_system/dapi/config"
-	"ams_system/dapi/initialize"
+	"ams_api/dapi/config"
+	"ams_api/dapi/initialize"
 )
 
 func main() {

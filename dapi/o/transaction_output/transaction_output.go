@@ -1,7 +1,7 @@
 package transaction_output
 
 import (
-	"ams_system/dapi/x/mlog"
+	"ams_api/dapi/x/mlog"
 	"db/mgo"
 )
 

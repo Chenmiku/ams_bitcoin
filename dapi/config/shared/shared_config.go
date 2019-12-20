@@ -1,7 +1,7 @@
 package shared
 
 import (
-	"ams/dapi/x/mlog"
+	"ams_api/dapi/x/mlog"
 )
 
 var ConfigLog = mlog.NewTagLog("config")

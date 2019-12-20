@@ -1,7 +1,7 @@
 package role
 
 import (
-	"ams_system/dapi/o/model"
+	"ams_api/dapi/o/model"
 )
 
 //TableBranch : Table in DB

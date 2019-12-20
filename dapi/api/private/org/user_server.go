@@ -1,8 +1,8 @@
 package org
 
 import (
-	"ams_system/dapi/api/auth/session"
-	"ams_system/dapi/o/org/user"
+	"ams_api/dapi/api/auth/session"
+	"ams_api/dapi/o/org/user"
 	"http/web"
 	"net/http"
 	"strconv"

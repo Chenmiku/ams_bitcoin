@@ -3,7 +3,7 @@ package database
 import (
 	"db/mgo"
 	"fmt"
-	"ams_system/dapi/config/cons"
+	"ams_api/dapi/config/cons"
 )
 
 type DatabaseConfig struct {
