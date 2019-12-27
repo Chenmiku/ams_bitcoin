@@ -62,40 +62,45 @@ exports.create_a_address = async(req, res) => {
   var new_address = new Addr();
   var new_addresskey = new AddrKey();
 
+  // rpc command on bitcoin node
+  const getnewaddress = [
+    { method: 'getnewaddress', parameters: [] }
+  ]
+
   // check coin type
   switch(coinType) {
     case 'btc':
-      coin = 'btc';
+      coin = 'btc';       
+      await client.command(getnewaddress).then(function(addr){
+        new_address.addr = addr
+        new_addresskey.addr = addr
+      });
       break;
     case 'eth':
       coin = 'eth';
+        // Create a new address
+      const account = w3.eth.accounts.create(w3.utils.randomHex(32))
+        // check valid address
+      if (w3.utils.isAddress(account.address) == false) {
+        re.errorResponse('invalid_address', res, 500);
+        return
+      }
+      new_address.addr = account.address
+
+      new_addresskey.addr = account.address
+      //new_addresskey.public_key = account.publickey
+      new_addresskey.private_key = account.privateKey
       break;
-    default :
-      coin = 'btc';
+    case '':
+      coin = 'btc';       
+      await client.command(getnewaddress).then(function(addr){
+        new_address.addr = addr
+        new_addresskey.addr 
+      });
       break;
-  }
-
-  // Create a new address
-  const account = w3.eth.accounts.create(w3.utils.randomHex(32))
-  console.log(account)
-
-  // const batch = [
-  //   { method: 'getnewaddress', parameters: [] }
-  // ]
-   
-  // await client.command(batch).then(function(addr){
-  //   new_address.addr = addr
-  //   new_addresskey.addr 
-  // });
-
-  // check valid address
-  if (w3.utils.isAddress(account.address) == false) {
-    re.errorResponse('invalid_address', res, 500);
-    return
   }
 
   new_address._id = uuidv1()
-  new_address.addr = account.address
   new_address.balance = 0
   new_address.balance_string = "0"
   new_address.unconfirmed_balance = 0
@@ -111,9 +116,6 @@ exports.create_a_address = async(req, res) => {
   new_address.mtime = new Date().toISOString().replace('T', ' ').replace('Z', '')
 
   new_addresskey._id = uuidv1()
-  new_addresskey.addr = account.address
-  //new_addresskey.public_key = account.publickey
-  new_addresskey.private_key = account.privateKey
   new_addresskey.coin_type = coin
   new_addresskey.ctime = new Date().toISOString().replace('T', ' ').replace('Z', '')
   new_addresskey.mtime = new Date().toISOString().replace('T', ' ').replace('Z', '')
@@ -139,7 +141,7 @@ exports.create_a_address = async(req, res) => {
       addressResult.data.final_balance = "0"
       addressResult.data.final_balance = "0"
       addressResult.data.coin_type = coin
-      addressResult.data.user_id = new_address.user_id || 0
+      addressResult.data.user_id = userId || 0
       addressResult.data.ctime = new_address.ctime
       addressResult.data.mtime = new_address.mtime
       addressResult.success = true
