@@ -62,19 +62,35 @@ exports.create_a_address = async(req, res) => {
   var new_address = new Addr();
   var new_addresskey = new AddrKey();
 
-  // rpc command on bitcoin node
-  const getnewaddress = [
-    { method: 'getnewaddress', parameters: [] }
-  ]
-
   // check coin type
   switch(coinType) {
     case 'btc':
       coin = 'btc';       
-      await client.command(getnewaddress).then(function(addr){
-        new_address.addr = addr
-        new_addresskey.addr = addr
+      const walletName = randomString(5)
+      await client.createWallet(walletName).then(function(res){
+        console.log(res)
+        
+      }) 
+
+      await client.getNewAddress().then(function(address){
+        console.log(address)
+        new_address.addr = address
+        new_addresskey.addr = address
       });
+
+      await client.validateAddress(new_address.addr).then(function(res){
+        console.log(res)
+        if (res.isvalid == false) {
+          re.errorResponse('invalid_address', res, 500);
+          return
+        }
+        new_addresskey.public_key = res.pubkey
+      });
+
+      await client.dumpPrivKey(new_address.addr).then(function(privKey){
+        new_addresskey.private_key = privKey
+      }); 
+      
       break;
     case 'eth':
       coin = 'eth';
@@ -93,9 +109,23 @@ exports.create_a_address = async(req, res) => {
       break;
     case '':
       coin = 'btc';       
-      await client.command(getnewaddress).then(function(addr){
-        new_address.addr = addr
-        new_addresskey.addr 
+      await client.getNewAddress().then(function(address){
+        console.log(address)
+        new_address.addr = address
+        new_addresskey.addr = address
+      });
+
+      await client.validateAddress(new_address.addr).then(function(res){
+        console.log(res)
+        if (res.isvalid == false) {
+          re.errorResponse('invalid_address', res, 500);
+          return
+        }
+        new_addresskey.public_key = res.pubkey
+      });
+
+      await client.dumpPrivKey(new_address.addr).then(function(privKey){
+        new_addresskey.private_key = privKey
       });
       break;
   }
