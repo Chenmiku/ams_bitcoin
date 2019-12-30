@@ -40,12 +40,12 @@ var transactionSchema = new schema({
     nonce: {
         type: Number
     },
-    // block_hash: {
-    //     type: String
-    // },
-    // block_number: {
-    //     type: Number
-    // },
+    block_hash: {
+        type: String
+    },
+    block_index: {
+        type: Number
+    },
     signed_time: {
         type: String
     },

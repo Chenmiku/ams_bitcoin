@@ -137,13 +137,23 @@ exports.create_a_transaction = async(req, res) => {
       });
 
       // create and send transaction
-      console.log(Math.abs(senderBalance - feeBitValue))
       await client.sendToAddress(receiver, convert.convertToCoin(coin, Math.abs(senderBalance - feeBitValue))).then(function(transactionId){
         trans.transaction_id = transactionId
         trans.total_exchanged = Math.abs(senderBalance - feeBitValue)
         trans.total_exchanged_string = Math.abs(senderBalance - feeBitValue).toFixed()
-        trans.fees = feeBitValue
-        trans.fees_string = feeBitValue.toFixed()
+      })
+      .catch(function(err){
+        re.errorResponse(err, res, 500);
+        return
+      });
+
+      // get transaction info
+      await client.getTransaction(trans.transaction_id).then(function(res){
+        trans.fees = Math.abs(res.fee) * 100000000
+        trans.fees_string = trans.fees.toFixed()
+        trans.block_hash = res.blockhash
+        trans.block_index = res.blockindex
+        trans.hash = res.hex
       })
       .catch(function(err){
         re.errorResponse(err, res, 500);
@@ -153,7 +163,6 @@ exports.create_a_transaction = async(req, res) => {
       break;
     case 'eth':
       coin = 'eth';
-
       // check valid sender address
       if (w3.utils.isAddress(sender) == false) {
         re.errorResponse('invalid_address', res, 500);
@@ -255,8 +264,19 @@ exports.create_a_transaction = async(req, res) => {
         trans.transaction_id = transactionId
         trans.total_exchanged = Math.abs(senderBalance - feeBitValue)
         trans.total_exchanged_string = Math.abs(senderBalance - feeBitValue).toFixed()
-        trans.fees = feeBitValue
-        trans.fees_string = feeBitValue.toFixed()
+      })
+      .catch(function(err){
+        re.errorResponse(err, res, 500);
+        return
+      });
+
+      // get transaction info
+      await client.getTransaction(trans.transaction_id).then(function(res){
+        trans.fees = Math.abs(res.fee) * 100000000
+        trans.fees_string = trans.fees.toFixed()
+        trans.block_hash = res.blockhash
+        trans.block_index = res.blockindex
+        trans.hash = res.hex
       })
       .catch(function(err){
         re.errorResponse(err, res, 500);
@@ -296,7 +316,7 @@ exports.create_a_transaction = async(req, res) => {
   transactionResult.data.tx_value = String(convert.convertToCoin(coin, Math.abs(trans.total_exchanged)))
   transactionResult.data.tx_fee = String(convert.convertToCoin(coin, trans.fees))
   transactionResult.data.tx_total_amount = String(convert.convertToCoin(coin, Math.abs(trans.total_exchanged) + trans.fees))
-  transactionResult.data.next_balance = String(Math.abs(parseFloat(transactionResult.data.pre_balance) - parseFloat(transactionResult.data.tx_total_amount)))
+  transactionResult.data.next_balance = Math.abs(parseFloat(transactionResult.data.pre_balance) - parseFloat(transactionResult.data.tx_total_amount)).toFixed(8)
 
   // create a new transaction
   await trans.save(function(err){
@@ -418,6 +438,10 @@ exports.check_deposit_state = async(req, res) => {
       break;
   }
 
+  console.log(address.balance)
+  console.log(new_address.balance)
+  console.log(convert.convertToCoin(coin, Math.abs(new_address.balance - address.balance)))
+  // check transaction state
   if (address.balance != new_address.balance && new_address.unconfirmed_balance == 0) {
     depositStateResult.data.coin_type = coin
     depositStateResult.data.coin_value = String(convert.convertToCoin(coin, Math.abs(new_address.balance - address.balance)))
@@ -441,11 +465,10 @@ exports.check_deposit_state = async(req, res) => {
     });
   }
 
-  // check transaction state
   if (new_address.unconfirmed_balance > 0) {
     depositStateResult.data.coin_type = coin
-    depositStateResult.data.coin_value = String(convert.convertToCoin(coin, Math.abs(new_address.balance - address.balance)))
-    depositStateResult.data.confirm = true
+    depositStateResult.data.coin_value = String(convert.convertToCoin(coin, new_address.unconfirmed_balance))
+    depositStateResult.data.confirm = false
     depositStateResult.data.message = "transaction_pending"
     depositStateResult.success = true
 

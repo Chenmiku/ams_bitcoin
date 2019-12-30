@@ -63,7 +63,6 @@ exports.create_a_address = async(req, res) => {
       coin = 'btc';       
       // create a new wallet
       await client.createWallet(walletName).then(function(res){
-        console.log(res)
         if (res != null) {
           new_wallet.name = res.name
           new_wallet.file_backup = backupFileName
@@ -74,20 +73,9 @@ exports.create_a_address = async(req, res) => {
         return
       });
 
-      // backup wallet
-      // client = new Client({ host: process.env.Host, port: process.env.BitPort, username: process.env.BitUser, password: process.env.BitPassword, wallet: walletName });
-      // await client.backupWallet(process.env.BitWallet + backupFileName).then(function(res){
-      //   new_wallet.file_backup = backupFileName
-      // })
-      // .catch(function(err){
-      //   re.errorResponse(err, res, 500);
-      //   return
-      // })
-
       // create a new address
       client = new Client({ host: process.env.Host, port: process.env.BitPort, username: process.env.BitUser, password: process.env.BitPassword, wallet: walletName });
       await client.getNewAddress().then(function(address){
-        console.log(address)
         new_address.addr = address
         new_addresskey.addr = address
       })
@@ -98,7 +86,6 @@ exports.create_a_address = async(req, res) => {
 
       // add private key to address
       await client.dumpPrivKey(new_address.addr).then(function(privKey){
-        console.log(privKey)
         new_addresskey.private_key = privKey
       })
       .catch(function(err){
@@ -120,7 +107,6 @@ exports.create_a_address = async(req, res) => {
       coin = 'btc';       
       // create a new wallet
       await client.createWallet(walletName).then(function(res){
-        console.log(res)
         if (res != null) {
           new_wallet.name = res.name
           new_wallet.file_backup = backupFileName
@@ -131,20 +117,9 @@ exports.create_a_address = async(req, res) => {
         return
       });
 
-      // backup wallet
-      // client = new Client({ host: process.env.Host, port: process.env.BitPort, username: process.env.BitUser, password: process.env.BitPassword, wallet: walletName });
-      // await client.backupWallet(process.env.BitWallet + backupFileName).then(function(res){
-      //   new_wallet.file_backup = backupFileName
-      // })
-      // .catch(function(err){
-      //   re.errorResponse(err, res, 500);
-      //   return
-      // })
-
       // create a new address
       client = new Client({ host: process.env.Host, port: process.env.BitPort, username: process.env.BitUser, password: process.env.BitPassword, wallet: walletName });
       await client.getNewAddress().then(function(address){
-        console.log(address)
         new_address.addr = address
         new_addresskey.addr = address
       })
@@ -155,7 +130,6 @@ exports.create_a_address = async(req, res) => {
 
       // add private key to address
       await client.dumpPrivKey(new_address.addr).then(function(privKey){
-        console.log(privKey)
         new_addresskey.private_key = privKey
       })
       .catch(function(err){
@@ -269,13 +243,11 @@ exports.get_a_address = async(req, res) => {
 
       client = new Client({ host: process.env.Host, port: process.env.BitPort, username: process.env.BitUser, password: process.env.BitPassword, wallet: walletName });
       await client.getWalletInfo().then(function(res){
-        console.log(res)
         new_address.balance = res.balance * 100000000
         new_address.balance_string = new_address.balance.toFixed()
         new_address.unconfirmed_balance = res.unconfirmed_balance * 100000000
         new_address.unconfirmed_balance_string = new_address.unconfirmed_balance.toFixed()
         new_address.final_transaction = res.txcount
-        console.log(new_address)
       })
       .catch(function(err){
         re.errorResponse(err, res, 500);
@@ -302,7 +274,6 @@ exports.get_a_address = async(req, res) => {
       coin = 'btc';
       // validate address
       await client.validateAddress(new_address.addr).then(function(res){
-        console.log(res)
         if (res.isvalid == false) {
           re.errorResponse('invalid_address', res, 500);
           return
