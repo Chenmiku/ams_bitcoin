@@ -7,6 +7,9 @@ var transactionSchema = new schema({
     _id: {
         type: String
     },
+    transaction_id: {
+        type: String
+    },
     hash: {
         type: String
     },

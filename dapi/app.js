@@ -6,6 +6,7 @@ var express = require('express'),
   cors = require('cors'),
   port = process.env.Port || 3000
   mongoose = require('mongoose'),
+  Wallet = require('./db/models/walletModel'),
   Addr = require('./db/models/addressModel'),
   AddrKey = require('./db/models/addressKeyModel'),
   Transaction = require('./db/models/transactionModel'),
@@ -38,6 +39,8 @@ var tranRoutes = require('./routes/transactionRoutes');
 app.use('/api/' + process.env.Version + '/public/transaction', tranRoutes);
 var addrKeyRoutes = require('./routes/addressKeyRoutes');
 app.use('/api/' + process.env.Version + '/public/addresskey', addrKeyRoutes);
+var walletRoutes = require('./routes/walletRoutes');
+app.use('/api/' + process.env.Version + '/public/wallet', walletRoutes);
 
 // middlewares
 app.use(function(req, res) {

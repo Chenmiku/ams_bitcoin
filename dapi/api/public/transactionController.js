@@ -1,6 +1,7 @@
 'use strict';
 
 // library and modules
+require('dotenv').config()
 const mongoose = require('mongoose'),
   Addr = mongoose.model('addresses'),
   AddrKey = mongoose.model('addresskeys'),
@@ -16,6 +17,9 @@ const mongoose = require('mongoose'),
 const Web3 = require('web3'),
       mainnet = process.env.Provider,
       w3 = new Web3(new Web3.providers.HttpProvider(mainnet))
+
+const Client = require('bitcoin-core')
+var client = new Client({ host: process.env.Host, port: process.env.BitPort, username: process.env.BitUser, password: process.env.BitPassword })
 
 // variables
 var coin = 'eth'
@@ -64,20 +68,16 @@ exports.create_a_transaction = async(req, res) => {
   const receiver = q.receiver
   var trans = new Trans()
   var feeValue = 20000000000 * 21000
+  var feeBitValue = 3000
   var senderBalance = 0
   var raw = ''
   var addressKey = new AddrKey()
+  var walletName = ""
 
   // check params
   if (sender == "" || receiver == "") {
     re.errorResponse('sender_or_receiver_empty', res, 400)
     return
-  }
-
-  // check valid sender address
-  if (w3.utils.isAddress(sender) == false) {
-    re.errorResponse('invalid_address', res, 500);
-      return
   }
 
   // check exists address
@@ -90,6 +90,7 @@ exports.create_a_transaction = async(req, res) => {
       re.errorResponse('address_not_found', res, 404);
       return
     }
+    walletName = addr.wallet_name
   });
   await AddrKey.findOne({ addr: sender }, function(err, addrKey){
     if (err) {
@@ -107,12 +108,161 @@ exports.create_a_transaction = async(req, res) => {
   switch(coinType) {
     case 'btc':
       coin = 'btc';
+      // validate address
+      await client.validateAddress(sender).then(function(res){
+        if (res.isvalid == false) {
+          re.errorResponse('invalid_address', res, 500);
+          return
+        }
+      })
+      .catch(function(err){
+        re.errorResponse(err, res, 500);
+        return
+      });
+
+      // get balance
+      client = new Client({ host: process.env.Host, port: process.env.BitPort, username: process.env.BitUser, password: process.env.BitPassword, wallet: walletName });
+      await client.getWalletInfo().then(function(res){
+        console.log(res)
+        senderBalance = res.balance * 100000000
+        transactionResult.data.pre_balance = String(res.balance)
+        if (senderBalance <= feeBitValue) {
+          re.errorResponse('not_enough_fund', res, 500);
+          return
+        }
+      })
+      .catch(function(err){
+        re.errorResponse(err, res, 500);
+        return
+      });
+
+      // create and send transaction
+      console.log(Math.abs(senderBalance - feeBitValue))
+      await client.sendToAddress(receiver, convert.convertToCoin(coin, Math.abs(senderBalance - feeBitValue))).then(function(transactionId){
+        trans.transaction_id = transactionId
+        trans.total_exchanged = Math.abs(senderBalance - feeBitValue)
+        trans.total_exchanged_string = Math.abs(senderBalance - feeBitValue).toFixed()
+        trans.fees = feeBitValue
+        trans.fees_string = feeBitValue.toFixed()
+      })
+      .catch(function(err){
+        re.errorResponse(err, res, 500);
+        return
+      });
+
       break;
     case 'eth':
       coin = 'eth';
+
+      // check valid sender address
+      if (w3.utils.isAddress(sender) == false) {
+        re.errorResponse('invalid_address', res, 500);
+          return
+      }
+
+      // get gas price
+      await w3.eth.getGasPrice().then(function(gasPrice){
+        if (gasPrice > 0) {
+          feeValue = gasPrice * 21000
+        }
+      })
+      
+      //get balance address
+      await w3.eth.getBalance(sender).then(function(bal){
+        if (bal <= feeValue) {
+          re.errorResponse('not_enough_fund', res, 500);
+          return
+        }
+        senderBalance = bal
+        transactionResult.data.pre_balance = String(convert.convertToCoin(coin, bal))
+      })
+      .catch(function(err){
+        re.errorResponse('cant_get_balance', res, 500);
+        return
+      });
+    
+      let transactionObject = {};
+    
+      transactionObject = {
+        to: receiver,
+        value: senderBalance - feeValue,
+        gas: 21000,
+        gasPrice: feeValue / 21000
+      }
+    
+      // sign transaction
+      await w3.eth.accounts.signTransaction(transactionObject, addressKey.private_key, function(err, transaction){
+        if (err) {
+          re.errorResponse(err, res, 500);
+          return
+        }
+        console.log(transaction.tx)
+        raw = transaction.rawTransaction
+        trans.size = w3.utils.hexToNumber(transaction.v)
+        trans.signed_time = new Date().toISOString().replace('T', ' ').replace('Z', '')
+      })
+    
+      // send transaction
+      await w3.eth.sendSignedTransaction(raw, function(err, hash) {
+        if (err) {
+          re.errorResponse(err, res, 500);
+          return
+        }
+
+        trans.hash = hash
+        trans.total_exchanged = senderBalance - feeValue
+        trans.total_exchanged_string = (senderBalance - feeValue).toFixed()
+        trans.fees = feeValue
+        trans.fees_string = feeValue.toFixed()
+        trans.gas_price = feeValue / 21000
+        trans.gas_limit = 21000
+    
+        transactionResult.data.tx_hash = trans.hash
+        // transactionResult.data.chk_fee_value = chkFeeValue
+      })
       break;
     default :
       coin = 'btc';
+      // validate address
+      await client.validateAddress(sender).then(function(res){
+        if (res.isvalid == false) {
+          re.errorResponse('invalid_address', res, 500);
+          return
+        }
+      })
+      .catch(function(err){
+        re.errorResponse(err, res, 500);
+        return
+      });
+
+      // get balance
+      client = new Client({ host: process.env.Host, port: process.env.BitPort, username: process.env.BitUser, password: process.env.BitPassword, wallet: walletName });
+      await client.getWalletInfo().then(function(res){
+        senderBalance = res.balance * 100000000
+        transactionResult.data.pre_balance = String(res.balance)
+        if (senderBalance <= feeBitValue) {
+          re.errorResponse('not_enough_fund', res, 500);
+          return
+        }
+      })
+      .catch(function(err){
+        re.errorResponse(err, res, 500);
+        return
+      });
+
+      // create and send transaction
+      await client.sendToAddress(receiver, convert.convertToCoin(coin, Math.abs(senderBalance - feeBitValue))).then(function(transactionId){
+        trans.transaction_id = transactionId
+        trans.total_exchanged = Math.abs(senderBalance - feeBitValue)
+        trans.total_exchanged_string = Math.abs(senderBalance - feeBitValue).toFixed()
+        trans.fees = feeBitValue
+        trans.fees_string = feeBitValue.toFixed()
+      })
+      .catch(function(err){
+        re.errorResponse(err, res, 500);
+        return
+      });
+
       break;
   }
 
@@ -135,86 +285,18 @@ exports.create_a_transaction = async(req, res) => {
   //   return
   // });
 
-  await w3.eth.getGasPrice().then(function(gasPrice){
-    if (gasPrice > 0) {
-      feeValue = gasPrice * 21000
-    }
-  })
-  
-  //get balance address
-  await w3.eth.getBalance(sender).then(function(bal){
-    if (bal <= feeValue) {
-      re.errorResponse('not_enough_fund', res, 500);
-      return
-    }
-    senderBalance = bal
-    transactionResult.data.pre_balance = String(convert.convertToCoin(coin, bal))
-  })
-  .catch(function(err){
-		re.errorResponse('cant_get_balance', res, 500);
-    return
-  });
+  trans._id = uuidv1()
+  trans.sender = sender
+  trans.receiver = receiver
+  trans.coin_type = coin
+  trans.ctime = new Date().toISOString().replace('T', ' ').replace('Z', '')
+  trans.mtime = new Date().toISOString().replace('T', ' ').replace('Z', '')
 
-  let transactionObject = {};
-
-  transactionObject = {
-    to: receiver,
-    value: senderBalance - feeValue,
-    gas: 21000,
-    gasPrice: feeValue / 21000
-  }
-
-  // set transaction object for request send transaction
-  // switch(coin) {
-  //   case 'btc':
-
-  //     break;
-  //   case 'eth':
-  //     break;
-  //   default :
-  //     break;
-  // }
-
-  // sign transaction
-  await w3.eth.accounts.signTransaction(transactionObject, addressKey.private_key, function(err, transaction){
-    if (err) {
-      re.errorResponse(err, res, 500);
-      return
-    }
-    console.log(transaction.tx)
-    raw = transaction.rawTransaction
-    trans.size = w3.utils.hexToNumber(transaction.v)
-    trans.signed_time = new Date().toISOString().replace('T', ' ').replace('Z', '')
-  })
-
-  // send transaction
-  await w3.eth.sendSignedTransaction(raw, function(err, hash) {
-    if (err) {
-      re.errorResponse(err, res, 500);
-      return
-    }
-    trans._id = uuidv1()
-    trans.hash = hash
-    trans.sender = sender
-    trans.receiver = receiver
-    trans.coin_type = coin
-    trans.total_exchanged = senderBalance - feeValue
-    trans.total_exchanged_string = (senderBalance - feeValue).toFixed()
-    trans.fees = feeValue
-    trans.fees_string = feeValue.toFixed()
-    trans.gas_price = feeValue / 21000
-    trans.gas_limit = 21000
-    trans.ctime = new Date().toISOString().replace('T', ' ').replace('Z', '')
-    trans.mtime = new Date().toISOString().replace('T', ' ').replace('Z', '')
-
-    transactionResult.data.tx_hash = trans.hash
-    // transactionResult.data.chk_fee_value = chkFeeValue
-    transactionResult.data.tx_value = convert.convertToCoin(coin, Math.abs(trans.total_exchanged)).toFixed()
-    transactionResult.data.tx_fee = convert.convertToCoin(coin, trans.fees).toFixed()
-    transactionResult.data.tx_total_amount = convert.convertToCoin(coin, Math.abs(trans.total_exchanged) + trans.fees).toFixed()
-    transactionResult.data.next_balance = (parseFloat(transactionResult.data.pre_balance) - parseFloat(transactionResult.data.tx_total_amount)).toFixed()
-    transactionResult.data.tx_create_time = trans.ctime
-  })
+  transactionResult.data.tx_create_time = trans.ctime
+  transactionResult.data.tx_value = String(convert.convertToCoin(coin, Math.abs(trans.total_exchanged)))
+  transactionResult.data.tx_fee = String(convert.convertToCoin(coin, trans.fees))
+  transactionResult.data.tx_total_amount = String(convert.convertToCoin(coin, Math.abs(trans.total_exchanged) + trans.fees))
+  transactionResult.data.next_balance = String(Math.abs(parseFloat(transactionResult.data.pre_balance) - parseFloat(transactionResult.data.tx_total_amount)))
 
   // create a new transaction
   await trans.save(function(err){
@@ -238,17 +320,12 @@ exports.check_deposit_state = async(req, res) => {
   const addr = q.addr
   var address = new Addr()
   var new_address = new Addr()
+  var walletName = ""
 
   // check params
   if (addr == "") {
     errorMessage('address_empty', res, 400)
     return
-  }
-
-  // check valid address
-  if (w3.utils.isAddress(addr) == false) {
-    re.errorResponse('invalid_address', res, 500);
-      return
   }
 
   // check exists address
@@ -262,29 +339,88 @@ exports.check_deposit_state = async(req, res) => {
       return
     }
     address = add
+    walletName = add.wallet_name
   });
 
   // check coin type
   switch(coinType) {
     case 'btc':
       coin = 'btc';
+      // validate address
+      await client.validateAddress(addr).then(function(res){
+        if (res.isvalid == false) {
+          re.errorResponse('invalid_address', res, 500);
+          return
+        }
+      })
+      .catch(function(err){
+        re.errorResponse(err, res, 500);
+        return
+      });
+
+      // get balance
+      client = new Client({ host: process.env.Host, port: process.env.BitPort, username: process.env.BitUser, password: process.env.BitPassword, wallet: walletName });
+      await client.getWalletInfo().then(function(res){
+        new_address.balance = res.balance * 100000000
+        new_address.balance_string = new_address.balance.toFixed()
+        new_address.unconfirmed_balance = res.unconfirmed_balance * 100000000
+        new_address.unconfirmed_balance_string = new_address.unconfirmed_balance.toFixed()
+        new_address.final_transaction = res.txcount
+      })
+      .catch(function(err){
+        re.errorResponse(err, res, 500);
+        return
+      });
+
       break;
     case 'eth':
       coin = 'eth';
+      // check valid address
+      if (w3.utils.isAddress(addr) == false) {
+        re.errorResponse('invalid_address', res, 500);
+          return
+      }
+
+      //get balance address
+      await w3.eth.getBalance(addr).then(function(bal){
+        new_address.balance = bal
+      })
+
       break;
     default :
       coin = 'btc';
+      // validate address
+      await client.validateAddress(addr).then(function(res){
+        if (res.isvalid == false) {
+          re.errorResponse('invalid_address', res, 500);
+          return
+        }
+      })
+      .catch(function(err){
+        re.errorResponse(err, res, 500);
+        return
+      });
+
+      // get balance
+      client = new Client({ host: process.env.Host, port: process.env.BitPort, username: process.env.BitUser, password: process.env.BitPassword, wallet: walletName });
+      await client.getWalletInfo().then(function(res){
+        new_address.balance = res.balance * 100000000
+        new_address.balance_string = new_address.balance.toFixed()
+        new_address.unconfirmed_balance = res.unconfirmed_balance * 100000000
+        new_address.unconfirmed_balance_string = new_address.unconfirmed_balance.toFixed()
+        new_address.final_transaction = res.txcount
+      })
+      .catch(function(err){
+        re.errorResponse(err, res, 500);
+        return
+      });
+
       break;
   }
 
-  //get balance address
-  await w3.eth.getBalance(addr).then(function(bal){
-    new_address.balance = bal
-  })
-
-  if (address.balance != new_address.balance) {
+  if (address.balance != new_address.balance && new_address.unconfirmed_balance == 0) {
     depositStateResult.data.coin_type = coin
-    depositStateResult.data.coin_value = convert.convertToCoin(coin, Math.abs(new_address.balance - address.balance)).toFixed()
+    depositStateResult.data.coin_value = String(convert.convertToCoin(coin, Math.abs(new_address.balance - address.balance)))
     depositStateResult.data.confirm = true
     depositStateResult.data.message = "transaction_confirmed"
     depositStateResult.success = true
@@ -306,9 +442,9 @@ exports.check_deposit_state = async(req, res) => {
   }
 
   // check transaction state
-  if (address.balance != new_address.balance) {
+  if (new_address.unconfirmed_balance > 0) {
     depositStateResult.data.coin_type = coin
-    depositStateResult.data.coin_value = convert.convertToCoin(coin, Math.abs(new_address.balance - address.balance)).toFixed()
+    depositStateResult.data.coin_value = String(convert.convertToCoin(coin, Math.abs(new_address.balance - address.balance)))
     depositStateResult.data.confirm = true
     depositStateResult.data.message = "transaction_pending"
     depositStateResult.success = true

@@ -22,23 +22,17 @@ var addressSchema = new schema({
     unconfirmed_balance_string: {
         type: String
     },
-    final_balance: {
-        type: Number
-    },
-    final_balance_string: {
-        type: String
-    },
-    confirmed_transaction: {
-        type: Number
-    },
-    unconfirmed_transaction: {
-        type: Number
-    },
     final_transaction: {
         type: Number
     },
     user_id: {
         type: Number
+    },
+    wallet_id: {
+        type: String
+    },
+    wallet_name: {
+        type: String
     },
     coin_type: {
         type: String
