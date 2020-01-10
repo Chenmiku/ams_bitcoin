@@ -138,22 +138,19 @@ exports.create_a_transaction = async(req, res) => {
 
       // create and send transaction
       await client.sendToAddress(receiver, convert.convertToCoin(coin, Math.abs(senderBalance - feeBitValue))).then(function(transactionId){
-        trans.transaction_id = transactionId
+        trans.hash = transactionId
         trans.total_exchanged = Math.abs(senderBalance - feeBitValue)
         trans.total_exchanged_string = Math.abs(senderBalance - feeBitValue).toFixed()
       })
       .catch(function(err){
-        re.errorResponse(err, res, 500);
+        re.errorResponse('not_enough_fund', res, 500);
         return
       });
 
       // get transaction info
-      await client.getTransaction(trans.transaction_id).then(function(res){
+      await client.getTransaction(trans.hash).then(function(res){
         trans.fees = Math.abs(res.fee) * 100000000
         trans.fees_string = trans.fees.toFixed()
-        trans.block_hash = res.blockhash
-        trans.block_index = res.blockindex
-        trans.hash = res.hex
       })
       .catch(function(err){
         re.errorResponse(err, res, 500);
@@ -193,6 +190,7 @@ exports.create_a_transaction = async(req, res) => {
       let transactionObject = {};
     
       transactionObject = {
+        from: sender,
         to: receiver,
         value: senderBalance - feeValue,
         gas: 21000,
@@ -211,7 +209,7 @@ exports.create_a_transaction = async(req, res) => {
         trans.signed_time = new Date().toISOString().replace('T', ' ').replace('Z', '')
       })
     
-      // send transaction
+      // send signed transaction
       await w3.eth.sendSignedTransaction(raw, function(err, hash) {
         if (err) {
           re.errorResponse(err, res, 500);
@@ -221,14 +219,30 @@ exports.create_a_transaction = async(req, res) => {
         trans.hash = hash
         trans.total_exchanged = senderBalance - feeValue
         trans.total_exchanged_string = (senderBalance - feeValue).toFixed()
+        trans.gas_limit = 21000
         trans.fees = feeValue
         trans.fees_string = feeValue.toFixed()
-        trans.gas_price = feeValue / 21000
-        trans.gas_limit = 21000
     
         transactionResult.data.tx_hash = trans.hash
         // transactionResult.data.chk_fee_value = chkFeeValue
-      })
+      });
+
+      // get transaction info
+      await web3.eth.getTransaction(trans.hash, function(err, transaction){
+        if (err) {
+          re.errorResponse(err, res, 500);
+          return
+        }
+        if (transaction == null) {
+          re.errorResponse('transaction_not_found', res, 404);
+          return
+        }
+
+        trans.gas_price = transaction.gasPrice
+        trans.gas = transaction.gas
+        trans.nonce = transaction.nonce
+      });
+
       break;
     default :
       coin = 'btc';
@@ -247,6 +261,7 @@ exports.create_a_transaction = async(req, res) => {
       // get balance
       client = new Client({ host: process.env.Host, port: process.env.BitPort, username: process.env.BitUser, password: process.env.BitPassword, wallet: walletName });
       await client.getWalletInfo().then(function(res){
+        console.log(res)
         senderBalance = res.balance * 100000000
         transactionResult.data.pre_balance = String(res.balance)
         if (senderBalance <= feeBitValue) {
@@ -261,22 +276,19 @@ exports.create_a_transaction = async(req, res) => {
 
       // create and send transaction
       await client.sendToAddress(receiver, convert.convertToCoin(coin, Math.abs(senderBalance - feeBitValue))).then(function(transactionId){
-        trans.transaction_id = transactionId
+        trans.hash = transactionId
         trans.total_exchanged = Math.abs(senderBalance - feeBitValue)
         trans.total_exchanged_string = Math.abs(senderBalance - feeBitValue).toFixed()
       })
       .catch(function(err){
-        re.errorResponse(err, res, 500);
+        re.errorResponse('not_enough_fund', res, 500);
         return
       });
 
       // get transaction info
-      await client.getTransaction(trans.transaction_id).then(function(res){
+      await client.getTransaction(trans.hash).then(function(res){
         trans.fees = Math.abs(res.fee) * 100000000
         trans.fees_string = trans.fees.toFixed()
-        trans.block_hash = res.blockhash
-        trans.block_index = res.blockindex
-        trans.hash = res.hex
       })
       .catch(function(err){
         re.errorResponse(err, res, 500);
@@ -438,9 +450,6 @@ exports.check_deposit_state = async(req, res) => {
       break;
   }
 
-  console.log(address.balance)
-  console.log(new_address.balance)
-  console.log(convert.convertToCoin(coin, Math.abs(new_address.balance - address.balance)))
   // check transaction state
   if (address.balance != new_address.balance && new_address.unconfirmed_balance == 0) {
     depositStateResult.data.coin_type = coin
@@ -449,6 +458,7 @@ exports.check_deposit_state = async(req, res) => {
     depositStateResult.data.message = "transaction_confirmed"
     depositStateResult.success = true
 
+    new_address.mtime = new Date().toISOString().replace('T', ' ').replace('Z', '')
     // update address
     await Addr.findOneAndUpdate({ addr: addr }, new_address, function(err, ad) {
       if (err) {
@@ -458,11 +468,11 @@ exports.check_deposit_state = async(req, res) => {
       if (ad == null) {
         re.errorResponse('address_not_found', res, 404);
         return
-      } else {
-        res.json(depositStateResult);
-        return
       }
     });
+
+    res.json(depositStateResult);
+    return
   }
 
   if (new_address.unconfirmed_balance > 0) {
@@ -482,4 +492,129 @@ exports.check_deposit_state = async(req, res) => {
 
     res.json(depositStateResult);
   }
+};
+
+// api check transaction state
+exports.check_transaction = async(req, res) => {
+  let q = url.parse(req.url, true).query;
+  const coinType = q.coin_type;
+  const hash = q.hash
+  var walletName = ""
+  var sender = ""
+  var trans = new Trans()
+
+  // check params
+  if (hash == "") {
+    errorMessage('transaction_hash_empty', res, 400)
+    return
+  }
+
+  // check exists transaction
+  await Trans.findOne({ hash: hash }, function(err, tran){
+    if (err) {
+      re.errorResponse(err, res, 404);
+      return
+    }
+    if (tran == null) {
+      re.errorResponse('transaction_not_found', res, 404);
+      return
+    }
+
+    sender = tran.sender
+    trans = tran
+  });
+
+  // get wallet name
+  await Addr.findOne({ addr: sender }, function(err, add){
+    if (err) {
+      re.errorResponse(err, res, 404);
+      return
+    }
+    if (add == null) {
+      re.errorResponse('address_not_found', res, 404);
+      return
+    }
+
+    walletName = add.wallet_name
+  })
+
+  // check coin type
+  switch(coinType) {
+    case 'btc':
+      coin = 'btc';
+      // get transaction info
+      client = new Client({ host: process.env.Host, port: process.env.BitPort, username: process.env.BitUser, password: process.env.BitPassword, wallet: walletName });
+      await client.getTransaction(trans.hash).then(function(res){
+        trans.confirmations = res.confirmations
+        trans.block_hash = res.blockhash
+        trans.block_index = res.blockindex
+        depositStateResult.data.coin_value = String(res.amount)
+      })
+      .catch(function(err){
+        re.errorResponse(err, res, 500);
+        return
+      });
+
+      break;
+    case 'eth':
+      coin = 'eth';
+      // get transaction info
+      await web3.eth.getTransaction(hash, function(err, transaction){
+        if (err) {
+          re.errorResponse(err, res, 500);
+          return
+        }
+        if (transaction == null) {
+          re.errorResponse('transaction_not_found', res, 404);
+          return
+        }
+        trans.confirmations = transaction.blockNumber
+        trans.block_hash = transaction.blockHash
+        trans.block_index = transaction.transactionIndex
+        depositStateResult.data.coin_value = String(convert.convertToCoin(res.value))
+      });
+      
+      break;
+    default :
+      coin = 'btc';
+      // get transaction info
+      client = new Client({ host: process.env.Host, port: process.env.BitPort, username: process.env.BitUser, password: process.env.BitPassword, wallet: walletName });
+      await client.getTransaction(trans.hash).then(function(res){
+        trans.confirmations = res.confirmations
+        trans.block_hash = res.blockhash
+        trans.block_index = res.blockindex
+        depositStateResult.data.coin_value = String(res.amount)
+      })
+      .catch(function(err){
+        re.errorResponse(err, res, 500);
+        return
+      });
+
+      break;
+  }
+
+  trans.mtime = new Date().toISOString().replace('T', ' ').replace('Z', '')
+  // check transaction state
+  if (trans.confirmations > 0) {
+    depositStateResult.data.coin_type = coin
+    depositStateResult.data.confirm = true
+    depositStateResult.data.message = "transaction_confirmed"
+    depositStateResult.success = true
+
+    // update transaction
+    Trans.findOneAndUpdate({ hash: hash }, trans, function(err){
+      if (err) {
+        re.errorResponse(err, res, 500);
+        return
+      }
+    })
+
+  } else {
+    depositStateResult.data.coin_type = coin
+    depositStateResult.data.confirm = false
+    depositStateResult.data.message = "transaction_pending"
+    depositStateResult.success = true
+  }
+
+  res.json(depositStateResult);
 };

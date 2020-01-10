@@ -7,9 +7,6 @@ var transactionSchema = new schema({
     _id: {
         type: String
     },
-    transaction_id: {
-        type: String
-    },
     hash: {
         type: String
     },
@@ -46,6 +43,9 @@ var transactionSchema = new schema({
     block_index: {
         type: Number
     },
+    confirmations: {
+        type: Number
+    },
     signed_time: {
         type: String
     },
@@ -53,6 +53,9 @@ var transactionSchema = new schema({
         type: Number
     },
     gas_limit: {
+        type: Number
+    },
+    gas: {
         type: Number
     },
     ctime: {

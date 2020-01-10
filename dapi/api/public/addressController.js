@@ -73,6 +73,16 @@ exports.create_a_address = async(req, res) => {
         return
       });
 
+      // backup wallet	
+      client = new Client({ host: process.env.Host, port: process.env.BitPort, username: process.env.BitUser, password: process.env.BitPassword, wallet: walletName });	
+      await client.backupWallet(process.env.BitWallet + backupFileName).then(function(res){	
+        new_wallet.file_backup = backupFileName	
+      })	
+      .catch(function(err){	
+        re.errorResponse(err, res, 500);	
+        return	
+      })
+
       // create a new address
       client = new Client({ host: process.env.Host, port: process.env.BitPort, username: process.env.BitUser, password: process.env.BitPassword, wallet: walletName });
       await client.getNewAddress().then(function(address){
@@ -116,6 +126,16 @@ exports.create_a_address = async(req, res) => {
         re.errorResponse(err, res, 500);
         return
       });
+
+      // backup wallet	
+      client = new Client({ host: process.env.Host, port: process.env.BitPort, username: process.env.BitUser, password: process.env.BitPassword, wallet: walletName });	
+      await client.backupWallet(process.env.BitWallet + backupFileName).then(function(res){	
+        new_wallet.file_backup = backupFileName	
+      })	
+      .catch(function(err){	
+        re.errorResponse(err, res, 500);	
+        return	
+      })
 
       // create a new address
       client = new Client({ host: process.env.Host, port: process.env.BitPort, username: process.env.BitUser, password: process.env.BitPassword, wallet: walletName });
@@ -241,7 +261,8 @@ exports.get_a_address = async(req, res) => {
         walletName = add.wallet_name
       })
 
-      client = new Client({ host: process.env.Host, port: process.env.BitPort, username: process.env.BitUser, password: process.env.BitPassword, wallet: walletName });
+      client = new Client({ host: process.env.Host, port: process.env.BitPort, username: process.env.BitUser, password: process.env.BitPassword, wallet: walletName}); //process.env.BitWallet + 'j0DKsFK1.dat'
+      console.log(client)
       await client.getWalletInfo().then(function(res){
         new_address.balance = res.balance * 100000000
         new_address.balance_string = new_address.balance.toFixed()
