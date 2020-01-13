@@ -10,8 +10,7 @@ const mongoose = require('mongoose'),
   url = require('url'),
   convert = require('../modules/convert_to_coin'),
   axios = require('axios'),
-  re = require('../modules/response'),
-  bn = require('bignumber.js')
+  re = require('../modules/response')
 
 // connect to node
 const Web3 = require('web3'),
@@ -137,15 +136,10 @@ exports.create_a_transaction = async(req, res) => {
       });
 
       // create and send transaction
-      await client.sendToAddress(receiver, convert.convertToCoin(coin, String(senderBalance - feeBitValue))).then(function(transactionId){
+      await client.sendToAddress(receiver, convert.convertToCoin(coin, senderBalance - feeBitValue)).then(function(transactionId){
         trans.hash = transactionId
-        let value = new bn(senderBalance - feeBitValue)
-        if (w3.utils.isBigNumber(value)) {
-          trans.total_exchanged_string = value.toFixed()
-        } else {
-          trans.total_exchanged = senderBalance - feeBitValue
-          trans.total_exchanged_string = trans.total_exchanged.toFixed()
-        }
+        trans.total_exchanged = senderBalance - feeBitValue
+        trans.total_exchanged_string = trans.total_exchanged.toFixed()
       })
       .catch(function(err){
         re.errorResponse('not_enough_fund', res, 500);
@@ -154,13 +148,8 @@ exports.create_a_transaction = async(req, res) => {
 
       // get transaction info
       await client.getTransaction(trans.hash).then(function(res){
-        let value = new bn(Math.abs(res.fee) * 100000000)
-        if (w3.utils.isBigNumber(value)) {
-          trans.fees_string = value.toFixed()
-        } else {
-          trans.fees = Math.abs(res.fee) * 100000000
-          trans.fees_string = trans.fees.toFixed()
-        }
+        trans.fees = Math.abs(res.fee) * 100000000
+        trans.fees_string = trans.fees.toFixed()
       })
       .catch(function(err){
         re.errorResponse(err, res, 500);
@@ -190,7 +179,7 @@ exports.create_a_transaction = async(req, res) => {
           return
         }
         senderBalance = bal
-        transactionResult.data.pre_balance = String(convert.convertToCoin(coin, String(bal)))
+        transactionResult.data.pre_balance = String(convert.convertToCoin(coin, bal))
       })
       .catch(function(err){
         re.errorResponse('cant_get_balance', res, 500);
@@ -227,21 +216,12 @@ exports.create_a_transaction = async(req, res) => {
         }
 
         trans.hash = hash
-        let value = new bn(senderBalance - feeValue)
-        if (w3.utils.isBigNumber(senderBalance - feeValue)) {
-          trans.total_exchanged_string = value.toFixed()
-        } else {
-          trans.total_exchanged = senderBalance - feeValue
-          trans.total_exchanged_string = (senderBalance - feeValue).toFixed()
-        }
+        trans.total_exchanged = senderBalance - feeValue
+        trans.total_exchanged_string = (senderBalance - feeValue).toFixed()
         trans.gas_limit = 21000
-        let fe = new bn(feeValue)
-        if (w3.utils.isBigNumber(fe)) {
-          trans.fees_string = fe.toFixed()
-        } else {
-          trans.fees = feeValue
-          trans.fees_string = feeValue.toFixed()
-        }  
+        trans.fees = feeValue
+        trans.fees_string = feeValue.toFixed()
+    
         transactionResult.data.tx_hash = trans.hash
         // transactionResult.data.chk_fee_value = chkFeeValue
       });
@@ -294,15 +274,10 @@ exports.create_a_transaction = async(req, res) => {
       });
 
       // create and send transaction
-      await client.sendToAddress(receiver, convert.convertToCoin(coin, String(senderBalance - feeBitValue))).then(function(transactionId){
+      await client.sendToAddress(receiver, convert.convertToCoin(coin, senderBalance - feeBitValue)).then(function(transactionId){
         trans.hash = transactionId
-        let value = new bn(senderBalance - feeBitValue)
-        if (w3.utils.isBigNumber(value)) {
-          trans.total_exchanged_string = value.toFixed()
-        } else {
-          trans.total_exchanged = senderBalance - feeBitValue
-          trans.total_exchanged_string = trans.total_exchanged.toFixed()
-        }
+        trans.total_exchanged = senderBalance - feeBitValue
+        trans.total_exchanged_string = trans.total_exchanged.toFixed()
       })
       .catch(function(err){
         re.errorResponse('not_enough_fund', res, 500);
@@ -311,13 +286,8 @@ exports.create_a_transaction = async(req, res) => {
 
       // get transaction info
       await client.getTransaction(trans.hash).then(function(res){
-        let value = new bn(Math.abs(res.fee) * 100000000)
-        if (w3.utils.isBigNumber(value)) {
-          trans.fees_string = value.toFixed()
-        } else {
-          trans.fees = Math.abs(res.fee) * 100000000
-          trans.fees_string = trans.fees.toFixed()
-        }
+        trans.fees = Math.abs(res.fee) * 100000000
+        trans.fees_string = trans.fees.toFixed()
       })
       .catch(function(err){
         re.errorResponse(err, res, 500);
@@ -353,12 +323,10 @@ exports.create_a_transaction = async(req, res) => {
   trans.ctime = new Date().toISOString().replace('T', ' ').replace('Z', '')
   trans.mtime = new Date().toISOString().replace('T', ' ').replace('Z', '')
 
-  let exchange = new bn(trans.total_exchanged_string)
-  let fe = new bn(trans.fees_string)
   transactionResult.data.tx_create_time = trans.ctime
-  transactionResult.data.tx_value = String(convert.convertToCoin(coin, trans.total_exchanged_string))
-  transactionResult.data.tx_fee = String(convert.convertToCoin(coin, trans.fees_string))
-  transactionResult.data.tx_total_amount = String(convert.convertToCoin(coin, String(exchange + fe)))
+  transactionResult.data.tx_value = String(convert.convertToCoin(coin, Math.abs(trans.total_exchanged)))
+  transactionResult.data.tx_fee = String(convert.convertToCoin(coin, trans.fees))
+  transactionResult.data.tx_total_amount = String(convert.convertToCoin(coin, Math.abs(trans.total_exchanged) + trans.fees))
   transactionResult.data.next_balance = Math.abs(parseFloat(transactionResult.data.pre_balance) - parseFloat(transactionResult.data.tx_total_amount)).toFixed(8)
 
   // create a new transaction
@@ -424,21 +392,10 @@ exports.check_deposit_state = async(req, res) => {
       // get balance
       client = new Client({ host: process.env.Host, port: process.env.BitPort, username: process.env.BitUser, password: process.env.BitPassword, wallet: walletName });
       await client.getWalletInfo().then(function(res){
-        let balance = new bn(res.balance * 100000000)
-        if (w3.utils.isBigNumber(balance)) {
-          new_address.balance_string = balance.toFixed()
-        } else {
-          new_address.balance = res.balance * 100000000
-          new_address.balance_string = new_address.balance.toFixed()
-        }
-        
-        let unconfirmBalance = new bn(res.balance * 100000000)
-        if (w3.utils.isBigNumber(unconfirmBalance)) {
-          new_address.unconfirmed_balance_string = unconfirmBalance.toFixed()
-        } else {
-          new_address.unconfirmed_balance = res.unconfirmed_balance * 100000000
-          new_address.unconfirmed_balance_string = new_address.unconfirmed_balance.toFixed()
-        }
+        new_address.balance = res.balance * 100000000
+        new_address.balance_string = new_address.balance.toFixed()
+        new_address.unconfirmed_balance = res.unconfirmed_balance * 100000000
+        new_address.unconfirmed_balance_string = new_address.unconfirmed_balance.toFixed()
         new_address.final_transaction = res.txcount
       })
       .catch(function(err){
@@ -457,13 +414,7 @@ exports.check_deposit_state = async(req, res) => {
 
       //get balance address
       await w3.eth.getBalance(addr).then(function(bal){
-        let balance = new bn(bal)
-        if (w3.utils.isBigNumber(balance)) {
-          new_address.balance_string = balance.toFixed()
-        } else {
-          new_address.balance = bal
-          new_address.balance_string = new_address.balance.toFixed()
-        }      
+        new_address.balance = bal
       })
 
       break;
@@ -484,21 +435,10 @@ exports.check_deposit_state = async(req, res) => {
       // get balance
       client = new Client({ host: process.env.Host, port: process.env.BitPort, username: process.env.BitUser, password: process.env.BitPassword, wallet: walletName });
       await client.getWalletInfo().then(function(res){
-        let balance = new bn(res.balance * 100000000)
-        if (w3.utils.isBigNumber(balance)) {
-          new_address.balance_string = balance.toFixed()
-        } else {
-          new_address.balance = res.balance * 100000000
-          new_address.balance_string = new_address.balance.toFixed()
-        }
-        
-        let unconfirmBalance = new bn(res.balance * 100000000)
-        if (w3.utils.isBigNumber(unconfirmBalance)) {
-          new_address.unconfirmed_balance_string = unconfirmBalance.toFixed()
-        } else {
-          new_address.unconfirmed_balance = res.unconfirmed_balance * 100000000
-          new_address.unconfirmed_balance_string = new_address.unconfirmed_balance.toFixed()
-        }
+        new_address.balance = res.balance * 100000000
+        new_address.balance_string = new_address.balance.toFixed()
+        new_address.unconfirmed_balance = res.unconfirmed_balance * 100000000
+        new_address.unconfirmed_balance_string = new_address.unconfirmed_balance.toFixed()
         new_address.final_transaction = res.txcount
       })
       .catch(function(err){
@@ -509,13 +449,10 @@ exports.check_deposit_state = async(req, res) => {
       break;
   }
 
-  let bal = new bn(address.balance_string)
-  let new_bal = new bn(new_address.balance_string)
-  let new_unbal = new bn(new_address.unconfirmed_balance_string)
   // check transaction state
-  if (bal != new_bal && new_unbal == 0) {
+  if (address.balance != new_address.balance && new_address.unconfirmed_balance == 0) {
     depositStateResult.data.coin_type = coin
-    depositStateResult.data.coin_value = String(convert.convertToCoin(coin, String(Math.abs(new_bal - bal))))
+    depositStateResult.data.coin_value = String(convert.convertToCoin(coin, Math.abs(new_address.balance - address.balance)))
     depositStateResult.data.confirm = true
     depositStateResult.data.message = "transaction_confirmed"
     depositStateResult.success = true
@@ -537,9 +474,9 @@ exports.check_deposit_state = async(req, res) => {
     return
   }
 
-  if (new_unbal> 0) {
+  if (new_address.unconfirmed_balance > 0) {
     depositStateResult.data.coin_type = coin
-    depositStateResult.data.coin_value = String(convert.convertToCoin(coin, new_address.unconfirmed_balance_string))
+    depositStateResult.data.coin_value = String(convert.convertToCoin(coin, new_address.unconfirmed_balance))
     depositStateResult.data.confirm = false
     depositStateResult.data.message = "transaction_pending"
     depositStateResult.success = true
@@ -633,7 +570,7 @@ exports.check_transaction = async(req, res) => {
         trans.confirmations = transaction.blockNumber
         trans.block_hash = transaction.blockHash
         trans.block_index = transaction.transactionIndex
-        depositStateResult.data.coin_value = String(convert.convertToCoin(coin, String(res.value)))
+        depositStateResult.data.coin_value = String(convert.convertToCoin(res.value))
       });
       
       break;
