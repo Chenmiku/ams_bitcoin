@@ -264,10 +264,22 @@ exports.get_a_address = async(req, res) => {
       client = new Client({ host: process.env.Host, port: process.env.BitPort, username: process.env.BitUser, password: process.env.BitPassword, wallet: walletName}); //process.env.BitWallet + 'j0DKsFK1.dat'
       console.log(client)
       await client.getWalletInfo().then(function(res){
-        new_address.balance = res.balance * 100000000
-        new_address.balance_string = new_address.balance.toFixed()
-        new_address.unconfirmed_balance = res.unconfirmed_balance * 100000000
-        new_address.unconfirmed_balance_string = new_address.unconfirmed_balance.toFixed()
+        let balance = new bn(res.balance * 100000000)
+        if (w3.utils.isBigNumber(balance)) {
+          new_address.balance_string = balance.toFixed()
+        } else {
+          new_address.balance = res.balance * 100000000
+          new_address.balance_string = new_address.balance.toFixed()
+        }
+
+        let unconfirmBalance = new bn(res.unconfirmed_balance * 100000000)
+        if (w3.utils.isBigNumber(unconfirmBalance)) {
+          new_address.unconfirmed_balance_string = unconfirmBalance.toFixed()
+        } else {
+          new_address.unconfirmed_balance = res.unconfirmed_balance * 100000000
+          new_address.unconfirmed_balance_string = new_address.unconfirmed_balance.toFixed()
+        }
+        
         new_address.final_transaction = res.txcount
       })
       .catch(function(err){
@@ -286,8 +298,13 @@ exports.get_a_address = async(req, res) => {
 
       //get balance address
       await w3.eth.getBalance(addr).then(function(bal){
-        new_address.balance = bal
-        new_address.balance_string = Number(bal).toFixed()
+        let balance = new bn(bal) 
+        if (w3.utils.isBigNumber(balance)) {
+          new_address.balance_string = balance.toFixed()
+        } else {
+          new_address.balance = bal
+          new_address.balance_string = Number(bal).toFixed()
+        }
       })
 
       break;
@@ -319,10 +336,22 @@ exports.get_a_address = async(req, res) => {
 
       client = new Client({ host: process.env.Host, port: process.env.BitPort, username: process.env.BitUser, password: process.env.BitPassword, wallet: walletName });
       await client.getWalletInfo().then(function(res){
-        new_address.balance = res.balance * 100000000
-        new_address.balance_string = new_address.balance.toFixed()
-        new_address.unconfirmed_balance = res.unconfirmed_balance * 100000000
-        new_address.unconfirmed_balance_string = new_address.unconfirmed_balance.toFixed()
+        let balance = new bn(res.balance * 100000000)
+        if (w3.utils.isBigNumber(balance)) {
+          new_address.balance_string = balance.toFixed()
+        } else {
+          new_address.balance = res.balance * 100000000
+          new_address.balance_string = new_address.balance.toFixed()
+        }
+
+        let unconfirmBalance = new bn(res.unconfirmed_balance * 100000000)
+        if (w3.utils.isBigNumber(unconfirmBalance)) {
+          new_address.unconfirmed_balance_string = unconfirmBalance.toFixed()
+        } else {
+          new_address.unconfirmed_balance = res.unconfirmed_balance * 100000000
+          new_address.unconfirmed_balance_string = new_address.unconfirmed_balance.toFixed()
+        }
+        
         new_address.final_transaction = res.txcount
       })
       .catch(function(err){
@@ -344,8 +373,8 @@ exports.get_a_address = async(req, res) => {
       re.errorResponse('address_not_found', res, 404);
     } else {
       addressResult.data.addr = addr
-      addressResult.data.balance = String(convert.convertToCoin(coin, ad.balance))
-      addressResult.data.unconfirmed_balance = String(convert.convertToCoin(coin, ad.unconfirmed_balance))
+      addressResult.data.balance = String(convert.convertToCoin(coin, ad.balance_string))
+      addressResult.data.unconfirmed_balance = String(convert.convertToCoin(coin, ad.unconfirmed_balance_string))
       addressResult.data.final_transaction = ad.final_transaction
       addressResult.data.coin_type = coin
       addressResult.data.user_id = ad.user_id || 0
