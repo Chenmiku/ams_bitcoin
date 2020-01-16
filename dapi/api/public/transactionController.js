@@ -208,20 +208,16 @@ exports.create_a_transaction = async(req, res) => {
       console.log(addressKey.private_key)
 
       // sign transaction
-      await w3.eth.accounts.signTransaction(transactionObject, addressKey.private_key).then(function(err, transaction) {
-        console.log('sign')
-        if (err) {
-          re.errorResponse(err, res, 500);
-          return
-        }
+      await w3.eth.accounts.signTransaction(transactionObject, addressKey.private_key).then(function(transaction) {
+        // if (err) {
+        //   console.log('err')
+        //   re.errorResponse(err, res, 500);
+        //   return
+        // }
         raw = transaction.rawTransaction
         trans.size = w3.utils.hexToNumber(transaction.v)
         trans.signed_time = new Date().toISOString().replace('T', ' ').replace('Z', '')
       })
-      .catch(function(err){
-        re.errorResponse(err, res, 500);
-        return
-      });
     
       // send signed transaction
       await w3.eth.sendSignedTransaction(raw).then(function(err, hash) {
