@@ -579,7 +579,8 @@ exports.check_transaction = async(req, res) => {
     case 'eth':
       coin = 'eth';
       // get transaction info
-      await client.getTransaction(trans.hash).then(function(transaction){
+      await w3.eth.getTransaction(trans.hash, function(err, transaction){
+        console.log(transaction)
         if (err) {
           re.errorResponse(err, res, 500);
           return
@@ -588,10 +589,16 @@ exports.check_transaction = async(req, res) => {
           re.errorResponse('transaction_not_found', res, 404);
           return
         }
+
         trans.confirmations = transaction.blockNumber
         trans.block_hash = transaction.blockHash
+        trans.nonce = transaction.nonce
         trans.block_index = transaction.transactionIndex
         depositStateResult.data.coin_value = w3.utils.fromWei(transaction.value, 'ether')
+      })
+      .catch(function(err){
+        re.errorResponse(err, res, 500);
+        return
       });
       
       break;
