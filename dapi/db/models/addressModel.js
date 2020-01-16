@@ -10,6 +10,9 @@ var addressSchema = new schema({
     addr: {
         type: String
     },
+    entropy: {
+        type: String
+    },
     balance: {
         type: Number
     },

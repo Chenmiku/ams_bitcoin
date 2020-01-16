@@ -55,6 +55,7 @@ exports.create_a_address = async(req, res) => {
   var new_addresskey = new AddrKey();
   var new_wallet = new Wallet();
   const walletName = randomString.generate(8)
+  const entropy = w3.utils.randomHex(32)
   const backupFileName = walletName + '.dat';
 
   // check coin type
@@ -124,8 +125,9 @@ exports.create_a_address = async(req, res) => {
     case 'eth':
       coin = 'eth';
       // Create a new address
-      const account = w3.eth.accounts.create(w3.utils.randomHex(32))
+      const account = w3.eth.accounts.create(entropy)
       new_address.addr = account.address
+      new_address.entropy = entropy
 
       new_addresskey.addr = account.address
       new_addresskey.private_key = account.privateKey
