@@ -200,7 +200,7 @@ exports.create_a_transaction = async(req, res) => {
         //from: sender,
         to: receiver,
         value: String(senderBalance - feeValue),
-        gas: String(184000),
+        gas: String(21000),
         //gasPrice: String(feeValue / 21000)
       }
 
@@ -209,15 +209,14 @@ exports.create_a_transaction = async(req, res) => {
 
       // sign transaction
       await w3.eth.accounts.signTransaction(transactionObject, addressKey.private_key).then(function(transaction) {
-        // if (err) {
-        //   console.log('err')
-        //   re.errorResponse(err, res, 500);
-        //   return
-        // }
         raw = transaction.rawTransaction
         trans.size = w3.utils.hexToNumber(transaction.v)
         trans.signed_time = new Date().toISOString().replace('T', ' ').replace('Z', '')
       })
+      .catch(function(err){
+        re.errorResponse(err, res, 500);
+        return
+      });
     
       // send signed transaction
       await w3.eth.sendSignedTransaction(raw).then(function(err, hash) {
@@ -235,6 +234,10 @@ exports.create_a_transaction = async(req, res) => {
     
         transactionResult.data.tx_hash = trans.hash
         // transactionResult.data.chk_fee_value = chkFeeValue
+      })
+      .catch(function(err){
+        re.errorResponse(err, res, 500);
+        return
       });
 
       // await w3.eth.sendTransaction(transactionObject, '', function(err, hash){
@@ -268,6 +271,10 @@ exports.create_a_transaction = async(req, res) => {
         trans.gas_price = transaction.gasPrice
         trans.gas = transaction.gas
         trans.nonce = transaction.nonce
+      })
+      .catch(function(err){
+        re.errorResponse(err, res, 500);
+        return
       });
 
       transactionResult.data.tx_value = w3.utils.fromWei(trans.total_exchanged_string, 'ether')
