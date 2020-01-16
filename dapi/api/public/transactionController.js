@@ -193,7 +193,6 @@ exports.create_a_transaction = async(req, res) => {
       let transactionObject = {};
     
       transactionObject = {
-        from: sender,
         to: receiver,
         value: senderBalance - feeValue,
         gas: 21000,
