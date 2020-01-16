@@ -4,7 +4,7 @@ exports.convertToCoin = function(coinType , value) {
 	case 'btc':
 		result = parseFloat(value) / 100000000
 	case 'eth':
-		result = parseFloat(value) / 1000000000000000000n
+		result = parseFloat(value) / 10000000000 / 100000000
 	case '':
 		result = parseFloat(value) / 100000000
 	}
