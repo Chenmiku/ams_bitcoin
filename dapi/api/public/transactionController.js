@@ -66,7 +66,7 @@ exports.create_a_transaction = async(req, res) => {
   const sender = q.sender
   const receiver = q.receiver
   var trans = new Trans()
-  var feeValue = 20000000000 * 210000
+  var feeValue = 20000000000 * 21000
   var feeBitValue = 3000
   var senderBalance = 0
   var raw = ''
@@ -172,7 +172,7 @@ exports.create_a_transaction = async(req, res) => {
       // get gas price
       await w3.eth.getGasPrice().then(function(gasPrice){
         if (gasPrice > 0) {
-          feeValue = gasPrice * 210000
+          feeValue = gasPrice * 21000
         }
       })
       .catch(function(err){
@@ -199,8 +199,8 @@ exports.create_a_transaction = async(req, res) => {
       transactionObject = {
         to: receiver,
         value: String(senderBalance - feeValue),
-        gas: String(210000),
-        gasPrice: String(feeValue / 210000)
+        gas: String(21000),
+        gasPrice: String(feeValue / 21000)
       }
 
       // sign transaction
@@ -226,7 +226,7 @@ exports.create_a_transaction = async(req, res) => {
         trans.hash = hash
         trans.total_exchanged = senderBalance - feeValue
         trans.total_exchanged_string = (senderBalance - feeValue).toFixed()
-        trans.gas_limit = 210000
+        trans.gas_limit = 21000
         trans.fees = feeValue
         trans.fees_string = feeValue.toFixed()
     
