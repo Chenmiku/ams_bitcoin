@@ -167,7 +167,6 @@ exports.create_a_transaction = async(req, res) => {
 
       // get gas price
       await w3.eth.getGasPrice().then(function(gasPrice){
-        console.log(gasPrice)
         if (gasPrice > 0) {
           feeValue = gasPrice * 21000
         }
@@ -179,12 +178,10 @@ exports.create_a_transaction = async(req, res) => {
       
       //get balance address
       await w3.eth.getBalance(sender).then(function(bal){
-        console.log(bal)
         if (Number(bal) <= feeValue) {
           re.errorResponse('not_enough_fund', res, 500);
           return
         }
-        console.log('pass check')
         senderBalance = Number(bal)
         transactionResult.data.pre_balance = String(convert.convertToCoin(coin, bal))
       })
@@ -205,11 +202,11 @@ exports.create_a_transaction = async(req, res) => {
     
       // sign transaction
       await w3.eth.accounts.signTransaction(transactionObject, addressKey.private_key, function(err, transaction){
+        console.log('sign')
         if (err) {
           re.errorResponse(err, res, 500);
           return
         }
-        console.log(transaction.tx)
         raw = transaction.rawTransaction
         trans.size = w3.utils.hexToNumber(transaction.v)
         trans.signed_time = new Date().toISOString().replace('T', ' ').replace('Z', '')
