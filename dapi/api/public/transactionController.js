@@ -629,12 +629,14 @@ exports.check_transaction = async(req, res) => {
       }
     })
 
+    res.json(depositStateResult);
+
   } else {
     depositStateResult.data.coin_type = coin
     depositStateResult.data.confirm = false
     depositStateResult.data.message = "transaction_pending"
     depositStateResult.success = true
-  }
 
-  res.json(depositStateResult);
+    res.json(depositStateResult);
+  }
 };
