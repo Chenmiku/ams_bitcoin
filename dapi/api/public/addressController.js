@@ -63,9 +63,9 @@ exports.create_a_address = async(req, res) => {
     case 'btc':
       coin = 'btc';       
       // create a new wallet
-      await client.createWallet(walletName).then(function(res){
+      await client.createWallet(walletName).then(function(wall){
         if (res != null) {
-          new_wallet.name = res.name
+          new_wallet.name = wall.name
           new_wallet.file_backup = backupFileName
         }
       })
@@ -77,7 +77,7 @@ exports.create_a_address = async(req, res) => {
       // backup wallet	
       client = new Client({ host: process.env.Host, port: process.env.BitPort, username: process.env.BitUser, password: process.env.BitPassword, wallet: walletName });	
       console.log(client)
-      await client.backupWallet(process.env.BitWallet + backupFileName).then(function(res){	
+      await client.backupWallet(process.env.BitWallet + backupFileName).then(function(backupWall){	
         new_wallet.file_backup = backupFileName	
       })	
       .catch(function(err){	
@@ -135,9 +135,9 @@ exports.create_a_address = async(req, res) => {
     case '':
       coin = 'btc';       
       // create a new wallet
-      await client.createWallet(walletName).then(function(res){
+      await client.createWallet(walletName).then(function(wall){
         if (res != null) {
-          new_wallet.name = res.name
+          new_wallet.name = wall.name
           new_wallet.file_backup = backupFileName
         }
       })
@@ -148,7 +148,7 @@ exports.create_a_address = async(req, res) => {
 
       // backup wallet	
       client = new Client({ host: process.env.Host, port: process.env.BitPort, username: process.env.BitUser, password: process.env.BitPassword, wallet: walletName });	
-      await client.backupWallet(process.env.BitWallet + backupFileName).then(function(res){	
+      await client.backupWallet(process.env.BitWallet + backupFileName).then(function(backupWall){	
         new_wallet.file_backup = backupFileName	
       })	
       .catch(function(err){	
@@ -258,8 +258,8 @@ exports.get_a_address = async(req, res) => {
     case 'btc':
       coin = 'btc';
       // validate address
-      await client.validateAddress(addr).then(function(res){
-        if (res.isvalid == false) {
+      await client.validateAddress(addr).then(function(validate){
+        if (validate.isvalid == false) {
           re.errorResponse('invalid_address', res, 500);
           return
         }
@@ -283,12 +283,12 @@ exports.get_a_address = async(req, res) => {
 
       client = new Client({ host: process.env.Host, port: process.env.BitPort, username: process.env.BitUser, password: process.env.BitPassword, wallet: walletName}); //process.env.BitWallet + 'j0DKsFK1.dat'
       console.log(client)
-      await client.getWalletInfo().then(function(res){
-        new_address.balance = res.balance * 100000000
+      await client.getWalletInfo().then(function(walletInfo){
+        new_address.balance = walletInfo.balance * 100000000
         new_address.balance_string = new_address.balance.toFixed()
-        new_address.unconfirmed_balance = res.unconfirmed_balance * 100000000
+        new_address.unconfirmed_balance = walletInfo.unconfirmed_balance * 100000000
         new_address.unconfirmed_balance_string = new_address.unconfirmed_balance.toFixed()
-        new_address.final_transaction = res.txcount
+        new_address.final_transaction = walletInfo.txcount
       })
       .catch(function(err){
         re.errorResponse(err, res, 500);
@@ -324,8 +324,8 @@ exports.get_a_address = async(req, res) => {
     default :
       coin = 'btc';
       // validate address
-      await client.validateAddress(new_address.addr).then(function(res){
-        if (res.isvalid == false) {
+      await client.validateAddress(new_address.addr).then(function(validate){
+        if (validate.isvalid == false) {
           re.errorResponse('invalid_address', res, 500);
           return
         }
@@ -348,12 +348,12 @@ exports.get_a_address = async(req, res) => {
       })
 
       client = new Client({ host: process.env.Host, port: process.env.BitPort, username: process.env.BitUser, password: process.env.BitPassword, wallet: walletName });
-      await client.getWalletInfo().then(function(res){
-        new_address.balance = res.balance * 100000000
+      await client.getWalletInfo().then(function(walletInfo){
+        new_address.balance = walletInfo.balance * 100000000
         new_address.balance_string = new_address.balance.toFixed()
-        new_address.unconfirmed_balance = res.unconfirmed_balance * 100000000
+        new_address.unconfirmed_balance = walletInfo.unconfirmed_balance * 100000000
         new_address.unconfirmed_balance_string = new_address.unconfirmed_balance.toFixed()
-        new_address.final_transaction = res.txcount
+        new_address.final_transaction = walletInfo.txcount
       })
       .catch(function(err){
         re.errorResponse(err, res, 500);

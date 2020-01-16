@@ -108,8 +108,8 @@ exports.create_a_transaction = async(req, res) => {
     case 'btc':
       coin = 'btc';
       // validate address
-      await client.validateAddress(sender).then(function(res){
-        if (res.isvalid == false) {
+      await client.validateAddress(sender).then(function(validate){
+        if (validate.isvalid == false) {
           re.errorResponse('invalid_address', res, 500);
           return
         }
@@ -121,10 +121,10 @@ exports.create_a_transaction = async(req, res) => {
 
       // get balance
       client = new Client({ host: process.env.Host, port: process.env.BitPort, username: process.env.BitUser, password: process.env.BitPassword, wallet: walletName });
-      await client.getWalletInfo().then(function(res){
-        console.log(res)
-        senderBalance = res.balance * 100000000
-        transactionResult.data.pre_balance = String(res.balance)
+      await client.getWalletInfo().then(function(walletInfo){
+        console.log(walletInfo)
+        senderBalance = walletInfo.balance * 100000000
+        transactionResult.data.pre_balance = String(walletInfo.balance)
         if (senderBalance <= feeBitValue) {
           re.errorResponse('not_enough_fund', res, 500);
           return
@@ -147,8 +147,8 @@ exports.create_a_transaction = async(req, res) => {
       });
 
       // get transaction info
-      await client.getTransaction(trans.hash).then(function(res){
-        trans.fees = Math.abs(res.fee) * 100000000
+      await client.getTransaction(trans.hash).then(function(transaction){
+        trans.fees = Math.abs(transaction.fee) * 100000000
         trans.fees_string = trans.fees.toFixed()
       })
       .catch(function(err){
@@ -266,8 +266,8 @@ exports.create_a_transaction = async(req, res) => {
     default :
       coin = 'btc';
       // validate address
-      await client.validateAddress(sender).then(function(res){
-        if (res.isvalid == false) {
+      await client.validateAddress(sender).then(function(validate){
+        if (validate.isvalid == false) {
           re.errorResponse('invalid_address', res, 500);
           return
         }
@@ -279,10 +279,10 @@ exports.create_a_transaction = async(req, res) => {
 
       // get balance
       client = new Client({ host: process.env.Host, port: process.env.BitPort, username: process.env.BitUser, password: process.env.BitPassword, wallet: walletName });
-      await client.getWalletInfo().then(function(res){
-        console.log(res)
-        senderBalance = res.balance * 100000000
-        transactionResult.data.pre_balance = String(res.balance)
+      await client.getWalletInfo().then(function(walletInfo){
+        console.log(walletInfo)
+        senderBalance = walletInfo.balance * 100000000
+        transactionResult.data.pre_balance = String(walletInfo.balance)
         if (senderBalance <= feeBitValue) {
           re.errorResponse('not_enough_fund', res, 500);
           return
@@ -305,8 +305,8 @@ exports.create_a_transaction = async(req, res) => {
       });
 
       // get transaction info
-      await client.getTransaction(trans.hash).then(function(res){
-        trans.fees = Math.abs(res.fee) * 100000000
+      await client.getTransaction(trans.hash).then(function(transaction){
+        trans.fees = Math.abs(transaction.fee) * 100000000
         trans.fees_string = trans.fees.toFixed()
       })
       .catch(function(err){
@@ -399,8 +399,8 @@ exports.check_deposit_state = async(req, res) => {
     case 'btc':
       coin = 'btc';
       // validate address
-      await client.validateAddress(addr).then(function(res){
-        if (res.isvalid == false) {
+      await client.validateAddress(addr).then(function(validate){
+        if (validate.isvalid == false) {
           re.errorResponse('invalid_address', res, 500);
           return
         }
@@ -412,12 +412,12 @@ exports.check_deposit_state = async(req, res) => {
 
       // get balance
       client = new Client({ host: process.env.Host, port: process.env.BitPort, username: process.env.BitUser, password: process.env.BitPassword, wallet: walletName });
-      await client.getWalletInfo().then(function(res){
-        new_address.balance = res.balance * 100000000
+      await client.getWalletInfo().then(function(walletInfo){
+        new_address.balance = walletInfo.balance * 100000000
         new_address.balance_string = new_address.balance.toFixed()
-        new_address.unconfirmed_balance = res.unconfirmed_balance * 100000000
+        new_address.unconfirmed_balance = walletInfo.unconfirmed_balance * 100000000
         new_address.unconfirmed_balance_string = new_address.unconfirmed_balance.toFixed()
-        new_address.final_transaction = res.txcount
+        new_address.final_transaction = walletInfo.txcount
       })
       .catch(function(err){
         re.errorResponse(err, res, 500);
@@ -442,8 +442,8 @@ exports.check_deposit_state = async(req, res) => {
     default :
       coin = 'btc';
       // validate address
-      await client.validateAddress(addr).then(function(res){
-        if (res.isvalid == false) {
+      await client.validateAddress(addr).then(function(validate){
+        if (validate.isvalid == false) {
           re.errorResponse('invalid_address', res, 500);
           return
         }
@@ -455,12 +455,12 @@ exports.check_deposit_state = async(req, res) => {
 
       // get balance
       client = new Client({ host: process.env.Host, port: process.env.BitPort, username: process.env.BitUser, password: process.env.BitPassword, wallet: walletName });
-      await client.getWalletInfo().then(function(res){
-        new_address.balance = res.balance * 100000000
+      await client.getWalletInfo().then(function(walletInfo){
+        new_address.balance = walletInfo.balance * 100000000
         new_address.balance_string = new_address.balance.toFixed()
-        new_address.unconfirmed_balance = res.unconfirmed_balance * 100000000
+        new_address.unconfirmed_balance = walletInfo.unconfirmed_balance * 100000000
         new_address.unconfirmed_balance_string = new_address.unconfirmed_balance.toFixed()
-        new_address.final_transaction = res.txcount
+        new_address.final_transaction = walletInfo.txcount
       })
       .catch(function(err){
         re.errorResponse(err, res, 500);
@@ -564,11 +564,11 @@ exports.check_transaction = async(req, res) => {
       coin = 'btc';
       // get transaction info
       client = new Client({ host: process.env.Host, port: process.env.BitPort, username: process.env.BitUser, password: process.env.BitPassword, wallet: walletName });
-      await client.getTransaction(trans.hash).then(function(res){
-        trans.confirmations = res.confirmations
-        trans.block_hash = res.blockhash
-        trans.block_index = res.blockindex
-        depositStateResult.data.coin_value = String(parseFloat(res.amount) / 100000000)
+      await client.getTransaction(trans.hash).then(function(transaction){
+        trans.confirmations = transaction.confirmations
+        trans.block_hash = transaction.blockhash
+        trans.block_index = transaction.blockindex
+        depositStateResult.data.coin_value = String(parseFloat(transaction.amount) / 100000000)
       })
       .catch(function(err){
         re.errorResponse(err, res, 500);
@@ -579,7 +579,7 @@ exports.check_transaction = async(req, res) => {
     case 'eth':
       coin = 'eth';
       // get transaction info
-      await w3.eth.getTransaction(hash, function(err, transaction){
+      await client.getTransaction(trans.hash).then(function(transaction){
         if (err) {
           re.errorResponse(err, res, 500);
           return
@@ -591,7 +591,7 @@ exports.check_transaction = async(req, res) => {
         trans.confirmations = transaction.blockNumber
         trans.block_hash = transaction.blockHash
         trans.block_index = transaction.transactionIndex
-        depositStateResult.data.coin_value = w3.utils.fromWei(res.value, 'ether')
+        depositStateResult.data.coin_value = w3.utils.fromWei(transaction.value, 'ether')
       });
       
       break;
@@ -599,11 +599,11 @@ exports.check_transaction = async(req, res) => {
       coin = 'btc';
       // get transaction info
       client = new Client({ host: process.env.Host, port: process.env.BitPort, username: process.env.BitUser, password: process.env.BitPassword, wallet: walletName });
-      await client.getTransaction(trans.hash).then(function(res){
-        trans.confirmations = res.confirmations
-        trans.block_hash = res.blockhash
-        trans.block_index = res.blockindex
-        depositStateResult.data.coin_value = String(parseFloat(res.amount) / 100000000)
+      await client.getTransaction(trans.hash).then(function(transaction){
+        trans.confirmations = transaction.confirmations
+        trans.block_hash = transaction.blockhash
+        trans.block_index = transaction.blockindex
+        depositStateResult.data.coin_value = String(parseFloat(transaction.amount) / 100000000)
       })
       .catch(function(err){
         re.errorResponse(err, res, 500);
