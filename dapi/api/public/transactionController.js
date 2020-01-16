@@ -136,7 +136,7 @@ exports.create_a_transaction = async(req, res) => {
       });
 
       // create and send transaction
-      await client.sendToAddress(receiver, convert.convertToCoin(coin, senderBalance - feeBitValue)).then(function(transactionId){
+      await client.sendToAddress(receiver, parseFloat(convert.convertToCoin(coin, senderBalance - feeBitValue))).then(function(transactionId){
         trans.hash = transactionId
         trans.total_exchanged = senderBalance - feeBitValue
         trans.total_exchanged_string = trans.total_exchanged.toFixed()
@@ -183,7 +183,7 @@ exports.create_a_transaction = async(req, res) => {
           return
         }
         senderBalance = Number(bal)
-        transactionResult.data.pre_balance = String(convert.convertToCoin(coin, bal))
+        transactionResult.data.pre_balance = convert.convertToCoin(coin, bal)
       })
       .catch(function(err){
         re.errorResponse(err, res, 500);
@@ -199,6 +199,8 @@ exports.create_a_transaction = async(req, res) => {
         gas: 21000,
         gasPrice: feeValue / 21000
       }
+
+      console.log(transactionObject)
     
       // sign transaction
       await w3.eth.accounts.signTransaction(transactionObject, addressKey.private_key, function(err, transaction){
@@ -278,7 +280,7 @@ exports.create_a_transaction = async(req, res) => {
       });
 
       // create and send transaction
-      await client.sendToAddress(receiver, convert.convertToCoin(coin, senderBalance - feeBitValue)).then(function(transactionId){
+      await client.sendToAddress(receiver, parseFloat(convert.convertToCoin(coin, senderBalance - feeBitValue))).then(function(transactionId){
         trans.hash = transactionId
         trans.total_exchanged = senderBalance - feeBitValue
         trans.total_exchanged_string = trans.total_exchanged.toFixed()
@@ -328,9 +330,9 @@ exports.create_a_transaction = async(req, res) => {
   trans.mtime = new Date().toISOString().replace('T', ' ').replace('Z', '')
 
   transactionResult.data.tx_create_time = trans.ctime
-  transactionResult.data.tx_value = String(convert.convertToCoin(coin, Math.abs(trans.total_exchanged)))
-  transactionResult.data.tx_fee = String(convert.convertToCoin(coin, trans.fees))
-  transactionResult.data.tx_total_amount = String(convert.convertToCoin(coin, Math.abs(trans.total_exchanged) + trans.fees))
+  transactionResult.data.tx_value = convert.convertToCoin(coin, Math.abs(trans.total_exchanged))
+  transactionResult.data.tx_fee = convert.convertToCoin(coin, trans.fees)
+  transactionResult.data.tx_total_amount = convert.convertToCoin(coin, Math.abs(trans.total_exchanged) + trans.fees)
   transactionResult.data.next_balance = Math.abs(parseFloat(transactionResult.data.pre_balance) - parseFloat(transactionResult.data.tx_total_amount)).toFixed(8)
 
   // create a new transaction
@@ -456,7 +458,7 @@ exports.check_deposit_state = async(req, res) => {
   // check transaction state
   if (address.balance != new_address.balance && new_address.unconfirmed_balance == 0) {
     depositStateResult.data.coin_type = coin
-    depositStateResult.data.coin_value = String(convert.convertToCoin(coin, Math.abs(new_address.balance - address.balance)))
+    depositStateResult.data.coin_value = convert.convertToCoin(coin, Math.abs(new_address.balance - address.balance))
     depositStateResult.data.confirm = true
     depositStateResult.data.message = "transaction_confirmed"
     depositStateResult.success = true
@@ -480,7 +482,7 @@ exports.check_deposit_state = async(req, res) => {
 
   if (new_address.unconfirmed_balance > 0) {
     depositStateResult.data.coin_type = coin
-    depositStateResult.data.coin_value = String(convert.convertToCoin(coin, new_address.unconfirmed_balance))
+    depositStateResult.data.coin_value = convert.convertToCoin(coin, new_address.unconfirmed_balance)
     depositStateResult.data.confirm = false
     depositStateResult.data.message = "transaction_pending"
     depositStateResult.success = true
@@ -574,7 +576,7 @@ exports.check_transaction = async(req, res) => {
         trans.confirmations = transaction.blockNumber
         trans.block_hash = transaction.blockHash
         trans.block_index = transaction.transactionIndex
-        depositStateResult.data.coin_value = String(convert.convertToCoin(coin, res.value))
+        depositStateResult.data.coin_value = convert.convertToCoin(coin, res.value)
       });
       
       break;
