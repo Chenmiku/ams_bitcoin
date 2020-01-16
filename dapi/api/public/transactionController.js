@@ -197,9 +197,10 @@ exports.create_a_transaction = async(req, res) => {
       let transactionObject = {};
     
       transactionObject = {
+        //from: sender,
         to: receiver,
         value: senderBalance - feeValue,
-        gas: feeValue,
+        gas: 21000,
         gasPrice: feeValue / 21000
       }
 
@@ -217,6 +218,10 @@ exports.create_a_transaction = async(req, res) => {
         trans.size = w3.utils.hexToNumber(transaction.v)
         trans.signed_time = new Date().toISOString().replace('T', ' ').replace('Z', '')
       })
+      .catch(function(err){
+        re.errorResponse(err, res, 500);
+        return
+      });
     
       // send signed transaction
       await w3.eth.sendSignedTransaction(raw, function(err, hash) {
@@ -235,6 +240,19 @@ exports.create_a_transaction = async(req, res) => {
         transactionResult.data.tx_hash = trans.hash
         // transactionResult.data.chk_fee_value = chkFeeValue
       });
+
+      // await w3.eth.sendTransaction(transactionObject, '', function(err, hash){
+      //   console.log('send')
+      //   if (err) {
+      //     re.errorResponse(err, res, 500);
+      //     return
+      //   }
+
+      //   trans.hash = hash
+      //   trans.total_exchanged = senderBalance - feeValue
+      //   trans.total_exchanged_string = (senderBalance - feeValue).toFixed()
+      //   trans.gas_limit = 21000
+      // })
 
       // get transaction info
       await web3.eth.getTransaction(trans.hash, function(err, transaction){
