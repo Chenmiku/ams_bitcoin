@@ -203,11 +203,9 @@ exports.create_a_transaction = async(req, res) => {
         gasPrice: String(feeValue / 210000)
       }
 
-      console.log(transactionObject)
-      console.log(addressKey.private_key)
-
       // sign transaction
       await w3.eth.accounts.signTransaction(transactionObject, addressKey.private_key).then(function(transaction) {
+        console.log(transaction)
         raw = transaction.rawTransaction
         trans.size = w3.utils.hexToNumber(transaction.v)
         trans.signed_time = new Date().toISOString().replace('T', ' ').replace('Z', '')
@@ -219,6 +217,7 @@ exports.create_a_transaction = async(req, res) => {
     
       // send signed transaction
       await w3.eth.sendSignedTransaction(raw, function(err, hash) {
+        console.log(hash)
         if (err) {
           re.errorResponse(err, res, 500);
           return
@@ -240,6 +239,7 @@ exports.create_a_transaction = async(req, res) => {
 
       // get transaction info
       await w3.eth.getTransaction(trans.hash, function(err, transaction){
+        console.log(transaction)
         if (err) {
           re.errorResponse(err, res, 500);
           return
