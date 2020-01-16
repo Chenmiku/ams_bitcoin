@@ -1,10 +1,16 @@
+const Web3 = require('web3'),
+      mainnet = process.env.Provider,
+      w3 = new Web3(new Web3.providers.HttpProvider(mainnet))
+
 exports.convertToCoin = function(coinType , value) {
-	let result = 0
+	var result
 	switch(coinType) {
 	case 'btc':
 		result = parseFloat(value) / 100000000
 	case 'eth':
-		result = parseFloat(value) / (10000000000 * 100000000)
+		await w3.utils.fromWei(value, 'ether').then(function(res){
+			result = res
+		})
 	case '':
 		result = parseFloat(value) / 100000000
 	}
