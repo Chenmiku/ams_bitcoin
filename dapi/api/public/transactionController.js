@@ -184,6 +184,7 @@ exports.create_a_transaction = async(req, res) => {
           re.errorResponse('not_enough_fund', res, 500);
           return
         }
+        console.log('pass check')
         senderBalance = Number(bal)
         transactionResult.data.pre_balance = String(convert.convertToCoin(coin, bal))
       })

@@ -9,6 +9,7 @@ exports.convertToCoin = function(coinType , value) {
 		result = String(parseFloat(value) / 100000000)
 	case 'eth':
 		result = w3.utils.fromWei(value, 'ether');
+		console.log(result)
 	case '':
 		result = String(parseFloat(value) / 100000000)
 	}
