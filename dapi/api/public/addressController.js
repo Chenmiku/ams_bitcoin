@@ -74,14 +74,14 @@ exports.create_a_address = async(req, res) => {
       });
 
       // backup wallet	
-      client = new Client({ host: process.env.Host, port: process.env.BitPort, username: process.env.BitUser, password: process.env.BitPassword, wallet: walletName });	
-      await client.backupWallet(process.env.BitWallet + backupFileName).then(function(res){	
-        new_wallet.file_backup = backupFileName	
-      })	
-      .catch(function(err){	
-        re.errorResponse(err, res, 500);	
-        return	
-      })
+      // client = new Client({ host: process.env.Host, port: process.env.BitPort, username: process.env.BitUser, password: process.env.BitPassword, wallet: walletName });	
+      // await client.backupWallet(process.env.BitWallet + backupFileName).then(function(res){	
+      //   new_wallet.file_backup = backupFileName	
+      // })	
+      // .catch(function(err){	
+      //   re.errorResponse(err, res, 500);
+      //   return	
+      // })
 
       // create a new address
       client = new Client({ host: process.env.Host, port: process.env.BitPort, username: process.env.BitUser, password: process.env.BitPassword, wallet: walletName });
@@ -144,14 +144,14 @@ exports.create_a_address = async(req, res) => {
       });
 
       // backup wallet	
-      client = new Client({ host: process.env.Host, port: process.env.BitPort, username: process.env.BitUser, password: process.env.BitPassword, wallet: walletName });	
-      await client.backupWallet(process.env.BitWallet + backupFileName).then(function(res){	
-        new_wallet.file_backup = backupFileName	
-      })	
-      .catch(function(err){	
-        re.errorResponse(err, res, 500);	
-        return	
-      })
+      // client = new Client({ host: process.env.Host, port: process.env.BitPort, username: process.env.BitUser, password: process.env.BitPassword, wallet: walletName });	
+      // await client.backupWallet(process.env.BitWallet + backupFileName).then(function(res){	
+      //   new_wallet.file_backup = backupFileName	
+      // })	
+      // .catch(function(err){	
+      //   re.errorResponse(err, res, 500);	
+      //   return	
+      // })
 
       // create a new address
       client = new Client({ host: process.env.Host, port: process.env.BitPort, username: process.env.BitUser, password: process.env.BitPassword, wallet: walletName });
