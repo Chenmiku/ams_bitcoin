@@ -304,7 +304,6 @@ exports.get_a_address = async(req, res) => {
 
       //get balance address
       await w3.eth.getBalance(addr).then(function(bal){
-        console.log('balance', bal)
         new_address.balance = Number(bal)
         new_address.balance_string = bal
       })
@@ -312,6 +311,8 @@ exports.get_a_address = async(req, res) => {
         re.errorResponse(err, res, 500);
         return
       });
+
+      addressResult.data.balance = w3.utils.fromWei(new_address.balance_string, 'ether');
 
       break;
     default :
@@ -367,9 +368,9 @@ exports.get_a_address = async(req, res) => {
       re.errorResponse('address_not_found', res, 404);
     } else {
       addressResult.data.addr = addr
-      console.log('after convert', convert.convertToCoin(coin, ad.balance_string))
-      addressResult.data.balance = convert.convertToCoin(coin, ad.balance_string)
-      addressResult.data.unconfirmed_balance = convert.convertToCoin(coin, ad.unconfirmed_balance_string)
+      //console.log('after convert', convert.convertToCoin(coin, ad.balance_string))
+      //addressResult.data.balance =  convert.convertToCoin(coin, ad.balance_string)
+      //addressResult.data.unconfirmed_balance = convert.convertToCoin(coin, ad.unconfirmed_balance_string)
       addressResult.data.final_transaction = ad.final_transaction
       addressResult.data.coin_type = coin
       addressResult.data.user_id = ad.user_id || 0
