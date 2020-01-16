@@ -102,6 +102,22 @@ exports.create_a_address = async(req, res) => {
         re.errorResponse(err, res, 500);
         return
       })
+
+      new_wallet._id = uuidv1()
+      new_wallet.coin_type = coin
+      new_wallet.ctime = new Date().toISOString().replace('T', ' ').replace('Z', '')
+      new_wallet.mtime = new Date().toISOString().replace('T', ' ').replace('Z', '')
+
+      new_address.wallet_id = new_wallet._id
+      new_address.wallet_name = new_wallet.name
+
+      // create a new wallet
+      await new_wallet.save(function(err){
+        if(err) {
+          re.errorResponse(err, res, 500);
+          return
+        }
+      })
       
       break;
     case 'eth':
@@ -157,13 +173,24 @@ exports.create_a_address = async(req, res) => {
         return
       })
 
+      new_wallet._id = uuidv1()
+      new_wallet.coin_type = coin
+      new_wallet.ctime = new Date().toISOString().replace('T', ' ').replace('Z', '')
+      new_wallet.mtime = new Date().toISOString().replace('T', ' ').replace('Z', '')
+
+      new_address.wallet_id = new_wallet._id
+      new_address.wallet_name = new_wallet.name
+
+      // create a new wallet
+      await new_wallet.save(function(err){
+        if(err) {
+          re.errorResponse(err, res, 500);
+          return
+        }
+      })
+
       break;
   }
-
-  new_wallet._id = uuidv1()
-  new_wallet.coin_type = coin
-  new_wallet.ctime = new Date().toISOString().replace('T', ' ').replace('Z', '')
-  new_wallet.mtime = new Date().toISOString().replace('T', ' ').replace('Z', '')
 
   new_address._id = uuidv1()
   new_address.balance = 0
@@ -171,8 +198,6 @@ exports.create_a_address = async(req, res) => {
   new_address.unconfirmed_balance = 0
   new_address.unconfirmed_balance_string = "0"
   new_address.final_transaction = 0
-  new_address.wallet_id = new_wallet._id
-  new_address.wallet_name = new_wallet.name
   new_address.user_id = userId || 0
   new_address.coin_type = coin
   new_address.ctime = new Date().toISOString().replace('T', ' ').replace('Z', '')
@@ -182,14 +207,6 @@ exports.create_a_address = async(req, res) => {
   new_addresskey.coin_type = coin
   new_addresskey.ctime = new Date().toISOString().replace('T', ' ').replace('Z', '')
   new_addresskey.mtime = new Date().toISOString().replace('T', ' ').replace('Z', '')
-
-  // create a new wallet
-  await new_wallet.save(function(err){
-    if(err) {
-      re.errorResponse(err, res, 500);
-      return
-    }
-  })
 
   // create a new addresskey
   await new_addresskey.save(function(err){
