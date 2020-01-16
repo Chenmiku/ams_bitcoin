@@ -2,7 +2,7 @@ const Web3 = require('web3'),
       mainnet = process.env.Provider,
       w3 = new Web3(new Web3.providers.HttpProvider(mainnet))
 
-exports.convertToCoin = function(coinType , value) {
+exports.convertToCoin = async(coinType , value) => {
 	var result
 	switch(coinType) {
 	case 'btc':
