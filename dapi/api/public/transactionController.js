@@ -197,34 +197,52 @@ exports.create_a_transaction = async(req, res) => {
       let transactionObject = {};
     
       transactionObject = {
-        //from: sender,
+        from: sender,
         to: receiver,
-        value: String(senderBalance - feeValue),
-        gas: String(21000),
-        gasPrice: String(feeValue / 21000)
+        value: senderBalance - feeValue,
+        gas: 21000,
+        gasPrice: feeValue / 21000
       }
 
       console.log(transactionObject)
       console.log(addressKey.private_key)
 
-      // sign transaction
-      await w3.eth.accounts.signTransaction(transactionObject, addressKey.private_key, function(err, transaction){
-        console.log('sign')
-        if (err) {
-          re.errorResponse(err, res, 500);
-          return
-        }
-        raw = transaction.rawTransaction
-        trans.size = w3.utils.hexToNumber(transaction.v)
-        trans.signed_time = new Date().toISOString().replace('T', ' ').replace('Z', '')
-      })
-      .catch(function(err){
-        re.errorResponse(err, res, 500);
-        return
-      });
+      // // sign transaction
+      // await w3.eth.accounts.signTransaction(transactionObject, addressKey.private_key, function(err, transaction){
+      //   console.log('sign')
+      //   if (err) {
+      //     re.errorResponse(err, res, 500);
+      //     return
+      //   }
+      //   raw = transaction.rawTransaction
+      //   trans.size = w3.utils.hexToNumber(transaction.v)
+      //   trans.signed_time = new Date().toISOString().replace('T', ' ').replace('Z', '')
+      // })
+      // .catch(function(err){
+      //   re.errorResponse(err, res, 500);
+      //   return
+      // });
     
-      // send signed transaction
-      await w3.eth.sendSignedTransaction(raw, function(err, hash) {
+      // // send signed transaction
+      // await w3.eth.sendSignedTransaction(raw, function(err, hash) {
+      //   if (err) {
+      //     re.errorResponse(err, res, 500);
+      //     return
+      //   }
+
+      //   trans.hash = hash
+      //   trans.total_exchanged = senderBalance - feeValue
+      //   trans.total_exchanged_string = (senderBalance - feeValue).toFixed()
+      //   trans.gas_limit = 21000
+      //   trans.fees = feeValue
+      //   trans.fees_string = feeValue.toFixed()
+    
+      //   transactionResult.data.tx_hash = trans.hash
+      //   // transactionResult.data.chk_fee_value = chkFeeValue
+      // });
+
+      await w3.eth.sendTransaction(transactionObject, '', function(err, hash){
+        console.log('send')
         if (err) {
           re.errorResponse(err, res, 500);
           return
@@ -236,23 +254,9 @@ exports.create_a_transaction = async(req, res) => {
         trans.gas_limit = 21000
         trans.fees = feeValue
         trans.fees_string = feeValue.toFixed()
-    
+
         transactionResult.data.tx_hash = trans.hash
-        // transactionResult.data.chk_fee_value = chkFeeValue
-      });
-
-      // await w3.eth.sendTransaction(transactionObject, '', function(err, hash){
-      //   console.log('send')
-      //   if (err) {
-      //     re.errorResponse(err, res, 500);
-      //     return
-      //   }
-
-      //   trans.hash = hash
-      //   trans.total_exchanged = senderBalance - feeValue
-      //   trans.total_exchanged_string = (senderBalance - feeValue).toFixed()
-      //   trans.gas_limit = 21000
-      // })
+      })
 
       // get transaction info
       await web3.eth.getTransaction(trans.hash, function(err, transaction){
