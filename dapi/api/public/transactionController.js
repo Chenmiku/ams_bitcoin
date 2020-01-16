@@ -136,7 +136,7 @@ exports.create_a_transaction = async(req, res) => {
       });
 
       // create and send transaction
-      await client.sendToAddress(receiver, parseFloat(convert.convertToCoin(coin, senderBalance - feeBitValue))).then(function(transactionId){
+      await client.sendToAddress(receiver, parseFloat(senderBalance - feeBitValue) / 100000000).then(function(transactionId){
         trans.hash = transactionId
         trans.total_exchanged = senderBalance - feeBitValue
         trans.total_exchanged_string = trans.total_exchanged.toFixed()
@@ -155,6 +155,10 @@ exports.create_a_transaction = async(req, res) => {
         re.errorResponse(err, res, 500);
         return
       });
+
+      transactionResult.data.tx_value = String(parseFloat(trans.total_exchanged_string) / 100000000)
+      transactionResult.data.tx_fee = String(parseFloat(trans.fees_string) / 100000000) 
+      transactionResult.data.tx_total_amount = String(parseFloat(trans.total_exchanged + trans.fees) / 100000000)
 
       break;
     case 'eth':
@@ -183,7 +187,7 @@ exports.create_a_transaction = async(req, res) => {
           return
         }
         senderBalance = Number(bal)
-        transactionResult.data.pre_balance = convert.convertToCoin(coin, bal)
+        transactionResult.data.pre_balance = w3.utils.fromWei(bal, 'ether')
       })
       .catch(function(err){
         re.errorResponse(err, res, 500);
@@ -200,7 +204,8 @@ exports.create_a_transaction = async(req, res) => {
       }
 
       console.log(transactionObject)
-    
+      console.log(addressKey.private_key)
+
       // sign transaction
       await w3.eth.accounts.signTransaction(transactionObject, addressKey.private_key, function(err, transaction){
         console.log('sign')
@@ -247,6 +252,10 @@ exports.create_a_transaction = async(req, res) => {
         trans.nonce = transaction.nonce
       });
 
+      transactionResult.data.tx_value = w3.utils.fromWei(trans.total_exchanged_string, 'ether')
+      transactionResult.data.tx_fee = w3.utils.fromWei(trans.fees_string, 'ether')
+      transactionResult.data.tx_total_amount = w3.utils.fromWei(String(trans.total_exchanged + trans.fees), 'ether')
+
       break;
     default :
       coin = 'btc';
@@ -279,7 +288,7 @@ exports.create_a_transaction = async(req, res) => {
       });
 
       // create and send transaction
-      await client.sendToAddress(receiver, parseFloat(convert.convertToCoin(coin, senderBalance - feeBitValue))).then(function(transactionId){
+      await client.sendToAddress(receiver, parseFloat(senderBalance - feeBitValue) / 100000000).then(function(transactionId){
         trans.hash = transactionId
         trans.total_exchanged = senderBalance - feeBitValue
         trans.total_exchanged_string = trans.total_exchanged.toFixed()
@@ -298,6 +307,10 @@ exports.create_a_transaction = async(req, res) => {
         re.errorResponse(err, res, 500);
         return
       });
+
+      transactionResult.data.tx_value = String(parseFloat(trans.total_exchanged_string) / 100000000)
+      transactionResult.data.tx_fee = String(parseFloat(trans.fees_string) / 100000000) 
+      transactionResult.data.tx_total_amount = String(parseFloat(trans.total_exchanged + trans.fees) / 100000000)
 
       break;
   }
@@ -329,9 +342,6 @@ exports.create_a_transaction = async(req, res) => {
   trans.mtime = new Date().toISOString().replace('T', ' ').replace('Z', '')
 
   transactionResult.data.tx_create_time = trans.ctime
-  transactionResult.data.tx_value = convert.convertToCoin(coin, Math.abs(trans.total_exchanged))
-  transactionResult.data.tx_fee = convert.convertToCoin(coin, trans.fees)
-  transactionResult.data.tx_total_amount = convert.convertToCoin(coin, Math.abs(trans.total_exchanged) + trans.fees)
   transactionResult.data.next_balance = Math.abs(parseFloat(transactionResult.data.pre_balance) - parseFloat(transactionResult.data.tx_total_amount)).toFixed(8)
 
   // create a new transaction
@@ -457,7 +467,7 @@ exports.check_deposit_state = async(req, res) => {
   // check transaction state
   if (address.balance != new_address.balance && new_address.unconfirmed_balance == 0) {
     depositStateResult.data.coin_type = coin
-    depositStateResult.data.coin_value = convert.convertToCoin(coin, Math.abs(new_address.balance - address.balance))
+    depositStateResult.data.coin_value = String(parseFloat(Math.abs(new_address.balance - address.balance)) / 100000000)
     depositStateResult.data.confirm = true
     depositStateResult.data.message = "transaction_confirmed"
     depositStateResult.success = true
@@ -481,7 +491,7 @@ exports.check_deposit_state = async(req, res) => {
 
   if (new_address.unconfirmed_balance > 0) {
     depositStateResult.data.coin_type = coin
-    depositStateResult.data.coin_value = convert.convertToCoin(coin, new_address.unconfirmed_balance)
+    depositStateResult.data.coin_value = String(parseFloat(new_address.unconfirmed_balance) / 100000000)
     depositStateResult.data.confirm = false
     depositStateResult.data.message = "transaction_pending"
     depositStateResult.success = true
@@ -552,7 +562,7 @@ exports.check_transaction = async(req, res) => {
         trans.confirmations = res.confirmations
         trans.block_hash = res.blockhash
         trans.block_index = res.blockindex
-        depositStateResult.data.coin_value = String(res.amount)
+        depositStateResult.data.coin_value = String(parseFloat(res.amount) / 100000000)
       })
       .catch(function(err){
         re.errorResponse(err, res, 500);
@@ -575,7 +585,7 @@ exports.check_transaction = async(req, res) => {
         trans.confirmations = transaction.blockNumber
         trans.block_hash = transaction.blockHash
         trans.block_index = transaction.transactionIndex
-        depositStateResult.data.coin_value = convert.convertToCoin(coin, res.value)
+        depositStateResult.data.coin_value = w3.utils.fromWei(res.value, 'ether')
       });
       
       break;
@@ -587,7 +597,7 @@ exports.check_transaction = async(req, res) => {
         trans.confirmations = res.confirmations
         trans.block_hash = res.blockhash
         trans.block_index = res.blockindex
-        depositStateResult.data.coin_value = String(res.amount)
+        depositStateResult.data.coin_value = String(parseFloat(res.amount) / 100000000)
       })
       .catch(function(err){
         re.errorResponse(err, res, 500);

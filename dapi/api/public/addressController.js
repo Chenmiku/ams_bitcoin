@@ -293,6 +293,9 @@ exports.get_a_address = async(req, res) => {
         return
       });
 
+      addressResult.data.balance =  String(parseFloat(new_address.balance_string) / 100000000)
+      addressResult.data.unconfirmed_balance = String(parseFloat(new_address.unconfirmed_balance_string) / 100000000)
+
       break;
     case 'eth':
       coin = 'eth';
@@ -313,6 +316,7 @@ exports.get_a_address = async(req, res) => {
       });
 
       addressResult.data.balance = w3.utils.fromWei(new_address.balance_string, 'ether');
+      addressResult.data.unconfirmed_balance = 0
 
       break;
     default :
@@ -353,12 +357,16 @@ exports.get_a_address = async(req, res) => {
         re.errorResponse(err, res, 500);
         return
       });
+
+      addressResult.data.balance =  String(parseFloat(new_address.balance_string) / 100000000)
+      addressResult.data.unconfirmed_balance = String(parseFloat(new_address.unconfirmed_balance_string) / 100000000)
+
       break;
   }
 
   new_address.mtime = new Date().toISOString().replace('T', ' ').replace('Z', '')
 
-  // update address- 
+  // update address
   await Addr.findOneAndUpdate({ addr: addr }, new_address, function(err, ad) {
     if (err) {
       re.errorResponse(err, res, 500);
@@ -368,9 +376,6 @@ exports.get_a_address = async(req, res) => {
       re.errorResponse('address_not_found', res, 404);
     } else {
       addressResult.data.addr = addr
-      //console.log('after convert', convert.convertToCoin(coin, ad.balance_string))
-      //addressResult.data.balance =  convert.convertToCoin(coin, ad.balance_string)
-      //addressResult.data.unconfirmed_balance = convert.convertToCoin(coin, ad.unconfirmed_balance_string)
       addressResult.data.final_transaction = ad.final_transaction
       addressResult.data.coin_type = coin
       addressResult.data.user_id = ad.user_id || 0
