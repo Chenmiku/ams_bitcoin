@@ -74,14 +74,15 @@ exports.create_a_address = async(req, res) => {
       });
 
       // backup wallet	
-      // client = new Client({ host: process.env.Host, port: process.env.BitPort, username: process.env.BitUser, password: process.env.BitPassword, wallet: walletName });	
-      // await client.backupWallet(process.env.BitWallet + backupFileName).then(function(res){	
-      //   new_wallet.file_backup = backupFileName	
-      // })	
-      // .catch(function(err){	
-      //   re.errorResponse(err, res, 500);
-      //   return	
-      // })
+      client = new Client({ host: process.env.Host, port: process.env.BitPort, username: process.env.BitUser, password: process.env.BitPassword, wallet: walletName });	
+      console.log(client)
+      await client.backupWallet(process.env.BitWallet + backupFileName).then(function(res){	
+        new_wallet.file_backup = backupFileName	
+      })	
+      .catch(function(err){	
+        re.errorResponse(err, res, 500);
+        return	
+      })
 
       // create a new address
       client = new Client({ host: process.env.Host, port: process.env.BitPort, username: process.env.BitUser, password: process.env.BitPassword, wallet: walletName });
@@ -144,14 +145,14 @@ exports.create_a_address = async(req, res) => {
       });
 
       // backup wallet	
-      // client = new Client({ host: process.env.Host, port: process.env.BitPort, username: process.env.BitUser, password: process.env.BitPassword, wallet: walletName });	
-      // await client.backupWallet(process.env.BitWallet + backupFileName).then(function(res){	
-      //   new_wallet.file_backup = backupFileName	
-      // })	
-      // .catch(function(err){	
-      //   re.errorResponse(err, res, 500);	
-      //   return	
-      // })
+      client = new Client({ host: process.env.Host, port: process.env.BitPort, username: process.env.BitUser, password: process.env.BitPassword, wallet: walletName });	
+      await client.backupWallet(process.env.BitWallet + backupFileName).then(function(res){	
+        new_wallet.file_backup = backupFileName	
+      })	
+      .catch(function(err){	
+        re.errorResponse(err, res, 500);	
+        return	
+      })
 
       // create a new address
       client = new Client({ host: process.env.Host, port: process.env.BitPort, username: process.env.BitUser, password: process.env.BitPassword, wallet: walletName });
@@ -303,9 +304,14 @@ exports.get_a_address = async(req, res) => {
 
       //get balance address
       await w3.eth.getBalance(addr).then(function(bal){
-        new_address.balance = bal
-        new_address.balance_string = Number(bal).toFixed()
+        console.log(bal)
+        new_address.balance = Number(bal)
+        new_address.balance_string = bal
       })
+      .catch(function(err){
+        re.errorResponse(err, res, 500);
+        return
+      });
 
       break;
     default :

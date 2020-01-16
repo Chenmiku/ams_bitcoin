@@ -162,27 +162,33 @@ exports.create_a_transaction = async(req, res) => {
       // check valid sender address
       if (w3.utils.isAddress(sender) == false) {
         re.errorResponse('invalid_address', res, 500);
-          return
+        return
       }
 
       // get gas price
       await w3.eth.getGasPrice().then(function(gasPrice){
+        console.log(gasPrice)
         if (gasPrice > 0) {
           feeValue = gasPrice * 21000
         }
       })
+      .catch(function(err){
+        re.errorResponse(err, res, 500);
+        return
+      });
       
       //get balance address
       await w3.eth.getBalance(sender).then(function(bal){
-        if (bal <= feeValue) {
+        console.log(bal)
+        if (Number(bal) <= feeValue) {
           re.errorResponse('not_enough_fund', res, 500);
           return
         }
-        senderBalance = bal
+        senderBalance = Number(bal)
         transactionResult.data.pre_balance = String(convert.convertToCoin(coin, bal))
       })
       .catch(function(err){
-        re.errorResponse('cant_get_balance', res, 500);
+        re.errorResponse(err, res, 500);
         return
       });
     
@@ -414,7 +420,7 @@ exports.check_deposit_state = async(req, res) => {
 
       //get balance address
       await w3.eth.getBalance(addr).then(function(bal){
-        new_address.balance = bal
+        new_address.balance = Number(bal)
       })
 
       break;
@@ -570,7 +576,7 @@ exports.check_transaction = async(req, res) => {
         trans.confirmations = transaction.blockNumber
         trans.block_hash = transaction.blockHash
         trans.block_index = transaction.transactionIndex
-        depositStateResult.data.coin_value = String(convert.convertToCoin(res.value))
+        depositStateResult.data.coin_value = String(convert.convertToCoin(coin, res.value))
       });
       
       break;
