@@ -368,8 +368,8 @@ exports.get_a_address = async(req, res) => {
     } else {
       addressResult.data.addr = addr
       console.log(convert.convertToCoin(coin, ad.balance_string))
-      addressResult.data.balance = String(convert.convertToCoin(coin, ad.balance_string))
-      addressResult.data.unconfirmed_balance = String(convert.convertToCoin(coin, ad.unconfirmed_balance_string))
+      addressResult.data.balance = convert.convertToCoin(coin, ad.balance_string)
+      addressResult.data.unconfirmed_balance = convert.convertToCoin(coin, ad.unconfirmed_balance_string)
       addressResult.data.final_transaction = ad.final_transaction
       addressResult.data.coin_type = coin
       addressResult.data.user_id = ad.user_id || 0
