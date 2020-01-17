@@ -64,32 +64,31 @@ var transactionHistory = {
 exports.check_deposit_history = async(req, res) => {
   let q = url.parse(req.url, true).query
   const addr = q.addr
-  var count = 0
+  var count = 0 
 
-  // check exists address
-  await Addr.findOne({ addr: addr }, function(err, add){
-    if (err) {
-      re.errorResponse(err, res, 500);
-      return
-    }
-    if (add == null) {
-      re.errorResponse('address_not_found', res, 404);
-      return
-    }
-  });
-  await AddrKey.findOne({ addr: addr }, function(err, addrKey){
-    if (err) {
-      re.errorResponse(err, res, 500);
-      return
-    }
-    if (addrKey == null) {
-      re.errorResponse('addresskey_not_found', res, 404);
-      return
-    }
-  }); 
-
-  // get transaction
   if (addr != "") {
+    // check exists address
+    await Addr.findOne({ addr: addr }, function(err, add){
+      if (err) {
+        re.errorResponse(err, res, 500);
+        return
+      }
+      if (add == null) {
+        re.errorResponse('address_not_found', res, 404);
+        return
+      }
+    });
+    await AddrKey.findOne({ addr: addr }, function(err, addrKey){
+      if (err) {
+        re.errorResponse(err, res, 500);
+        return
+      }
+      if (addrKey == null) {
+        re.errorResponse('addresskey_not_found', res, 404);
+        return
+      }
+    });
+
     // get count transaction
     await Trans.countDocuments({ sender: addr, is_deposit: true }, function(err, ct){
       if (err) {
@@ -131,7 +130,7 @@ exports.check_deposit_history = async(req, res) => {
     })
 
     // get transaction
-    Trans.find({ is_deposit: true }, function(err, transaction) {
+    await Trans.find({ is_deposit: true }, function(err, transaction) {
       if (err) {
         re.errorResponse(err, res, 500);
         return
@@ -160,33 +159,32 @@ exports.check_deposit_history = async(req, res) => {
 exports.check_transaction_history = async(req, res) => {
   let q = url.parse(req.url, true).query
   const addr = q.addr
-  var count = 0
+  var count = 0 
 
-  // check exists address
-  await Addr.findOne({ addr: addr }, function(err, add){
-    if (err) {
-      re.errorResponse(err, res, 500);
-      return
-    }
-    if (add == null) {
-      re.errorResponse('address_not_found', res, 404);
-      return
-    }
-  });
-
-  await AddrKey.findOne({ addr: addr }, function(err, addrKey){
-    if (err) {
-      re.errorResponse(err, res, 500);
-      return
-    }
-    if (addrKey == null) {
-      re.errorResponse('addresskey_not_found', res, 404);
-      return
-    }
-  }); 
-
-  // get transaction
   if (addr != "") {
+    // check exists address
+    await Addr.findOne({ addr: addr }, function(err, add){
+      if (err) {
+        re.errorResponse(err, res, 500);
+        return
+      }
+      if (add == null) {
+        re.errorResponse('address_not_found', res, 404);
+        return
+      }
+    });
+
+    await AddrKey.findOne({ addr: addr }, function(err, addrKey){
+      if (err) {
+        re.errorResponse(err, res, 500);
+        return
+      }
+      if (addrKey == null) {
+        re.errorResponse('addresskey_not_found', res, 404);
+        return
+      }
+    });
+
     // get count transaction
     await Trans.countDocuments({ sender: addr }, function(err, ct){
       if (err) {
@@ -228,7 +226,7 @@ exports.check_transaction_history = async(req, res) => {
     })
 
     // get transaction
-    Trans.find({ }, function(err, transaction) {
+    await Trans.find({ }, function(err, transaction) {
       if (err) {
         re.errorResponse(err, res, 500);
         return
