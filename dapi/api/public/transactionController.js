@@ -49,12 +49,217 @@ var depositStateResult = {
   success: Boolean,
 };
 
+var transactionHistory = {
+  data: [
+    {
+      address: String,
+      coin_value: String,
+      coin_type: String
+    },
+  ],
+  success: Boolean
+};
+
+// api check deposit history
+exports.check_deposit_history = async(req, res) => {
+  let q = url.parse(req.url, true).query
+  const addr = q.addr
+  var count = 0
+
+  // check exists address
+  await Addr.findOne({ addr: addr }, function(err, add){
+    if (err) {
+      re.errorResponse(err, res, 500);
+      return
+    }
+    if (add == null) {
+      re.errorResponse('address_not_found', res, 404);
+      return
+    }
+  });
+  await AddrKey.findOne({ addr: addr }, function(err, addrKey){
+    if (err) {
+      re.errorResponse(err, res, 500);
+      return
+    }
+    if (addrKey == null) {
+      re.errorResponse('addresskey_not_found', res, 404);
+      return
+    }
+  }); 
+
+  // get transaction
+  if (addr != "") {
+    // get count transaction
+    await Trans.countDocuments({ sender: addr, is_deposit: true }, function(err, ct){
+      if (err) {
+        res.status(500).send(err)
+      }
+      count = ct
+    })
+
+    // get transaction
+    await Trans.find({ sender: addr, is_deposit: true }, function(err, transaction) {
+      if (err) {
+        re.errorResponse(err, res, 500);
+        return
+      }
+      //transactionHistory
+      for(var i=0; i<count;i++) {
+        transactionHistory.data.address = addr
+        transactionHistory.data.coin_type = transaction[i].coin_type
+        transaction.success = true
+        switch(transaction[i].coin_type) {
+          case 'btc': 
+            transactionHistory.data.coin_value = String(parseFloat(transaction[i].total_exchanged_string) / 100000000)
+            break;
+          case 'eth':
+            transactionHistory.data.coin_value = w3.utils.fromWei(transaction[i].total_exchanged_string, 'ether');
+            break;
+        }
+      }
+    })
+
+    res.json(transactionHistory);
+  } else {
+    // get count transaction
+    await Trans.countDocuments({ is_deposit: true }, function(err, ct){
+      if (err) {
+        res.status(500).send(err)
+      }
+      count = ct
+    })
+
+    // get transaction
+    Trans.find({ is_deposit: true }, function(err, transaction) {
+      if (err) {
+        re.errorResponse(err, res, 500);
+        return
+      }
+      //transactionHistory
+      for(var i=0; i<count;i++) {
+        transactionHistory.data.address = addr
+        transactionHistory.data.coin_type = transaction[i].coin_type
+        transaction.success = true
+        switch(transaction[i].coin_type) {
+          case 'btc': 
+            transactionHistory.data.coin_value = String(parseFloat(transaction[i].total_exchanged_string) / 100000000)
+            break;
+          case 'eth':
+            transactionHistory.data.coin_value = w3.utils.fromWei(transaction[i].total_exchanged_string, 'ether');
+            break;
+        }
+      }
+    })
+
+    res.json(transactionHistory);
+  }
+};
+
+// api check transaction history
+exports.check_transaction_history = async(req, res) => {
+  let q = url.parse(req.url, true).query
+  const addr = q.addr
+  var count = 0
+
+  // check exists address
+  await Addr.findOne({ addr: addr }, function(err, add){
+    if (err) {
+      re.errorResponse(err, res, 500);
+      return
+    }
+    if (add == null) {
+      re.errorResponse('address_not_found', res, 404);
+      return
+    }
+  });
+
+  await AddrKey.findOne({ addr: addr }, function(err, addrKey){
+    if (err) {
+      re.errorResponse(err, res, 500);
+      return
+    }
+    if (addrKey == null) {
+      re.errorResponse('addresskey_not_found', res, 404);
+      return
+    }
+  }); 
+
+  // get transaction
+  if (addr != "") {
+    // get count transaction
+    await Trans.countDocuments({ sender: addr }, function(err, ct){
+      if (err) {
+        res.status(500).send(err)
+      }
+      count = ct
+    })
+
+    // get transaction
+    await Trans.find({ sender: addr }, function(err, transaction) {
+      if (err) {
+        re.errorResponse(err, res, 500);
+        return
+      }
+      //transactionHistory
+      for(var i=0; i<count;i++) {
+        transactionHistory.data.address = addr
+        transactionHistory.data.coin_type = transaction[i].coin_type
+        transaction.success = true
+        switch(transaction[i].coin_type) {
+          case 'btc': 
+            transactionHistory.data.coin_value = String(parseFloat(transaction[i].total_exchanged_string) / 100000000)
+            break;
+          case 'eth':
+            transactionHistory.data.coin_value = w3.utils.fromWei(transaction[i].total_exchanged_string, 'ether');
+            break;
+        }
+      }
+    })
+
+    res.json(transactionHistory);
+  } else {
+    // get count transaction
+    await Trans.countDocuments({ }, function(err, ct){
+      if (err) {
+        res.status(500).send(err)
+      }
+      count = ct
+    })
+
+    // get transaction
+    Trans.find({ }, function(err, transaction) {
+      if (err) {
+        re.errorResponse(err, res, 500);
+        return
+      }
+      //transactionHistory
+      for(var i=0; i<count;i++) {
+        transactionHistory.data.address = addr
+        transactionHistory.data.coin_type = transaction[i].coin_type
+        transaction.success = true
+        switch(transaction[i].coin_type) {
+          case 'btc': 
+            transactionHistory.data.coin_value = String(parseFloat(transaction[i].total_exchanged_string) / 100000000)
+            break;
+          case 'eth':
+            transactionHistory.data.coin_value = w3.utils.fromWei(transaction[i].total_exchanged_string, 'ether');
+            break;
+        }
+      }
+    })
+
+    res.json(transactionHistory);
+  }
+  
+};
+
 // api get all transaction 
 exports.list_all_transaction = async(req, res) => {
-    await Trans.find({}, function(err, transaction) {
-      if (err)
-        res.send(err);
-      res.json(transaction);
+  await Trans.find({}, function(err, transaction) {
+    if (err)
+      res.send(err);
+    res.json(transaction);
   });
 };
 
@@ -338,6 +543,7 @@ exports.create_a_transaction = async(req, res) => {
   trans.sender = sender
   trans.receiver = receiver
   trans.coin_type = coin
+  trans.is_deposit = false
   trans.ctime = new Date().toISOString().replace('T', ' ').replace('Z', '')
   trans.mtime = new Date().toISOString().replace('T', ' ').replace('Z', '')
 

@@ -34,6 +34,9 @@ var transactionSchema = new schema({
     size: {
         type: Number
     },
+    is_deposit: {
+        type: Boolean
+    },
     nonce: {
         type: Number
     },
