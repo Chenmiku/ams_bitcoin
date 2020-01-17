@@ -132,10 +132,10 @@ exports.check_deposit_history = async(req, res) => {
         transactionHistory.success = true
         switch(transaction[i].coin_type) {
           case 'btc': 
-            transactionHistory.data.push({ address: addr, coin_type: transaction[i].coin_type, coin_value: String(parseFloat(transaction[i].total_exchanged_string) / 100000000) })
+            transactionHistory.data.push({ address: transaction[i].sender, coin_type: transaction[i].coin_type, coin_value: String(parseFloat(transaction[i].total_exchanged_string) / 100000000) })
             break;
           case 'eth':
-            transactionHistory.data.push({ address: addr, coin_type: transaction[i].coin_type, coin_value: w3.utils.fromWei(transaction[i].total_exchanged_string, 'ether') }) 
+            transactionHistory.data.push({ address: transaction[i].sender, coin_type: transaction[i].coin_type, coin_value: w3.utils.fromWei(transaction[i].total_exchanged_string, 'ether') }) 
             break;
         }
       }
@@ -226,10 +226,10 @@ exports.check_transaction_history = async(req, res) => {
         transactionHistory.success = true
         switch(transaction[i].coin_type) {
           case 'btc': 
-            transactionHistory.data.push({ address: addr, coin_type: transaction[i].coin_type, coin_value: String(parseFloat(transaction[i].total_exchanged_string) / 100000000) })
+            transactionHistory.data.push({ address: transaction[i].sender, coin_type: transaction[i].coin_type, coin_value: String(parseFloat(transaction[i].total_exchanged_string) / 100000000) })
             break;
           case 'eth':
-            transactionHistory.data.push({ address: addr, coin_type: transaction[i].coin_type, coin_value: w3.utils.fromWei(transaction[i].total_exchanged_string, 'ether') }) 
+            transactionHistory.data.push({ address: transaction[i].sender, coin_type: transaction[i].coin_type, coin_value: w3.utils.fromWei(transaction[i].total_exchanged_string, 'ether') }) 
             break;
         }
       }
