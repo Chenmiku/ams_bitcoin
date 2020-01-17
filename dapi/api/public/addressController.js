@@ -9,14 +9,14 @@ const mongoose = require('mongoose'),
   Wallet = mongoose.model('wallets'),
   randomString = require('randomstring'),
   url = require('url'),
-  convert = require('../modules/convert_to_coin'),
-  re = require('../modules/response'),
-  bn = require('bignumber.js')
+  re = require('../modules/response')
 
+// connect to ethereum node
 const Web3 = require('web3'),
       mainnet = process.env.Provider,
       w3 = new Web3(new Web3.providers.HttpProvider(mainnet))
 
+// connect to bitcoin node      
 const Client = require('bitcoin-core')
 var client = new Client({ host: process.env.Host, port: process.env.BitPort, username: process.env.BitUser, password: process.env.BitPassword })
 
@@ -66,7 +66,6 @@ exports.create_a_address = async(req, res) => {
       await client.createWallet(walletName).then(function(wall){
         if (res != null) {
           new_wallet.name = wall.name
-          new_wallet.file_backup = backupFileName
         }
       })
       .catch(function(err){
@@ -76,7 +75,6 @@ exports.create_a_address = async(req, res) => {
 
       // backup wallet	
       client = new Client({ host: process.env.Host, port: process.env.BitPort, username: process.env.BitUser, password: process.env.BitPassword, wallet: walletName });	
-      console.log(client)
       await client.backupWallet(process.env.BitWallet + backupFileName).then(function(backupWall){	
         new_wallet.file_backup = backupFileName	
       })	
@@ -138,7 +136,6 @@ exports.create_a_address = async(req, res) => {
       await client.createWallet(walletName).then(function(wall){
         if (res != null) {
           new_wallet.name = wall.name
-          new_wallet.file_backup = backupFileName
         }
       })
       .catch(function(err){
@@ -282,7 +279,6 @@ exports.get_a_address = async(req, res) => {
       })
 
       client = new Client({ host: process.env.Host, port: process.env.BitPort, username: process.env.BitUser, password: process.env.BitPassword, wallet: walletName}); //process.env.BitWallet + 'j0DKsFK1.dat'
-      console.log(client)
       await client.getWalletInfo().then(function(walletInfo){
         new_address.balance = walletInfo.balance * 100000000
         new_address.balance_string = new_address.balance.toFixed()

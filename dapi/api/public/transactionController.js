@@ -8,15 +8,14 @@ const mongoose = require('mongoose'),
   Trans = mongoose.model('transactions'),
   uuidv1 = require('uuid/v1'),
   url = require('url'),
-  convert = require('../modules/convert_to_coin'),
-  axios = require('axios'),
   re = require('../modules/response')
 
-// connect to node
+// connect to ethereum node
 const Web3 = require('web3'),
       mainnet = process.env.Provider,
       w3 = new Web3(new Web3.providers.HttpProvider(mainnet))
 
+// connect to bitcoin node
 const Client = require('bitcoin-core')
 var client = new Client({ host: process.env.Host, port: process.env.BitPort, username: process.env.BitUser, password: process.env.BitPassword })
 
@@ -122,7 +121,6 @@ exports.create_a_transaction = async(req, res) => {
       // get balance
       client = new Client({ host: process.env.Host, port: process.env.BitPort, username: process.env.BitUser, password: process.env.BitPassword, wallet: walletName });
       await client.getWalletInfo().then(function(walletInfo){
-        console.log(walletInfo)
         senderBalance = walletInfo.balance * 100000000
         transactionResult.data.pre_balance = String(walletInfo.balance)
         if (senderBalance <= feeBitValue) {
@@ -205,7 +203,6 @@ exports.create_a_transaction = async(req, res) => {
 
       // sign transaction
       await w3.eth.accounts.signTransaction(transactionObject, addressKey.private_key).then(function(transaction) {
-        console.log(transaction)
         raw = transaction.rawTransaction
         trans.size = w3.utils.hexToNumber(transaction.v)
         trans.signed_time = new Date().toISOString().replace('T', ' ').replace('Z', '')
@@ -217,7 +214,6 @@ exports.create_a_transaction = async(req, res) => {
     
       // send signed transaction
       await w3.eth.sendSignedTransaction(raw, function(err, hash) {
-        console.log(hash)
         if (err) {
           re.errorResponse(err, res, 500);
           return
@@ -239,7 +235,6 @@ exports.create_a_transaction = async(req, res) => {
 
       // get transaction info
       await w3.eth.getTransaction(trans.hash, function(err, transaction){
-        console.log(transaction)
         if (err) {
           re.errorResponse(err, res, 500);
           return
@@ -280,7 +275,6 @@ exports.create_a_transaction = async(req, res) => {
       // get balance
       client = new Client({ host: process.env.Host, port: process.env.BitPort, username: process.env.BitUser, password: process.env.BitPassword, wallet: walletName });
       await client.getWalletInfo().then(function(walletInfo){
-        console.log(walletInfo)
         senderBalance = walletInfo.balance * 100000000
         transactionResult.data.pre_balance = String(walletInfo.balance)
         if (senderBalance <= feeBitValue) {
@@ -430,13 +424,17 @@ exports.check_deposit_state = async(req, res) => {
       // check valid address
       if (w3.utils.isAddress(addr) == false) {
         re.errorResponse('invalid_address', res, 500);
-          return
+        return
       }
 
       //get balance address
       await w3.eth.getBalance(addr).then(function(bal){
         new_address.balance = Number(bal)
       })
+      .catch(function(err){
+        re.errorResponse(err, res, 500);
+        return
+      });
 
       break;
     default :
