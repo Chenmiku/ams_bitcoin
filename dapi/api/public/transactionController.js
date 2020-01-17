@@ -105,15 +105,13 @@ exports.check_deposit_history = async(req, res) => {
       }
       //transactionHistory
       for(var i=0; i<count;i++) {
-        transactionHistory.data.address = addr
-        transactionHistory.data.coin_type = transaction[i].coin_type
         transaction.success = true
         switch(transaction[i].coin_type) {
           case 'btc': 
-            transactionHistory.data.coin_value = String(parseFloat(transaction[i].total_exchanged_string) / 100000000)
+            transactionHistory.data.push({ address: addr, coin_type: transaction[i].coin_type, coin_value: String(parseFloat(transaction[i].total_exchanged_string) / 100000000) })
             break;
           case 'eth':
-            transactionHistory.data.coin_value = w3.utils.fromWei(transaction[i].total_exchanged_string, 'ether');
+            transactionHistory.data.push({ address: addr, coin_type: transaction[i].coin_type, coin_value: w3.utils.fromWei(transaction[i].total_exchanged_string, 'ether') }) 
             break;
         }
       }
@@ -137,15 +135,13 @@ exports.check_deposit_history = async(req, res) => {
       }
       //transactionHistory
       for(var i=0; i<count;i++) {
-        transactionHistory.data.address = addr
-        transactionHistory.data.coin_type = transaction[i].coin_type
         transaction.success = true
         switch(transaction[i].coin_type) {
           case 'btc': 
-            transactionHistory.data.coin_value = String(parseFloat(transaction[i].total_exchanged_string) / 100000000)
+            transactionHistory.data.push({ address: addr, coin_type: transaction[i].coin_type, coin_value: String(parseFloat(transaction[i].total_exchanged_string) / 100000000) })
             break;
           case 'eth':
-            transactionHistory.data.coin_value = w3.utils.fromWei(transaction[i].total_exchanged_string, 'ether');
+            transactionHistory.data.push({ address: addr, coin_type: transaction[i].coin_type, coin_value: w3.utils.fromWei(transaction[i].total_exchanged_string, 'ether') }) 
             break;
         }
       }
@@ -203,21 +199,19 @@ exports.check_transaction_history = async(req, res) => {
       }
       //transactionHistory
       for(var i=0; i<count;i++) {
-        console.log(transaction[0])
-        transactionHistory.data.address = addr
-        transactionHistory.data.coin_type = transaction[i].coin_type
         transaction.success = true
         switch(transaction[i].coin_type) {
           case 'btc': 
-            transactionHistory.data.coin_value = String(parseFloat(transaction[i].total_exchanged_string) / 100000000)
+            transactionHistory.data.push({ address: addr, coin_type: transaction[i].coin_type, coin_value: String(parseFloat(transaction[i].total_exchanged_string) / 100000000) })
             break;
           case 'eth':
-            transactionHistory.data.coin_value = w3.utils.fromWei(transaction[i].total_exchanged_string, 'ether');
+            transactionHistory.data.push({ address: addr, coin_type: transaction[i].coin_type, coin_value: w3.utils.fromWei(transaction[i].total_exchanged_string, 'ether') }) 
             break;
         }
       }
     })
 
+    console.log(transactionHistory)
     res.json(transactionHistory);
   } else {
     // get count transaction
@@ -238,21 +232,19 @@ exports.check_transaction_history = async(req, res) => {
       }
       //transactionHistory
       for(var i=0; i<count;i++) {
-        console.log(transaction[0])
-        transactionHistory.data.address = addr
-        transactionHistory.data.coin_type = transaction[i].coin_type
         transaction.success = true
         switch(transaction[i].coin_type) {
           case 'btc': 
-            transactionHistory.data.coin_value = String(parseFloat(transaction[i].total_exchanged_string) / 100000000)
+            transactionHistory.data.push({ address: addr, coin_type: transaction[i].coin_type, coin_value: String(parseFloat(transaction[i].total_exchanged_string) / 100000000) })
             break;
           case 'eth':
-            transactionHistory.data.coin_value = w3.utils.fromWei(transaction[i].total_exchanged_string, 'ether');
+            transactionHistory.data.push({ address: addr, coin_type: transaction[i].coin_type, coin_value: w3.utils.fromWei(transaction[i].total_exchanged_string, 'ether') }) 
             break;
         }
       }
     })
 
+    console.log(transactionHistory)
     res.json(transactionHistory);
   }
   
