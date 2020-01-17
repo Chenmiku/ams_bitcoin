@@ -187,6 +187,7 @@ exports.check_transaction_history = async(req, res) => {
 
     // get count transaction
     await Trans.countDocuments({ sender: addr }, function(err, ct){
+      console.log(ct)
       if (err) {
         res.status(500).send(err)
       }
@@ -195,12 +196,14 @@ exports.check_transaction_history = async(req, res) => {
 
     // get transaction
     await Trans.find({ sender: addr }, function(err, transaction) {
+      console.log(transaction)
       if (err) {
         re.errorResponse(err, res, 500);
         return
       }
       //transactionHistory
       for(var i=0; i<count;i++) {
+        console.log(transaction[0])
         transactionHistory.data.address = addr
         transactionHistory.data.coin_type = transaction[i].coin_type
         transaction.success = true
@@ -219,6 +222,7 @@ exports.check_transaction_history = async(req, res) => {
   } else {
     // get count transaction
     await Trans.countDocuments({ }, function(err, ct){
+      console.log(ct)
       if (err) {
         res.status(500).send(err)
       }
@@ -227,12 +231,14 @@ exports.check_transaction_history = async(req, res) => {
 
     // get transaction
     await Trans.find({ }, function(err, transaction) {
+      console.log(transaction)
       if (err) {
         re.errorResponse(err, res, 500);
         return
       }
       //transactionHistory
       for(var i=0; i<count;i++) {
+        console.log(transaction[0])
         transactionHistory.data.address = addr
         transactionHistory.data.coin_type = transaction[i].coin_type
         transaction.success = true
