@@ -50,13 +50,7 @@ var depositStateResult = {
 };
 
 var transactionHistory = {
-  data: [
-    {
-      address: String,
-      coin_value: String,
-      coin_type: String
-    },
-  ],
+  data: [],
   success: Boolean
 };
 
@@ -105,7 +99,7 @@ exports.check_deposit_history = async(req, res) => {
       }
       //transactionHistory
       for(var i=0; i<count;i++) {
-        transaction.success = true
+        transactionHistory.success = true
         switch(transaction[i].coin_type) {
           case 'btc': 
             transactionHistory.data.push({ address: addr, coin_type: transaction[i].coin_type, coin_value: String(parseFloat(transaction[i].total_exchanged_string) / 100000000) })
@@ -135,7 +129,7 @@ exports.check_deposit_history = async(req, res) => {
       }
       //transactionHistory
       for(var i=0; i<count;i++) {
-        transaction.success = true
+        transactionHistory.success = true
         switch(transaction[i].coin_type) {
           case 'btc': 
             transactionHistory.data.push({ address: addr, coin_type: transaction[i].coin_type, coin_value: String(parseFloat(transaction[i].total_exchanged_string) / 100000000) })
@@ -183,7 +177,6 @@ exports.check_transaction_history = async(req, res) => {
 
     // get count transaction
     await Trans.countDocuments({ sender: addr }, function(err, ct){
-      console.log(ct)
       if (err) {
         res.status(500).send(err)
       }
@@ -192,14 +185,13 @@ exports.check_transaction_history = async(req, res) => {
 
     // get transaction
     await Trans.find({ sender: addr }, function(err, transaction) {
-      console.log(transaction)
       if (err) {
         re.errorResponse(err, res, 500);
         return
       }
       //transactionHistory
       for(var i=0; i<count;i++) {
-        transaction.success = true
+        transactionHistory.success = true
         switch(transaction[i].coin_type) {
           case 'btc': 
             transactionHistory.data.push({ address: addr, coin_type: transaction[i].coin_type, coin_value: String(parseFloat(transaction[i].total_exchanged_string) / 100000000) })
@@ -225,14 +217,13 @@ exports.check_transaction_history = async(req, res) => {
 
     // get transaction
     await Trans.find({ }, function(err, transaction) {
-      console.log(transaction)
       if (err) {
         re.errorResponse(err, res, 500);
         return
       }
       //transactionHistory
       for(var i=0; i<count;i++) {
-        transaction.success = true
+        transactionHistory.success = true
         switch(transaction[i].coin_type) {
           case 'btc': 
             transactionHistory.data.push({ address: addr, coin_type: transaction[i].coin_type, coin_value: String(parseFloat(transaction[i].total_exchanged_string) / 100000000) })
