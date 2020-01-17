@@ -98,6 +98,7 @@ exports.check_deposit_history = async(req, res) => {
         return
       }
       //transactionHistory
+      transactionHistory.data = []
       for(var i=0; i<count;i++) {
         transactionHistory.success = true
         switch(transaction[i].coin_type) {
@@ -128,6 +129,7 @@ exports.check_deposit_history = async(req, res) => {
         return
       }
       //transactionHistory
+      transactionHistory.data = []
       for(var i=0; i<count;i++) {
         transactionHistory.success = true
         switch(transaction[i].coin_type) {
@@ -190,6 +192,7 @@ exports.check_transaction_history = async(req, res) => {
         return
       }
       //transactionHistory
+      transactionHistory.data = []
       for(var i=0; i<count;i++) {
         transactionHistory.success = true
         switch(transaction[i].coin_type) {
@@ -221,6 +224,7 @@ exports.check_transaction_history = async(req, res) => {
         return
       }
       //transactionHistory
+      transactionHistory.data = []
       for(var i=0; i<count;i++) {
         transactionHistory.success = true
         switch(transaction[i].coin_type) {
