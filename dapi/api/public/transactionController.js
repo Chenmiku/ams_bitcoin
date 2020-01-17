@@ -176,7 +176,7 @@ exports.check_transaction_history = async(req, res) => {
     });
 
     // get count transaction
-    await Trans.countDocuments({ sender: addr }, function(err, ct){
+    await Trans.countDocuments({ sender: addr, is_deposit: false }, function(err, ct){
       if (err) {
         res.status(500).send(err)
       }
@@ -184,7 +184,7 @@ exports.check_transaction_history = async(req, res) => {
     })
 
     // get transaction
-    await Trans.find({ sender: addr }, function(err, transaction) {
+    await Trans.find({ sender: addr, is_deposit: false }, function(err, transaction) {
       if (err) {
         re.errorResponse(err, res, 500);
         return
@@ -203,11 +203,10 @@ exports.check_transaction_history = async(req, res) => {
       }
     })
 
-    console.log(transactionHistory)
     res.json(transactionHistory);
   } else {
     // get count transaction
-    await Trans.countDocuments({ }, function(err, ct){
+    await Trans.countDocuments({ is_deposit: false }, function(err, ct){
       console.log(ct)
       if (err) {
         res.status(500).send(err)
@@ -216,7 +215,7 @@ exports.check_transaction_history = async(req, res) => {
     })
 
     // get transaction
-    await Trans.find({ }, function(err, transaction) {
+    await Trans.find({ is_deposit: false }, function(err, transaction) {
       if (err) {
         re.errorResponse(err, res, 500);
         return
@@ -235,7 +234,6 @@ exports.check_transaction_history = async(req, res) => {
       }
     })
 
-    console.log(transactionHistory)
     res.json(transactionHistory);
   }
   
