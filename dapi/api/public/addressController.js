@@ -278,7 +278,32 @@ exports.get_a_address = async(req, res) => {
         walletName = add.wallet_name
       })
 
-      client = new Client({ host: process.env.Host, port: process.env.BitPort, username: process.env.BitUser, password: process.env.BitPassword, wallet: walletName}); //process.env.BitWallet + 'j0DKsFK1.dat'
+      // load wallet
+      var loadWallet = false
+      await client.listwallets().then(function(listwallet){
+        if (listwallet.includes(walletName) == false) {
+          loadWallet = false
+        } else {
+          loadWallet = true
+        }
+      })
+      .catch(function(err){
+        re.errorResponse(err, res, 500);
+        return
+      });
+
+      if (loadWallet == false) {
+        await client.loadwallet(walletName).then(function(wallet){
+          if (wallet.name != "") {
+            client = new Client({ host: process.env.Host, port: process.env.BitPort, username: process.env.BitUser, password: process.env.BitPassword, wallet: walletName});
+          }
+        })
+        .catch(function(err){
+          re.errorResponse(err, res, 500);
+          return
+        });
+      }
+
       await client.getWalletInfo().then(function(walletInfo){
         new_address.balance = walletInfo.balance * 100000000
         new_address.balance_string = new_address.balance.toFixed()
@@ -343,7 +368,32 @@ exports.get_a_address = async(req, res) => {
         walletName = add.wallet_name
       })
 
-      client = new Client({ host: process.env.Host, port: process.env.BitPort, username: process.env.BitUser, password: process.env.BitPassword, wallet: walletName });
+      // load wallet
+      var loadWallet = false
+      await client.listwallets().then(function(listwallet){
+        if (listwallet.includes(walletName) == false) {
+          loadWallet = false
+        } else {
+          loadWallet = true
+        }
+      })
+      .catch(function(err){
+        re.errorResponse(err, res, 500);
+        return
+      });
+
+      if (loadWallet == false) {
+        await client.loadwallet(walletName).then(function(wallet){
+          if (wallet.name != "") {
+            client = new Client({ host: process.env.Host, port: process.env.BitPort, username: process.env.BitUser, password: process.env.BitPassword, wallet: walletName});
+          }
+        })
+        .catch(function(err){
+          re.errorResponse(err, res, 500);
+          return
+        });
+      }
+      
       await client.getWalletInfo().then(function(walletInfo){
         new_address.balance = walletInfo.balance * 100000000
         new_address.balance_string = new_address.balance.toFixed()

@@ -316,8 +316,33 @@ exports.create_a_transaction = async(req, res) => {
         return
       });
 
+      // load wallet
+      var loadWallet = false
+      await client.listwallets().then(function(listwallet){
+        if (listwallet.includes(walletName) == false) {
+          loadWallet = false
+        } else {
+          loadWallet = true
+        }
+      })
+      .catch(function(err){
+        re.errorResponse(err, res, 500);
+        return
+      });
+
+      if (loadWallet == false) {
+        await client.loadwallet(walletName).then(function(wallet){
+          if (wallet.name != "") {
+            client = new Client({ host: process.env.Host, port: process.env.BitPort, username: process.env.BitUser, password: process.env.BitPassword, wallet: walletName});
+          }
+        })
+        .catch(function(err){
+          re.errorResponse(err, res, 500);
+          return
+        });
+      }
+
       // get balance
-      client = new Client({ host: process.env.Host, port: process.env.BitPort, username: process.env.BitUser, password: process.env.BitPassword, wallet: walletName });
       await client.getWalletInfo().then(function(walletInfo){
         senderBalance = walletInfo.balance * 100000000
         transactionResult.data.pre_balance = String(walletInfo.balance)
@@ -470,8 +495,33 @@ exports.create_a_transaction = async(req, res) => {
         return
       });
 
+      // load wallet
+      var loadWallet = false
+      await client.listwallets().then(function(listwallet){
+        if (listwallet.includes(walletName) == false) {
+          loadWallet = false
+        } else {
+          loadWallet = true
+        }
+      })
+      .catch(function(err){
+        re.errorResponse(err, res, 500);
+        return
+      });
+
+      if (loadWallet == false) {
+        await client.loadwallet(walletName).then(function(wallet){
+          if (wallet.name != "") {
+            client = new Client({ host: process.env.Host, port: process.env.BitPort, username: process.env.BitUser, password: process.env.BitPassword, wallet: walletName});
+          }
+        })
+        .catch(function(err){
+          re.errorResponse(err, res, 500);
+          return
+        });
+      }
+
       // get balance
-      client = new Client({ host: process.env.Host, port: process.env.BitPort, username: process.env.BitUser, password: process.env.BitPassword, wallet: walletName });
       await client.getWalletInfo().then(function(walletInfo){
         senderBalance = walletInfo.balance * 100000000
         transactionResult.data.pre_balance = String(walletInfo.balance)
@@ -603,8 +653,33 @@ exports.check_deposit_state = async(req, res) => {
         return
       });
 
+      // load wallet
+      var loadWallet = false
+      await client.listwallets().then(function(listwallet){
+        if (listwallet.includes(walletName) == false) {
+          loadWallet = false
+        } else {
+          loadWallet = true
+        }
+      })
+      .catch(function(err){
+        re.errorResponse(err, res, 500);
+        return
+      });
+
+      if (loadWallet == false) {
+        await client.loadwallet(walletName).then(function(wallet){
+          if (wallet.name != "") {
+            client = new Client({ host: process.env.Host, port: process.env.BitPort, username: process.env.BitUser, password: process.env.BitPassword, wallet: walletName});
+          }
+        })
+        .catch(function(err){
+          re.errorResponse(err, res, 500);
+          return
+        });
+      }
+
       // get balance
-      client = new Client({ host: process.env.Host, port: process.env.BitPort, username: process.env.BitUser, password: process.env.BitPassword, wallet: walletName });
       await client.getWalletInfo().then(function(walletInfo){
         new_address.balance = walletInfo.balance * 100000000
         new_address.balance_string = new_address.balance.toFixed()
@@ -650,8 +725,33 @@ exports.check_deposit_state = async(req, res) => {
         return
       });
 
+      // load wallet
+      var loadWallet = false
+      await client.listwallets().then(function(listwallet){
+        if (listwallet.includes(walletName) == false) {
+          loadWallet = false
+        } else {
+          loadWallet = true
+        }
+      })
+      .catch(function(err){
+        re.errorResponse(err, res, 500);
+        return
+      });
+
+      if (loadWallet == false) {
+        await client.loadwallet(walletName).then(function(wallet){
+          if (wallet.name != "") {
+            client = new Client({ host: process.env.Host, port: process.env.BitPort, username: process.env.BitUser, password: process.env.BitPassword, wallet: walletName});
+          }
+        })
+        .catch(function(err){
+          re.errorResponse(err, res, 500);
+          return
+        });
+      }
+
       // get balance
-      client = new Client({ host: process.env.Host, port: process.env.BitPort, username: process.env.BitUser, password: process.env.BitPassword, wallet: walletName });
       await client.getWalletInfo().then(function(walletInfo){
         new_address.balance = walletInfo.balance * 100000000
         new_address.balance_string = new_address.balance.toFixed()
@@ -759,8 +859,33 @@ exports.check_transaction = async(req, res) => {
   switch(coinType) {
     case 'btc':
       coin = 'btc';
+      // load wallet
+      var loadWallet = false
+      await client.listwallets().then(function(listwallet){
+        if (listwallet.includes(walletName) == false) {
+          loadWallet = false
+        } else {
+          loadWallet = true
+        }
+      })
+      .catch(function(err){
+        re.errorResponse(err, res, 500);
+        return
+      });
+
+      if (loadWallet == false) {
+        await client.loadwallet(walletName).then(function(wallet){
+          if (wallet.name != "") {
+            client = new Client({ host: process.env.Host, port: process.env.BitPort, username: process.env.BitUser, password: process.env.BitPassword, wallet: walletName});
+          }
+        })
+        .catch(function(err){
+          re.errorResponse(err, res, 500);
+          return
+        });
+      }
+
       // get transaction info
-      client = new Client({ host: process.env.Host, port: process.env.BitPort, username: process.env.BitUser, password: process.env.BitPassword, wallet: walletName });
       await client.getTransaction(trans.hash).then(function(transaction){
         trans.confirmations = transaction.confirmations
         trans.block_hash = transaction.blockhash
@@ -801,8 +926,33 @@ exports.check_transaction = async(req, res) => {
       break;
     default :
       coin = 'btc';
+      // load wallet
+      var loadWallet = false
+      await client.listwallets().then(function(listwallet){
+        if (listwallet.includes(walletName) == false) {
+          loadWallet = false
+        } else {
+          loadWallet = true
+        }
+      })
+      .catch(function(err){
+        re.errorResponse(err, res, 500);
+        return
+      });
+
+      if (loadWallet == false) {
+        await client.loadwallet(walletName).then(function(wallet){
+          if (wallet.name != "") {
+            client = new Client({ host: process.env.Host, port: process.env.BitPort, username: process.env.BitUser, password: process.env.BitPassword, wallet: walletName});
+          }
+        })
+        .catch(function(err){
+          re.errorResponse(err, res, 500);
+          return
+        });
+      }
+
       // get transaction info
-      client = new Client({ host: process.env.Host, port: process.env.BitPort, username: process.env.BitUser, password: process.env.BitPassword, wallet: walletName });
       await client.getTransaction(trans.hash).then(function(transaction){
         trans.confirmations = transaction.confirmations
         trans.block_hash = transaction.blockhash
