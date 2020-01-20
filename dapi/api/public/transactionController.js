@@ -669,6 +669,7 @@ exports.check_deposit_state = async(req, res) => {
 
       if (loadWallet == false) {
         await client.loadWallet(walletName).then(function(wallet){
+          console.log(walletName)
           if (wallet.name != "") {
             client = new Client({ host: process.env.Host, port: process.env.BitPort, username: process.env.BitUser, password: process.env.BitPassword, wallet: walletName});
           }
