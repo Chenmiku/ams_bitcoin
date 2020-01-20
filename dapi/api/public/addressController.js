@@ -280,7 +280,7 @@ exports.get_a_address = async(req, res) => {
 
       // load wallet
       var loadWallet = false
-      await client.listwallets().then(function(listwallet){
+      await client.listWallets().then(function(listwallet){
         if (listwallet.includes(walletName) == false) {
           loadWallet = false
         } else {
@@ -293,7 +293,7 @@ exports.get_a_address = async(req, res) => {
       });
 
       if (loadWallet == false) {
-        await client.loadwallet(walletName).then(function(wallet){
+        await client.loadWallet(walletName).then(function(wallet){
           if (wallet.name != "") {
             client = new Client({ host: process.env.Host, port: process.env.BitPort, username: process.env.BitUser, password: process.env.BitPassword, wallet: walletName});
           }
