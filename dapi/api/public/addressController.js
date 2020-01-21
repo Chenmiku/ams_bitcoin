@@ -11,7 +11,8 @@ const mongoose = require('mongoose'),
   randomString = require('randomstring'),
   url = require('url'),
   re = require('../modules/response'),
-  axios = require('axios')
+  axios = require('axios'),
+  qs = require('querystring')
 
 // connect to ethereum node
 const Web3 = require('web3'),
@@ -500,6 +501,7 @@ exports.get_a_address = async(req, res) => {
 };
 
 async function checkDeposit(coin,address,walletName,preBalance,intervalObject,res) {
+  console.log('run')
   var balance = 0
   var trans = new Trans()
   var new_address = new Addr()
