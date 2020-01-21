@@ -904,7 +904,7 @@ exports.check_transaction = async(req, res) => {
         trans.confirmations = transaction.confirmations
         trans.block_hash = transaction.blockhash
         trans.block_index = transaction.blockindex
-        depositStateResult.data.coin_value = String(parseFloat(transaction.amount) / 100000000)
+        depositStateResult.data.coin_value = String(parseFloat(Math.abs(transaction.amount)) / 100000000).toFixed(8)
       })
       .catch(function(err){
         re.errorResponse(err, res, 500);
@@ -973,7 +973,7 @@ exports.check_transaction = async(req, res) => {
         trans.confirmations = transaction.confirmations
         trans.block_hash = transaction.blockhash
         trans.block_index = transaction.blockindex
-        depositStateResult.data.coin_value = String(parseFloat(transaction.amount) / 100000000)
+        depositStateResult.data.coin_value = String(parseFloat(Math.abs(transaction.amount)) / 100000000).toFixed(8)
       })
       .catch(function(err){
         re.errorResponse(err, res, 500);
