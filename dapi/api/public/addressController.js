@@ -500,6 +500,7 @@ exports.get_a_address = async(req, res) => {
   });
 };
 
+// function auto check deposit 
 async function checkDeposit(coin,address,walletName,preBalance,intervalObject,res) {
   console.log('run')
   var balance = 0
