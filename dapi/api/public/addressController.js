@@ -290,7 +290,7 @@ exports.create_a_address = async(req, res) => {
   });
 
   const intervalObj = setInterval(() => {
-    checkDeposit(coin, new_address.addr, walletName, 0, intervalObj)
+    checkDeposit(coin, new_address.addr, walletName, 0, intervalObj, res)
   }, 3000); 
 
 };
@@ -499,7 +499,7 @@ exports.get_a_address = async(req, res) => {
   });
 };
 
-async function checkDeposit(coin,address,walletName,preBalance,intervalObject) {
+async function checkDeposit(coin,address,walletName,preBalance,intervalObject,res) {
   var balance = 0
   var trans = new Trans()
   var new_address = new Addr()
