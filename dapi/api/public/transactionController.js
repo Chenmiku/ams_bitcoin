@@ -213,7 +213,6 @@ exports.check_transaction_history = async(req, res) => {
   } else {
     // get count transaction
     await Trans.countDocuments({ is_deposit: false }, function(err, ct){
-      console.log(ct)
       if (err) {
         res.status(500).send(err)
       }
@@ -916,7 +915,6 @@ exports.check_transaction = async(req, res) => {
       coin = 'eth';
       // get transaction info
       await w3.eth.getTransaction(trans.hash, function(err, transaction){
-        console.log(transaction)
         if (err) {
           re.errorResponse(err, res, 500);
           return
