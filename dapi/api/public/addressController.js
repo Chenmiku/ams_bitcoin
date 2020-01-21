@@ -513,6 +513,7 @@ async function checkDeposit(coin,address,walletName,preBalance,intervalObject,re
       client = new Client({ host: process.env.Host, port: process.env.BitPort, username: process.env.BitUser, password: process.env.BitPassword, wallet: walletName});
       await client.getWalletInfo().then(function(walletInfo){
         balance = walletInfo.balance * 100000000
+        new_address.final_transaction = walletInfo.txcount
       })
       .catch(function(err){
         re.errorResponse(err, res, 500);
@@ -536,6 +537,7 @@ async function checkDeposit(coin,address,walletName,preBalance,intervalObject,re
       client = new Client({ host: process.env.Host, port: process.env.BitPort, username: process.env.BitUser, password: process.env.BitPassword, wallet: walletName});
       await client.getWalletInfo().then(function(walletInfo){
         balance = walletInfo.balance * 100000000
+        new_address.final_transaction = walletInfo.txcount
       })
       .catch(function(err){
         re.errorResponse(err, res, 500);
@@ -579,7 +581,7 @@ async function checkDeposit(coin,address,walletName,preBalance,intervalObject,re
         'Content-Type': 'application/x-www-form-urlencoded'
       }
     }
-    
+
     await axios.post(process.env.NotificationURL, qs.stringify(requestBody), config)
     .then(function(noti){
     	console.log('sent')
