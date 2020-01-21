@@ -340,6 +340,8 @@ exports.create_a_transaction = async(req, res) => {
           re.errorResponse(err, res, 500);
           return
         });
+      } else {
+        client = new Client({ host: process.env.Host, port: process.env.BitPort, username: process.env.BitUser, password: process.env.BitPassword, wallet: walletName});
       }
 
       // get balance
@@ -519,6 +521,8 @@ exports.create_a_transaction = async(req, res) => {
           re.errorResponse(err, res, 500);
           return
         });
+      } else {
+        client = new Client({ host: process.env.Host, port: process.env.BitPort, username: process.env.BitUser, password: process.env.BitPassword, wallet: walletName});
       }
 
       // get balance
@@ -669,7 +673,6 @@ exports.check_deposit_state = async(req, res) => {
 
       if (loadWallet == false) {
         await client.loadWallet(walletName).then(function(wallet){
-          console.log(walletName)
           if (wallet.name != "") {
             client = new Client({ host: process.env.Host, port: process.env.BitPort, username: process.env.BitUser, password: process.env.BitPassword, wallet: walletName});
           }
@@ -678,6 +681,8 @@ exports.check_deposit_state = async(req, res) => {
           re.errorResponse(err, res, 500);
           return
         });
+      } else {
+        client = new Client({ host: process.env.Host, port: process.env.BitPort, username: process.env.BitUser, password: process.env.BitPassword, wallet: walletName});
       }
 
       // get balance
@@ -750,6 +755,8 @@ exports.check_deposit_state = async(req, res) => {
           re.errorResponse(err, res, 500);
           return
         });
+      } else {
+        client = new Client({ host: process.env.Host, port: process.env.BitPort, username: process.env.BitUser, password: process.env.BitPassword, wallet: walletName});
       }
 
       // get balance
@@ -884,6 +891,8 @@ exports.check_transaction = async(req, res) => {
           re.errorResponse(err, res, 500);
           return
         });
+      } else {
+        client = new Client({ host: process.env.Host, port: process.env.BitPort, username: process.env.BitUser, password: process.env.BitPassword, wallet: walletName});
       }
 
       // get transaction info
@@ -951,6 +960,8 @@ exports.check_transaction = async(req, res) => {
           re.errorResponse(err, res, 500);
           return
         });
+      } else {
+        client = new Client({ host: process.env.Host, port: process.env.BitPort, username: process.env.BitUser, password: process.env.BitPassword, wallet: walletName});
       }
 
       // get transaction info

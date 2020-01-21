@@ -73,8 +73,35 @@ exports.create_a_address = async(req, res) => {
         return
       });
 
+      // load wallet
+      var loadWallet = false
+      await client.listWallets().then(function(listwallet){
+        if (listwallet.includes(walletName) == false) {
+          loadWallet = false
+        } else {
+          loadWallet = true
+        }
+      })
+      .catch(function(err){
+        re.errorResponse(err, res, 500);
+        return
+      });
+
+      if (loadWallet == false) {
+        await client.loadWallet(walletName).then(function(wallet){
+          if (wallet.name != "") {
+            client = new Client({ host: process.env.Host, port: process.env.BitPort, username: process.env.BitUser, password: process.env.BitPassword, wallet: walletName});
+          }
+        })
+        .catch(function(err){
+          re.errorResponse(err, res, 500);
+          return
+        });
+      } else {
+        client = new Client({ host: process.env.Host, port: process.env.BitPort, username: process.env.BitUser, password: process.env.BitPassword, wallet: walletName});
+      }
+
       // backup wallet	
-      client = new Client({ host: process.env.Host, port: process.env.BitPort, username: process.env.BitUser, password: process.env.BitPassword, wallet: walletName });	
       await client.backupWallet(process.env.BitWallet + backupFileName).then(function(backupWall){	
         new_wallet.file_backup = backupFileName	
       })	
@@ -84,7 +111,6 @@ exports.create_a_address = async(req, res) => {
       })
 
       // create a new address
-      client = new Client({ host: process.env.Host, port: process.env.BitPort, username: process.env.BitUser, password: process.env.BitPassword, wallet: walletName });
       await client.getNewAddress().then(function(address){
         new_address.addr = address
         new_addresskey.addr = address
@@ -143,8 +169,35 @@ exports.create_a_address = async(req, res) => {
         return
       });
 
+      // load wallet
+      var loadWallet = false
+      await client.listWallets().then(function(listwallet){
+        if (listwallet.includes(walletName) == false) {
+          loadWallet = false
+        } else {
+          loadWallet = true
+        }
+      })
+      .catch(function(err){
+        re.errorResponse(err, res, 500);
+        return
+      });
+
+      if (loadWallet == false) {
+        await client.loadWallet(walletName).then(function(wallet){
+          if (wallet.name != "") {
+            client = new Client({ host: process.env.Host, port: process.env.BitPort, username: process.env.BitUser, password: process.env.BitPassword, wallet: walletName});
+          }
+        })
+        .catch(function(err){
+          re.errorResponse(err, res, 500);
+          return
+        });
+      } else {
+        client = new Client({ host: process.env.Host, port: process.env.BitPort, username: process.env.BitUser, password: process.env.BitPassword, wallet: walletName});
+      }
+
       // backup wallet	
-      client = new Client({ host: process.env.Host, port: process.env.BitPort, username: process.env.BitUser, password: process.env.BitPassword, wallet: walletName });	
       await client.backupWallet(process.env.BitWallet + backupFileName).then(function(backupWall){	
         new_wallet.file_backup = backupFileName	
       })	
@@ -154,7 +207,6 @@ exports.create_a_address = async(req, res) => {
       })
 
       // create a new address
-      client = new Client({ host: process.env.Host, port: process.env.BitPort, username: process.env.BitUser, password: process.env.BitPassword, wallet: walletName });
       await client.getNewAddress().then(function(address){
         new_address.addr = address
         new_addresskey.addr = address
@@ -302,6 +354,8 @@ exports.get_a_address = async(req, res) => {
           re.errorResponse(err, res, 500);
           return
         });
+      } else {
+        client = new Client({ host: process.env.Host, port: process.env.BitPort, username: process.env.BitUser, password: process.env.BitPassword, wallet: walletName});
       }
 
       await client.getWalletInfo().then(function(walletInfo){
@@ -392,6 +446,8 @@ exports.get_a_address = async(req, res) => {
           re.errorResponse(err, res, 500);
           return
         });
+      } else {
+        client = new Client({ host: process.env.Host, port: process.env.BitPort, username: process.env.BitUser, password: process.env.BitPassword, wallet: walletName});
       }
       
       await client.getWalletInfo().then(function(walletInfo){
