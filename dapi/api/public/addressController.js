@@ -549,16 +549,37 @@ async function checkDeposit(coin,address,walletName,preBalance,intervalObject,re
     // stop interval 
     clearInterval(intervalObject)
     // send notification to pms
-    const requestBody = {
-      'u_wallet': address,
-      'u_coin': coin,
-      'u_deposit': balance - preBalance,
+    var requestBody = {}
+    switch(coin) {
+      case 'btc': 
+        requestBody = {
+          'u_wallet': address,
+          'u_coin': coin,
+          'u_deposit': String(parseFloat(balance - preBalance) / 100000000)
+        }
+        break;
+      case 'eth':
+        requestBody = {
+          'u_wallet': address,
+          'u_coin': coin,
+          'u_deposit': w3.utils.fromWei(String(balance - preBalance), 'ether')
+        }
+        break;
+      default:
+        requestBody = {
+          'u_wallet': address,
+          'u_coin': coin,
+          'u_deposit': String(parseFloat(balance - preBalance) / 100000000)
+        }
+        break;
     }
+
     const config = {
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded'
       }
     }
+    
     await axios.post(process.env.NotificationURL, qs.stringify(requestBody), config)
     .then(function(noti){
     	console.log('sent')
@@ -568,10 +589,17 @@ async function checkDeposit(coin,address,walletName,preBalance,intervalObject,re
       return
     });
 
+    new_address.balance = balance - preBalance
+    new_address.balance_string = String(balance - preBalance)
+    new_address.mtime = new Date().toISOString().replace('T', ' ').replace('Z', '')
     // update address's balance
     await Addr.findOneAndUpdate({ addr: address }, new_address, function(err, add){
       if (err) {
         re.errorResponse('error_update_transaction', res, 500)
+        return
+      }
+      if (add == null) {
+        re.errorResponse('address_not_found', res, 500)
         return
       }
     });
