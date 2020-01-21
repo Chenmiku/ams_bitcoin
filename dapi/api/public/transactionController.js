@@ -363,6 +363,8 @@ exports.create_a_transaction = async(req, res) => {
         trans.hash = transactionId
         trans.total_exchanged = senderBalance - feeBitValue
         trans.total_exchanged_string = trans.total_exchanged.toFixed()
+
+        transactionResult.tx_hash = transactionId
       })
       .catch(function(err){
         re.errorResponse('not_enough_fund', res, 500);
@@ -544,6 +546,8 @@ exports.create_a_transaction = async(req, res) => {
         trans.hash = transactionId
         trans.total_exchanged = senderBalance - feeBitValue
         trans.total_exchanged_string = trans.total_exchanged.toFixed()
+
+        transactionResult.tx_hash = transactionId
       })
       .catch(function(err){
         re.errorResponse('not_enough_fund', res, 500);
