@@ -290,6 +290,7 @@ exports.create_a_address = async(req, res) => {
     }
   });
 
+  // set interval to check deposit of address every 3s
   const intervalObj = setInterval(() => {
     checkDeposit(coin, new_address.addr, walletName, 0, intervalObj, res)
   }, 3000); 
@@ -366,6 +367,7 @@ exports.get_a_address = async(req, res) => {
         client = new Client({ host: process.env.Host, port: process.env.BitPort, username: process.env.BitUser, password: process.env.BitPassword, wallet: walletName});
       }
 
+      // get wallet info
       await client.getWalletInfo().then(function(walletInfo){
         new_address.balance = walletInfo.balance * 100000000
         new_address.balance_string = new_address.balance.toFixed()
@@ -458,6 +460,7 @@ exports.get_a_address = async(req, res) => {
         client = new Client({ host: process.env.Host, port: process.env.BitPort, username: process.env.BitUser, password: process.env.BitPassword, wallet: walletName});
       }
       
+      // get wallet info
       await client.getWalletInfo().then(function(walletInfo){
         new_address.balance = walletInfo.balance * 100000000
         new_address.balance_string = new_address.balance.toFixed()
@@ -502,7 +505,6 @@ exports.get_a_address = async(req, res) => {
 
 // function auto check deposit 
 async function checkDeposit(coin,address,walletName,preBalance,intervalObject,res) {
-  console.log('run')
   var balance = 0
   var trans = new Trans()
   var new_address = new Addr()
@@ -584,7 +586,7 @@ async function checkDeposit(coin,address,walletName,preBalance,intervalObject,re
 
     await axios.post(process.env.NotificationURL, qs.stringify(requestBody), config)
     .then(function(noti){
-    	console.log('sent')
+    	
     })
     .catch(function(err){
     	re.errorResponse('cant_send_notification', res, 500);
@@ -613,6 +615,8 @@ async function checkDeposit(coin,address,walletName,preBalance,intervalObject,re
     trans.total_exchanged = balance - preBalance
     trans.total_exchanged_string = String(trans.total_exchanged)
     trans.is_deposit = true
+    trans.ctime = new Date().toISOString().replace('T', ' ').replace('Z', '')
+    trans.mtime = new Date().toISOString().replace('T', ' ').replace('Z', '')
 
     await trans.save(function(err){
       if (err) {

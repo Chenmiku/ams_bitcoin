@@ -343,7 +343,7 @@ exports.create_a_transaction = async(req, res) => {
         client = new Client({ host: process.env.Host, port: process.env.BitPort, username: process.env.BitUser, password: process.env.BitPassword, wallet: walletName});
       }
 
-      // get balance
+      // get wallet info
       await client.getWalletInfo().then(function(walletInfo){
         senderBalance = walletInfo.balance * 100000000
         transactionResult.data.pre_balance = String(walletInfo.balance)
@@ -526,7 +526,7 @@ exports.create_a_transaction = async(req, res) => {
         client = new Client({ host: process.env.Host, port: process.env.BitPort, username: process.env.BitUser, password: process.env.BitPassword, wallet: walletName});
       }
 
-      // get balance
+      // get wallet info
       await client.getWalletInfo().then(function(walletInfo){
         senderBalance = walletInfo.balance * 100000000
         transactionResult.data.pre_balance = String(walletInfo.balance)
@@ -688,7 +688,7 @@ exports.check_deposit_state = async(req, res) => {
         client = new Client({ host: process.env.Host, port: process.env.BitPort, username: process.env.BitUser, password: process.env.BitPassword, wallet: walletName});
       }
 
-      // get balance
+      // get wallet info
       await client.getWalletInfo().then(function(walletInfo){
         new_address.balance = walletInfo.balance * 100000000
         new_address.balance_string = new_address.balance.toFixed()
@@ -762,7 +762,7 @@ exports.check_deposit_state = async(req, res) => {
         client = new Client({ host: process.env.Host, port: process.env.BitPort, username: process.env.BitUser, password: process.env.BitPassword, wallet: walletName});
       }
 
-      // get balance
+      // get wallet info
       await client.getWalletInfo().then(function(walletInfo){
         new_address.balance = walletInfo.balance * 100000000
         new_address.balance_string = new_address.balance.toFixed()
