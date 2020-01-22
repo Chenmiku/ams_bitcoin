@@ -535,7 +535,7 @@ async function checkDepositBit(coin,address,walletName,preBalance,intervalObject
   var new_address = new Addr()
 
   // validate address
-  await client.validateAddress(addr).then(function(validate){
+  await client.validateAddress(address).then(function(validate){
     if (validate.isvalid == false) {
       //re.errorResponse('invalid_address', res, 500);
       return
@@ -621,7 +621,7 @@ async function checkDepositEther(coin,address,preBalance,intervalObject,res) {
   var new_address = new Addr()
 
   // check valid address
-  if (w3.utils.isAddress(addr) == false) {
+  if (w3.utils.isAddress(address) == false) {
     //re.errorResponse('invalid_address', res, 500);
     return
   }
