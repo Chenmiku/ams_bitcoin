@@ -516,7 +516,8 @@ exports.get_a_address = async(req, res) => {
 
 // function auto check deposit 
 async function checkDeposit(coin,address,walletName,preBalance,intervalObject,res) {
-  console.log('run')
+  console.log('coin:', coin)
+  console.log('addr:', address)
   var balance = 0
   var trans = new Trans()
   var new_address = new Addr()
