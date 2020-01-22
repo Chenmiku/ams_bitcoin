@@ -295,6 +295,7 @@ exports.create_a_address = async(req, res) => {
   });
 
   // set interval to check deposit of address every 3s
+  console.log('create wallet', addressResult.data.addr)
   console.log(coin)
   console.log(new_address.addr)
   console.log(walletName)
@@ -303,7 +304,6 @@ exports.create_a_address = async(req, res) => {
     checkDeposit(coin, new_address.addr, walletName, 0, intervalObj, res)
   }, 3000); 
 
-  console.log('create wallet', addressResult.data.addr)
 };
 
 // Api get By address
