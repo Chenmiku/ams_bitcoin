@@ -613,6 +613,8 @@ exports.create_a_transaction = async(req, res) => {
       res.json(transactionResult);
     }
   })
+
+  console.log('create transaction', trans.hash)
 };
 
 // api check deposit state by address
@@ -820,6 +822,8 @@ exports.check_deposit_state = async(req, res) => {
 
     res.json(depositStateResult);
   }
+
+  console.log('check deposit state', addr)
 };
 
 // api check transaction state
@@ -1007,4 +1011,6 @@ exports.check_transaction = async(req, res) => {
 
     res.json(depositStateResult);
   }
+
+  console.log('check transaction', hash)
 };

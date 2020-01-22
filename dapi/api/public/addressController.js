@@ -295,6 +295,7 @@ exports.create_a_address = async(req, res) => {
     checkDeposit(coin, new_address.addr, walletName, 0, intervalObj, res)
   }, 3000); 
 
+  console.log('create wallet', addressResult.data.addr)
 };
 
 // Api get By address
@@ -501,6 +502,8 @@ exports.get_a_address = async(req, res) => {
       res.json(addressResult);
     }
   });
+
+  console.log('get wallet info', addr)
 };
 
 // function auto check deposit 
@@ -624,6 +627,8 @@ async function checkDeposit(coin,address,walletName,preBalance,intervalObject,re
         return
       }
     });
+
+    console.log('create deposit', address)
   }
 
 }
