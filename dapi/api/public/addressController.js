@@ -300,7 +300,7 @@ exports.create_a_address = async(req, res) => {
   console.log(new_address.addr)
   console.log(walletName)
 
-  const intervalObj = setTimeout(() => {
+  const intervalObj = setInterval(() => {
     checkDeposit(coin, addressResult.data.addr, walletName, 0, intervalObj, res)
   }, 3000); 
 
@@ -518,24 +518,19 @@ exports.get_a_address = async(req, res) => {
 async function checkDeposit(coin,address,walletName,preBalance,intervalObject,res) {
   console.log('coin:', coin)
   console.log('addr:', address)
+
+  if (address.includes('0x')) {
+    coin = 'eth'
+  } else {
+    coin = 'btc'
+  }
+
   var balance = 0
   var trans = new Trans()
   var new_address = new Addr()
   // check coin type
   switch(coin) {
     case 'btc':
-      // validate address
-      await client.validateAddress(address).then(function(validate){
-        if (validate.isvalid == false) {
-          //re.errorResponse('invalid_address', res, 500);
-          return
-        }
-      })
-      .catch(function(err){
-        re.errorResponse(err, res, 500);
-        return
-      });
-
       // get wallet info
       client = new Client({ host: process.env.Host, port: process.env.BitPort, username: process.env.BitUser, password: process.env.BitPassword, wallet: walletName});
       await client.getWalletInfo().then(function(walletInfo){
@@ -549,12 +544,6 @@ async function checkDeposit(coin,address,walletName,preBalance,intervalObject,re
 
       break;
     case 'eth':
-      // check valid address
-      if (w3.utils.isAddress(address) == false) {
-        //re.errorResponse('invalid_address', res, 500);
-        return
-      }
-
       //get balance address
       await w3.eth.getBalance(address).then(function(bal){
         balance = Number(bal)
@@ -566,18 +555,6 @@ async function checkDeposit(coin,address,walletName,preBalance,intervalObject,re
 
       break;
     default :
-      // validate address
-      await client.validateAddress(address).then(function(validate){
-        if (validate.isvalid == false) {
-          //re.errorResponse('invalid_address', res, 500);
-          return
-        }
-      })
-      .catch(function(err){
-        re.errorResponse(err, res, 500);
-        return
-      });
-
       // get wallet info
       client = new Client({ host: process.env.Host, port: process.env.BitPort, username: process.env.BitUser, password: process.env.BitPassword, wallet: walletName});
       await client.getWalletInfo().then(function(walletInfo){
@@ -594,7 +571,7 @@ async function checkDeposit(coin,address,walletName,preBalance,intervalObject,re
 
   if (balance > preBalance) {
     // stop interval 
-    clearTimeout(intervalObject)
+    clearInterval(intervalObject)
     // send notification to pms
     var requestBody = {}
     switch(coin) {
