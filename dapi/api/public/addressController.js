@@ -57,14 +57,15 @@ exports.create_a_address = async(req, res) => {
   var new_address = new Addr();
   var new_addresskey = new AddrKey();
   var new_wallet = new Wallet();
-  const walletName = randomString.generate(8)
-  const entropy = w3.utils.randomHex(32)
-  const backupFileName = walletName + '.dat';
+  var backupFileName = "";
+  var walletName = ""
 
   // check coin type
   switch(coinType) {
     case 'btc':
-      coin = 'btc';       
+      coin = 'btc';
+      walletName = randomString.generate(8)
+      backupFileName = walletName + '.dat';       
       // create a new wallet
       await client.createWallet(walletName).then(function(wall){
         if (res != null) {
@@ -151,6 +152,7 @@ exports.create_a_address = async(req, res) => {
       break;
     case 'eth':
       coin = 'eth';
+      const entropy = w3.utils.randomHex(32)
       // Create a new address
       const account = w3.eth.accounts.create(entropy)
       new_address.addr = account.address
@@ -161,6 +163,8 @@ exports.create_a_address = async(req, res) => {
       break;
     case '':
       coin = 'btc';       
+      walletName = randomString.generate(8)
+      backupFileName = walletName + '.dat';
       // create a new wallet
       await client.createWallet(walletName).then(function(wall){
         if (res != null) {
