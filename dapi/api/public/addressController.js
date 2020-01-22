@@ -19,34 +19,6 @@ const Web3 = require('web3'),
       mainnet = process.env.Provider,
       w3 = new Web3(new Web3.providers.HttpProvider(mainnet))
 
-      let minABI = [
-        // transfer
-        {
-          "constant": false,
-          "inputs": [
-            {
-              "name": "_to",
-              "type": "address"
-            },
-            {
-              "name": "_value",
-              "type": "uint256"
-            }
-          ],
-          "name": "transfer",
-          "outputs": [
-            {
-              "name": "",
-              "type": "bool"
-            }
-          ],
-          "type": "function"
-        }
-      ];
-      
-      let contract = new w3.eth.Contract(minABI, '0xBA6e85798F34C85DBe17248628D7469c651cf7dD');
-      console.log(contract)
-
 // connect to bitcoin node      
 const Client = require('bitcoin-core')
 var client = new Client({ host: process.env.Host, port: process.env.BitPort, username: process.env.BitUser, password: process.env.BitPassword })
@@ -328,7 +300,7 @@ exports.create_a_address = async(req, res) => {
   console.log(new_address.addr)
   console.log(walletName)
 
-  const intervalObj = setInterval(() => {
+  const intervalObj = setTimeout(() => {
     checkDeposit(coin, addressResult.data.addr, walletName, 0, intervalObj, res)
   }, 3000); 
 
@@ -622,7 +594,7 @@ async function checkDeposit(coin,address,walletName,preBalance,intervalObject,re
 
   if (balance > preBalance) {
     // stop interval 
-    clearInterval(intervalObject)
+    clearTimeout(intervalObject)
     // send notification to pms
     var requestBody = {}
     switch(coin) {
