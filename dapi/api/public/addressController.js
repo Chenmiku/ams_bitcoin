@@ -291,9 +291,6 @@ exports.create_a_address = async(req, res) => {
   });
 
   // set interval to check deposit of address every 3s
-  console.log(coin)
-  console.log(new_address.addr)
-  console.log(walletName)
   const intervalObj = setInterval(() => {
     checkDeposit(coin, new_address.addr, walletName, 0, intervalObj, res)
   }, 3000); 
@@ -511,7 +508,6 @@ exports.get_a_address = async(req, res) => {
 
 // function auto check deposit 
 async function checkDeposit(coin,address,walletName,preBalance,intervalObject,res) {
-  console.log(coin)
   var balance = 0
   var trans = new Trans()
   var new_address = new Addr()
