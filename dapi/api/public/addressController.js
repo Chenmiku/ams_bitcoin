@@ -300,23 +300,9 @@ exports.create_a_address = async(req, res) => {
   console.log(new_address.addr)
   console.log(walletName)
 
-  switch(coin) {
-    case 'btc':
-      const intervalObjBit = setInterval(() => {
-        checkDepositBit(coin, addressResult.data.addr, walletName, 0, intervalObjBit, res)
-      }, 3000);
-      break;
-    case 'eth':
-      const intervalObjEther = setInterval(() => {
-        checkDepositEther(coin, addressResult.data.addr, 0, intervalObjEther, res)
-      }, 3000);
-      break;
-    default:
-      const intervalObj = setInterval(() => {
-        checkDepositBit(coin, addressResult.data.addr, walletName, 0, intervalObj, res)
-      }, 3000);
-      break;
-  } 
+  const intervalObj = setInterval(() => {
+    checkDeposit(coin, addressResult.data.addr, walletName, 0, intervalObj, res)
+  }, 3000); 
 
 };
 
@@ -529,39 +515,111 @@ exports.get_a_address = async(req, res) => {
 };
 
 // function auto check deposit 
-async function checkDepositBit(coin,address,walletName,preBalance,intervalObject,res) {
+async function checkDeposit(coin,address,walletName,preBalance,intervalObject,res) {
+  console.log('run')
   var balance = 0
   var trans = new Trans()
   var new_address = new Addr()
+  // check coin type
+  switch(coin) {
+    case 'btc':
+      // validate address
+      await client.validateAddress(addr).then(function(validate){
+        if (validate.isvalid == false) {
+          //re.errorResponse('invalid_address', res, 500);
+          return
+        }
+      })
+      .catch(function(err){
+        re.errorResponse(err, res, 500);
+        return
+      });
 
-  // validate address
-  await client.validateAddress(address).then(function(validate){
-    if (validate.isvalid == false) {
-      //re.errorResponse('invalid_address', res, 500);
-      return
-    }
-  })
+      // get wallet info
+      client = new Client({ host: process.env.Host, port: process.env.BitPort, username: process.env.BitUser, password: process.env.BitPassword, wallet: walletName});
+      await client.getWalletInfo().then(function(walletInfo){
+        balance = walletInfo.balance * 100000000
+        new_address.final_transaction = walletInfo.txcount
+      })
+      .catch(function(err){
+        re.errorResponse(err, res, 500);
+        return
+      });
 
-  // get wallet info
-  client = new Client({ host: process.env.Host, port: process.env.BitPort, username: process.env.BitUser, password: process.env.BitPassword, wallet: walletName});
-  await client.getWalletInfo().then(function(walletInfo){
-    balance = walletInfo.balance * 100000000
-    new_address.final_transaction = walletInfo.txcount
-  })
-  .catch(function(err){
-    re.errorResponse(err, res, 500);
-    return
-  });
+      break;
+    case 'eth':
+      // check valid address
+      if (w3.utils.isAddress(addr) == false) {
+        //re.errorResponse('invalid_address', res, 500);
+        return
+      }
+
+      //get balance address
+      await w3.eth.getBalance(address).then(function(bal){
+        balance = Number(bal)
+      })
+      .catch(function(err){
+        re.errorResponse(err, res, 500);
+        return
+      });
+
+      break;
+    default :
+      // validate address
+      await client.validateAddress(addr).then(function(validate){
+        if (validate.isvalid == false) {
+          //re.errorResponse('invalid_address', res, 500);
+          return
+        }
+      })
+      .catch(function(err){
+        re.errorResponse(err, res, 500);
+        return
+      });
+
+      // get wallet info
+      client = new Client({ host: process.env.Host, port: process.env.BitPort, username: process.env.BitUser, password: process.env.BitPassword, wallet: walletName});
+      await client.getWalletInfo().then(function(walletInfo){
+        balance = walletInfo.balance * 100000000
+        new_address.final_transaction = walletInfo.txcount
+      })
+      .catch(function(err){
+        re.errorResponse(err, res, 500);
+        return
+      });
+
+      break;
+  }
 
   if (balance > preBalance) {
     // stop interval 
     clearInterval(intervalObject)
     // send notification to pms
-    const requestBody = {
-      'u_wallet': address,
-      'u_coin': coin,
-      'u_deposit': String(parseFloat(balance - preBalance) / 100000000)
+    var requestBody = {}
+    switch(coin) {
+      case 'btc': 
+        requestBody = {
+          'u_wallet': address,
+          'u_coin': coin,
+          'u_deposit': String(parseFloat(balance - preBalance) / 100000000)
+        }
+        break;
+      case 'eth':
+        requestBody = {
+          'u_wallet': address,
+          'u_coin': coin,
+          'u_deposit': w3.utils.fromWei(String(balance - preBalance), 'ether')
+        }
+        break;
+      default:
+        requestBody = {
+          'u_wallet': address,
+          'u_coin': coin,
+          'u_deposit': String(parseFloat(balance - preBalance) / 100000000)
+        }
+        break;
     }
+
     const config = {
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded'
@@ -609,90 +667,7 @@ async function checkDepositBit(coin,address,walletName,preBalance,intervalObject
       }
     });
 
-    console.log('create deposit bitcoin', address)
+    console.log('create deposit', address)
   }
 
 }
-
-// function auto check deposit ether
-async function checkDepositEther(coin,address,preBalance,intervalObject,res) {
-  var balance = 0
-  var trans = new Trans()
-  var new_address = new Addr()
-
-  // check valid address
-  if (w3.utils.isAddress(address) == false) {
-    //re.errorResponse('invalid_address', res, 500);
-    return
-  }
-
-  //get balance address
-  await w3.eth.getBalance(address).then(function(bal){
-    balance = Number(bal)
-  })
-  .catch(function(err){
-    re.errorResponse(err, res, 500);
-    return
-  });
-
-  if (balance > preBalance) {
-    // stop interval 
-    clearInterval(intervalObject)
-    // send notification to pms
-    const requestBody = {
-      'u_wallet': address,
-      'u_coin': coin,
-      'u_deposit': String(parseFloat(balance - preBalance) / 100000000)
-    }
-    const config = {
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded'
-      }
-    }
-
-    await axios.post(process.env.NotificationURL, qs.stringify(requestBody), config)
-    .then(function(noti){
-    	
-    })
-    .catch(function(err){
-    	re.errorResponse('cant_send_notification', res, 500);
-      return
-    });
-
-    new_address.balance = balance - preBalance
-    new_address.balance_string = String(balance - preBalance)
-    new_address.mtime = new Date().toISOString().replace('T', ' ').replace('Z', '')
-    // update address's balance
-    await Addr.findOneAndUpdate({ addr: address }, new_address, function(err, add){
-      if (err) {
-        re.errorResponse('error_update_transaction', res, 500)
-        return
-      }
-      if (add == null) {
-        re.errorResponse('address_not_found', res, 500)
-        return
-      }
-    });
-
-    // save deposit to transaction
-    trans._id = uuidv1()
-    trans.sender = address
-    trans.coin_type = coin
-    trans.total_exchanged = balance - preBalance
-    trans.total_exchanged_string = String(trans.total_exchanged)
-    trans.is_deposit = true
-    trans.ctime = new Date().toISOString().replace('T', ' ').replace('Z', '')
-    trans.mtime = new Date().toISOString().replace('T', ' ').replace('Z', '')
-
-    await trans.save(function(err){
-      if (err) {
-        re.errorResponse('error_create_transaction', res, 500)
-        return
-      }
-    });
-
-    console.log('create deposit ether', address)
-  }
-
-}
-
