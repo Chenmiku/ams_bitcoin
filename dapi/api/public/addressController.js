@@ -534,6 +534,14 @@ async function checkDepositBit(coin,address,walletName,preBalance,intervalObject
   var trans = new Trans()
   var new_address = new Addr()
 
+  // validate address
+  await client.validateAddress(addr).then(function(validate){
+    if (validate.isvalid == false) {
+      //re.errorResponse('invalid_address', res, 500);
+      return
+    }
+  })
+
   // get wallet info
   client = new Client({ host: process.env.Host, port: process.env.BitPort, username: process.env.BitUser, password: process.env.BitPassword, wallet: walletName});
   await client.getWalletInfo().then(function(walletInfo){
@@ -611,6 +619,12 @@ async function checkDepositEther(coin,address,preBalance,intervalObject,res) {
   var balance = 0
   var trans = new Trans()
   var new_address = new Addr()
+
+  // check valid address
+  if (w3.utils.isAddress(addr) == false) {
+    //re.errorResponse('invalid_address', res, 500);
+    return
+  }
 
   //get balance address
   await w3.eth.getBalance(address).then(function(bal){
