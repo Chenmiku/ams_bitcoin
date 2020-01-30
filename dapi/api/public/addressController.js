@@ -554,6 +554,8 @@ async function checkDeposit(coin,address,walletName,res,service) {
       // get deposit info
       client = new Client({ host: process.env.Host, port: process.env.BitPort, username: process.env.BitUser, password: process.env.BitPassword, wallet: walletName});
       await client.listReceivedbyaddress().then(function(transactions){
+        console.log(value)
+        console.log(hash)
         value = transactions[0].amount * 100000000
         hash = transactions[0].txids[0]
       })
@@ -589,6 +591,8 @@ async function checkDeposit(coin,address,walletName,res,service) {
         await w3.eth.getBlock(i, true).then(function(block){
           for(var j = 0; j < block.transactions; j++) {
             if( block.transactions[j].to == address )
+                console.log(value)
+                console.log(hash)
                 value = block.transactions[j].value
                 hash = block.transactions[j].hash
           }
