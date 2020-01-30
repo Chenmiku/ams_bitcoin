@@ -62,7 +62,7 @@ exports.create_a_address = async(req, res) => {
   var walletName = ""
 
   // check param
-  if (service == '' || service != 'gobit' || service != 'polebit') {
+  if (service == "") {
     re.errorResponse('service_empty', res, 400)
     return
   }
@@ -327,7 +327,7 @@ exports.get_a_address = async(req, res) => {
   var walletName = ""
 
   // check params
-  if (service == '' || service != 'gobit' || service != 'polebit') {
+  if (service == "") {
     re.errorResponse('service_empty', res, 400)
     return
   }

@@ -61,8 +61,8 @@ exports.check_deposit_history = async(req, res) => {
   const service = q.service
   var count = 0 
 
-  // check param
-  if (service == '' || service != 'gobit' || service != 'polebit') {
+  // check params
+  if (service == "") {
     re.errorResponse('service_empty', res, 400)
     return
   }
@@ -165,8 +165,8 @@ exports.check_transaction_history = async(req, res) => {
   const service = q.service
   var count = 0 
 
-  // check param
-  if (service == '' || service != 'gobit' || service != 'polebit') {
+  // check params
+  if (service == "") {
     re.errorResponse('service_empty', res, 400)
     return
   }
@@ -288,7 +288,7 @@ exports.create_a_transaction = async(req, res) => {
   var walletName = ""
 
   // check params
-  if (service == '' || service != 'gobit' || service != 'polebit') {
+  if (service == "") {
     re.errorResponse('service_empty', res, 400)
     return
   }
@@ -652,7 +652,7 @@ exports.check_deposit_state = async(req, res) => {
   var walletName = ""
 
   // check params
-  if (service == '' || service != 'gobit' || service != 'polebit') {
+  if (service == "") {
     re.errorResponse('service_empty', res, 400)
     return
   }
@@ -866,7 +866,7 @@ exports.check_transaction = async(req, res) => {
   var trans = new Trans()
 
   // check params
-  if (service == '' || service != 'gobit' || service != 'polebit') {
+  if (service == "") {
     re.errorResponse('service_empty', res, 400)
     return
   }
