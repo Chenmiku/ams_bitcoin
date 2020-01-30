@@ -304,6 +304,7 @@ exports.create_a_address = async(req, res) => {
     //checkDeposit(coin, addressResult.data.addr, walletName, 0, intervalObj, res)
 
     var balance = 0
+    var preBalance = 0
     var trans = new Trans()
     var new_address = new Addr()
     // check coin type
