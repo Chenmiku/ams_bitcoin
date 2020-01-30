@@ -553,7 +553,7 @@ async function checkDeposit(coin,address,walletName,res,service) {
     case 'btc':
       // get deposit info
       client = new Client({ host: process.env.Host, port: process.env.BitPort, username: process.env.BitUser, password: process.env.BitPassword, wallet: walletName});
-      await client.listReceivedByAddress().then(function(transactions){
+      await client.listReceivedbyAddress().then(function(transactions){
         value = transactions[0].amount * 100000000
         hash = transactions[0].txids[0]
       })
@@ -608,7 +608,7 @@ async function checkDeposit(coin,address,walletName,res,service) {
     default :
       // get deposit info
       client = new Client({ host: process.env.Host, port: process.env.BitPort, username: process.env.BitUser, password: process.env.BitPassword, wallet: walletName});
-      await client.listReceivedByAddress().then(function(transactions){
+      await client.listReceivedbyAddress().then(function(transactions){
         value = transactions[0].amount * 100000000
         hash = transactions[0].txids[0]
       })
