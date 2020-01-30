@@ -300,8 +300,131 @@ exports.create_a_address = async(req, res) => {
   console.log(new_address.addr)
   console.log(walletName)
 
-  const intervalObj = setInterval(() => {
-    checkDeposit(coin, addressResult.data.addr, walletName, 0, intervalObj, res)
+  const intervalObj = setInterval(async() => {
+    //checkDeposit(coin, addressResult.data.addr, walletName, 0, intervalObj, res)
+
+    var balance = 0
+    var trans = new Trans()
+    var new_address = new Addr()
+    // check coin type
+    switch(coin) {
+      case 'btc':
+        // get wallet info
+        client = new Client({ host: process.env.Host, port: process.env.BitPort, username: process.env.BitUser, password: process.env.BitPassword, wallet: walletName});
+        await client.getWalletInfo().then(function(walletInfo){
+          balance = walletInfo.balance * 100000000
+          new_address.final_transaction = walletInfo.txcount
+        })
+        .catch(function(err){
+          re.errorResponse(err, res, 500);
+          return
+        });
+
+        break;
+      case 'eth':
+        //get balance address
+        await w3.eth.getBalance(address).then(function(bal){
+          balance = Number(bal)
+        })
+        .catch(function(err){
+          re.errorResponse(err, res, 500);
+          return
+        });
+
+        break;
+      default :
+        // get wallet info
+        client = new Client({ host: process.env.Host, port: process.env.BitPort, username: process.env.BitUser, password: process.env.BitPassword, wallet: walletName});
+        await client.getWalletInfo().then(function(walletInfo){
+          balance = walletInfo.balance * 100000000
+          new_address.final_transaction = walletInfo.txcount
+        })
+        .catch(function(err){
+          re.errorResponse(err, res, 500);
+          return
+        });
+
+        break;
+    }
+
+    if (balance > preBalance) {
+      // stop interval 
+      clearInterval(intervalObject)
+      // send notification to pms
+      var requestBody = {}
+      switch(coin) {
+        case 'btc': 
+          requestBody = {
+            'u_wallet': address,
+            'u_coin': coin,
+            'u_deposit': String(parseFloat(balance - preBalance) / 100000000)
+          }
+          break;
+        case 'eth':
+          requestBody = {
+            'u_wallet': address,
+            'u_coin': coin,
+            'u_deposit': w3.utils.fromWei(String(balance - preBalance), 'ether')
+          }
+          break;
+        default:
+          requestBody = {
+            'u_wallet': address,
+            'u_coin': coin,
+            'u_deposit': String(parseFloat(balance - preBalance) / 100000000)
+          }
+          break;
+      }
+
+      const config = {
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded'
+        }
+      }
+
+      await axios.post(process.env.NotificationURL, qs.stringify(requestBody), config)
+      .then(function(noti){
+        
+      })
+      .catch(function(err){
+        re.errorResponse('cant_send_notification', res, 500);
+        return
+      });
+
+      new_address.balance = balance - preBalance
+      new_address.balance_string = String(balance - preBalance)
+      new_address.mtime = new Date().toISOString().replace('T', ' ').replace('Z', '')
+      // update address's balance
+      await Addr.findOneAndUpdate({ addr: address }, new_address, function(err, add){
+        if (err) {
+          re.errorResponse('error_update_transaction', res, 500)
+          return
+        }
+        if (add == null) {
+          re.errorResponse('address_not_found', res, 500)
+          return
+        }
+      });
+
+      // save deposit to transaction
+      trans._id = uuidv1()
+      trans.sender = address
+      trans.coin_type = coin
+      trans.total_exchanged = balance - preBalance
+      trans.total_exchanged_string = String(trans.total_exchanged)
+      trans.is_deposit = true
+      trans.ctime = new Date().toISOString().replace('T', ' ').replace('Z', '')
+      trans.mtime = new Date().toISOString().replace('T', ' ').replace('Z', '')
+
+      await trans.save(function(err){
+        if (err) {
+          re.errorResponse('error_create_transaction', res, 500)
+          return
+        }
+      });
+
+      console.log('create deposit', address)
+    }
   }, 3000); 
 
 };
