@@ -7,6 +7,9 @@ var walletSchema = new schema({
     _id: {
         type: String
     },
+    service: {
+        type: String
+    },
     name: {
         type: String
     },

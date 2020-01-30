@@ -58,11 +58,18 @@ var transactionHistory = {
 exports.check_deposit_history = async(req, res) => {
   let q = url.parse(req.url, true).query
   const addr = q.addr
+  const service = q.service
   var count = 0 
+
+  // check param
+  if (service == '' || service != 'gobit' || service != 'polebit') {
+    re.errorResponse('service_empty', res, 400)
+    return
+  }
 
   if (addr != "") {
     // check exists address
-    await Addr.findOne({ addr: addr }, function(err, add){
+    await Addr.findOne({ service: service, addr: addr }, function(err, add){
       if (err) {
         re.errorResponse(err, res, 500);
         return
@@ -72,7 +79,7 @@ exports.check_deposit_history = async(req, res) => {
         return
       }
     });
-    await AddrKey.findOne({ addr: addr }, function(err, addrKey){
+    await AddrKey.findOne({ service: service, addr: addr }, function(err, addrKey){
       if (err) {
         re.errorResponse(err, res, 500);
         return
@@ -84,7 +91,7 @@ exports.check_deposit_history = async(req, res) => {
     });
 
     // get count transaction
-    await Trans.countDocuments({ sender: addr, is_deposit: true }, function(err, ct){
+    await Trans.countDocuments({ service: service, sender: addr, is_deposit: true }, function(err, ct){
       if (err) {
         res.status(500).send(err)
       }
@@ -92,7 +99,7 @@ exports.check_deposit_history = async(req, res) => {
     })
 
     // get transaction
-    await Trans.find({ sender: addr, is_deposit: true }, function(err, transaction) {
+    await Trans.find({ service: service, sender: addr, is_deposit: true }, function(err, transaction) {
       if (err) {
         re.errorResponse(err, res, 500);
         return
@@ -116,7 +123,7 @@ exports.check_deposit_history = async(req, res) => {
     res.json(transactionHistory);
   } else {
     // get count transaction
-    await Trans.countDocuments({ is_deposit: true }, function(err, ct){
+    await Trans.countDocuments({ service: service, is_deposit: true }, function(err, ct){
       if (err) {
         res.status(500).send(err)
       }
@@ -124,7 +131,7 @@ exports.check_deposit_history = async(req, res) => {
     })
 
     // get transaction
-    await Trans.find({ is_deposit: true }, function(err, transaction) {
+    await Trans.find({ service: service, is_deposit: true }, function(err, transaction) {
       if (err) {
         re.errorResponse(err, res, 500);
         return
@@ -155,11 +162,18 @@ exports.check_deposit_history = async(req, res) => {
 exports.check_transaction_history = async(req, res) => {
   let q = url.parse(req.url, true).query
   const addr = q.addr
+  const service = q.service
   var count = 0 
+
+  // check param
+  if (service == '' || service != 'gobit' || service != 'polebit') {
+    re.errorResponse('service_empty', res, 400)
+    return
+  }
 
   if (addr != "") {
     // check exists address
-    await Addr.findOne({ addr: addr }, function(err, add){
+    await Addr.findOne({ service: service, addr: addr }, function(err, add){
       if (err) {
         re.errorResponse(err, res, 500);
         return
@@ -170,7 +184,7 @@ exports.check_transaction_history = async(req, res) => {
       }
     });
 
-    await AddrKey.findOne({ addr: addr }, function(err, addrKey){
+    await AddrKey.findOne({ service: service, addr: addr }, function(err, addrKey){
       if (err) {
         re.errorResponse(err, res, 500);
         return
@@ -182,7 +196,7 @@ exports.check_transaction_history = async(req, res) => {
     });
 
     // get count transaction
-    await Trans.countDocuments({ sender: addr, is_deposit: false }, function(err, ct){
+    await Trans.countDocuments({ service: service, sender: addr, is_deposit: false }, function(err, ct){
       if (err) {
         res.status(500).send(err)
       }
@@ -190,7 +204,7 @@ exports.check_transaction_history = async(req, res) => {
     })
 
     // get transaction
-    await Trans.find({ sender: addr, is_deposit: false }, function(err, transaction) {
+    await Trans.find({ service: service, sender: addr, is_deposit: false }, function(err, transaction) {
       if (err) {
         re.errorResponse(err, res, 500);
         return
@@ -214,7 +228,7 @@ exports.check_transaction_history = async(req, res) => {
     res.json(transactionHistory);
   } else {
     // get count transaction
-    await Trans.countDocuments({ is_deposit: false }, function(err, ct){
+    await Trans.countDocuments({ service: service, is_deposit: false }, function(err, ct){
       if (err) {
         res.status(500).send(err)
       }
@@ -222,7 +236,7 @@ exports.check_transaction_history = async(req, res) => {
     })
 
     // get transaction
-    await Trans.find({ is_deposit: false }, function(err, transaction) {
+    await Trans.find({ service: service, is_deposit: false }, function(err, transaction) {
       if (err) {
         re.errorResponse(err, res, 500);
         return
@@ -264,6 +278,7 @@ exports.create_a_transaction = async(req, res) => {
   const coinType = q.coin_type;
   const sender = q.sender
   const receiver = q.receiver
+  const service = q.service
   var trans = new Trans()
   var feeValue = 20000000000 * 21000
   var feeBitValue = 3000
@@ -273,13 +288,18 @@ exports.create_a_transaction = async(req, res) => {
   var walletName = ""
 
   // check params
+  if (service == '' || service != 'gobit' || service != 'polebit') {
+    re.errorResponse('service_empty', res, 400)
+    return
+  }
+
   if (sender == "" || receiver == "") {
     re.errorResponse('sender_or_receiver_empty', res, 400)
     return
   }
 
   // check exists address
-  await Addr.findOne({ addr: sender }, function(err, addr){
+  await Addr.findOne({ service: service, addr: sender }, function(err, addr){
     if (err) {
       re.errorResponse(err, res, 500);
       return
@@ -290,7 +310,7 @@ exports.create_a_transaction = async(req, res) => {
     }
     walletName = addr.wallet_name
   });
-  await AddrKey.findOne({ addr: sender }, function(err, addrKey){
+  await AddrKey.findOne({ service: service, addr: sender }, function(err, addrKey){
     if (err) {
       re.errorResponse(err, res, 500);
       return
@@ -596,6 +616,7 @@ exports.create_a_transaction = async(req, res) => {
   trans.sender = sender
   trans.receiver = receiver
   trans.coin_type = coin
+  trans.service = service
   trans.is_deposit = false
   trans.ctime = new Date().toISOString().replace('T', ' ').replace('Z', '')
   trans.mtime = new Date().toISOString().replace('T', ' ').replace('Z', '')
@@ -625,18 +646,23 @@ exports.check_deposit_state = async(req, res) => {
   let q = url.parse(req.url, true).query;
   const coinType = q.coin_type;
   const addr = q.addr
+  const service = q.service
   var address = new Addr()
   var new_address = new Addr()
   var walletName = ""
 
   // check params
+  if (service == '' || service != 'gobit' || service != 'polebit') {
+    re.errorResponse('service_empty', res, 400)
+    return
+  }
   if (addr == "") {
     errorMessage('address_empty', res, 400)
     return
   }
 
   // check exists address
-  await Addr.findOne({ addr: addr }, function(err, add){
+  await Addr.findOne({ service: service, addr: addr }, function(err, add){
     if (err) {
       re.errorResponse(err, res, 404);
       return
@@ -793,7 +819,7 @@ exports.check_deposit_state = async(req, res) => {
 
     new_address.mtime = new Date().toISOString().replace('T', ' ').replace('Z', '')
     // update address
-    await Addr.findOneAndUpdate({ addr: addr }, new_address, function(err, ad) {
+    await Addr.findOneAndUpdate({ service: service, addr: addr }, new_address, function(err, ad) {
       if (err) {
         re.errorResponse(err, res, 500);
         return
@@ -834,18 +860,23 @@ exports.check_transaction = async(req, res) => {
   let q = url.parse(req.url, true).query;
   const coinType = q.coin_type;
   const hash = q.hash
+  const service = q.service
   var walletName = ""
   var sender = ""
   var trans = new Trans()
 
   // check params
+  if (service == '' || service != 'gobit' || service != 'polebit') {
+    re.errorResponse('service_empty', res, 400)
+    return
+  }
   if (hash == "") {
     errorMessage('transaction_hash_empty', res, 400)
     return
   }
 
   // check exists transaction
-  await Trans.findOne({ hash: hash }, function(err, tran){
+  await Trans.findOne({ service: service, hash: hash }, function(err, tran){
     if (err) {
       re.errorResponse(err, res, 404);
       return
@@ -860,7 +891,7 @@ exports.check_transaction = async(req, res) => {
   });
 
   // get wallet name
-  await Addr.findOne({ addr: sender }, function(err, add){
+  await Addr.findOne({ service: service, addr: sender }, function(err, add){
     if (err) {
       re.errorResponse(err, res, 404);
       return
@@ -997,7 +1028,7 @@ exports.check_transaction = async(req, res) => {
     depositStateResult.success = true
 
     // update transaction
-    Trans.findOneAndUpdate({ hash: hash }, trans, function(err){
+    Trans.findOneAndUpdate({ service: service, hash: hash }, trans, function(err){
       if (err) {
         re.errorResponse(err, res, 500);
         return

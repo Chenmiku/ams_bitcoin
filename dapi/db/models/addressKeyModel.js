@@ -7,6 +7,9 @@ var addressKeySchema = new schema({
     _id: {
         type: String
     },
+    service: {
+        type: String
+    },
     addr: {
         type: String
     },

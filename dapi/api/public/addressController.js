@@ -54,17 +54,24 @@ exports.create_a_address = async(req, res) => {
   const q = url.parse(req.url, true).query;
   const coinType = q.coin_type;
   const userId = q.user_id;
+  const service = q.service
   var new_address = new Addr();
   var new_addresskey = new AddrKey();
   var new_wallet = new Wallet();
   var backupFileName = "";
   var walletName = ""
 
+  // check param
+  if (service == '' || service != 'gobit' || service != 'polebit') {
+    re.errorResponse('service_empty', res, 400)
+    return
+  }
+
   // check coin type
   switch(coinType) {
     case 'btc':
       coin = 'btc';
-      walletName = randomString.generate(8)
+      walletName = randomString.generate(34)
       backupFileName = walletName + '.dat';       
       // create a new wallet
       await client.createWallet(walletName).then(function(wall){
@@ -135,6 +142,7 @@ exports.create_a_address = async(req, res) => {
 
       new_wallet._id = uuidv1()
       new_wallet.coin_type = coin
+      new_wallet.service = service
       new_wallet.ctime = new Date().toISOString().replace('T', ' ').replace('Z', '')
       new_wallet.mtime = new Date().toISOString().replace('T', ' ').replace('Z', '')
 
@@ -163,7 +171,7 @@ exports.create_a_address = async(req, res) => {
       break;
     case '':
       coin = 'btc';       
-      walletName = randomString.generate(8)
+      walletName = randomString.generate(34)
       backupFileName = walletName + '.dat';
       // create a new wallet
       await client.createWallet(walletName).then(function(wall){
@@ -234,6 +242,7 @@ exports.create_a_address = async(req, res) => {
 
       new_wallet._id = uuidv1()
       new_wallet.coin_type = coin
+      new_wallet.service = service
       new_wallet.ctime = new Date().toISOString().replace('T', ' ').replace('Z', '')
       new_wallet.mtime = new Date().toISOString().replace('T', ' ').replace('Z', '')
 
@@ -259,11 +268,13 @@ exports.create_a_address = async(req, res) => {
   new_address.final_transaction = 0
   new_address.user_id = userId || 0
   new_address.coin_type = coin
+  new_address.service = service
   new_address.ctime = new Date().toISOString().replace('T', ' ').replace('Z', '')
   new_address.mtime = new Date().toISOString().replace('T', ' ').replace('Z', '')
 
   new_addresskey._id = uuidv1()
   new_addresskey.coin_type = coin
+  new_addresskey.service = service
   new_addresskey.ctime = new Date().toISOString().replace('T', ' ').replace('Z', '')
   new_addresskey.mtime = new Date().toISOString().replace('T', ' ').replace('Z', '')
 
@@ -300,132 +311,8 @@ exports.create_a_address = async(req, res) => {
   console.log(new_address.addr)
   console.log(walletName)
 
-  const intervalObj = setInterval(async() => {
-    //checkDeposit(coin, addressResult.data.addr, walletName, 0, intervalObj, res)
-
-    var balance = 0
-    var preBalance = 0
-    var trans = new Trans()
-    var new_address = new Addr()
-    // check coin type
-    switch(coin) {
-      case 'btc':
-        // get wallet info
-        client = new Client({ host: process.env.Host, port: process.env.BitPort, username: process.env.BitUser, password: process.env.BitPassword, wallet: walletName});
-        await client.getWalletInfo().then(function(walletInfo){
-          balance = walletInfo.balance * 100000000
-          new_address.final_transaction = walletInfo.txcount
-        })
-        .catch(function(err){
-          re.errorResponse(err, res, 500);
-          return
-        });
-
-        break;
-      case 'eth':
-        //get balance address
-        await w3.eth.getBalance(address).then(function(bal){
-          balance = Number(bal)
-        })
-        .catch(function(err){
-          re.errorResponse(err, res, 500);
-          return
-        });
-
-        break;
-      default :
-        // get wallet info
-        client = new Client({ host: process.env.Host, port: process.env.BitPort, username: process.env.BitUser, password: process.env.BitPassword, wallet: walletName});
-        await client.getWalletInfo().then(function(walletInfo){
-          balance = walletInfo.balance * 100000000
-          new_address.final_transaction = walletInfo.txcount
-        })
-        .catch(function(err){
-          re.errorResponse(err, res, 500);
-          return
-        });
-
-        break;
-    }
-
-    if (balance > preBalance) {
-      // stop interval 
-      clearInterval(intervalObject)
-      // send notification to pms
-      var requestBody = {}
-      switch(coin) {
-        case 'btc': 
-          requestBody = {
-            'u_wallet': address,
-            'u_coin': coin,
-            'u_deposit': String(parseFloat(balance - preBalance) / 100000000)
-          }
-          break;
-        case 'eth':
-          requestBody = {
-            'u_wallet': address,
-            'u_coin': coin,
-            'u_deposit': w3.utils.fromWei(String(balance - preBalance), 'ether')
-          }
-          break;
-        default:
-          requestBody = {
-            'u_wallet': address,
-            'u_coin': coin,
-            'u_deposit': String(parseFloat(balance - preBalance) / 100000000)
-          }
-          break;
-      }
-
-      const config = {
-        headers: {
-          'Content-Type': 'application/x-www-form-urlencoded'
-        }
-      }
-
-      await axios.post(process.env.NotificationURL, qs.stringify(requestBody), config)
-      .then(function(noti){
-        
-      })
-      .catch(function(err){
-        re.errorResponse('cant_send_notification', res, 500);
-        return
-      });
-
-      new_address.balance = balance - preBalance
-      new_address.balance_string = String(balance - preBalance)
-      new_address.mtime = new Date().toISOString().replace('T', ' ').replace('Z', '')
-      // update address's balance
-      await Addr.findOneAndUpdate({ addr: address }, new_address, function(err, add){
-        if (err) {
-          re.errorResponse('error_update_transaction', res, 500)
-          return
-        }
-        if (add == null) {
-          re.errorResponse('address_not_found', res, 500)
-          return
-        }
-      });
-
-      // save deposit to transaction
-      trans._id = uuidv1()
-      trans.sender = address
-      trans.coin_type = coin
-      trans.total_exchanged = balance - preBalance
-      trans.total_exchanged_string = String(trans.total_exchanged)
-      trans.is_deposit = true
-      trans.ctime = new Date().toISOString().replace('T', ' ').replace('Z', '')
-      trans.mtime = new Date().toISOString().replace('T', ' ').replace('Z', '')
-
-      await trans.save(function(err){
-        if (err) {
-          re.errorResponse('error_create_transaction', res, 500)
-          return
-        }
-      });
-
-      console.log('create deposit', address)
-    }
+  const intervalObj = setInterval(() => {
+    checkDeposit(coin, addressResult.data.addr, walletName, 0, intervalObj, res, service)
   }, 3000); 
 
 };
@@ -435,10 +322,16 @@ exports.get_a_address = async(req, res) => {
   const q = url.parse(req.url, true).query;
   const coinType = q.coin_type;
   const addr = q.addr
+  const service = q.service
   var new_address = new Addr()
   var walletName = ""
 
   // check params
+  if (service == '' || service != 'gobit' || service != 'polebit') {
+    re.errorResponse('service_empty', res, 400)
+    return
+  }
+
   if (addr == "") {
     re.errorResponse('address_empty', res, 400)
     return
@@ -460,7 +353,7 @@ exports.get_a_address = async(req, res) => {
         return
       });
 
-      await Addr.findOne({ addr: addr }, function(err, add){
+      await Addr.findOne({ service: service, addr: addr }, function(err, add){
         if (err) {
           re.errorResponse(err, res, 404);
           return
@@ -553,7 +446,7 @@ exports.get_a_address = async(req, res) => {
         return
       });
 
-      await Addr.findOne({ addr: addr }, function(err, add){
+      await Addr.findOne({ service: service, addr: addr }, function(err, add){
         if (err) {
           re.errorResponse(err, res, 404);
           return
@@ -615,7 +508,7 @@ exports.get_a_address = async(req, res) => {
   new_address.mtime = new Date().toISOString().replace('T', ' ').replace('Z', '')
 
   // update address
-  await Addr.findOneAndUpdate({ addr: addr }, new_address, function(err, ad) {
+  await Addr.findOneAndUpdate({ service: service, addr: addr }, new_address, function(err, ad) {
     if (err) {
       re.errorResponse(err, res, 500);
       return
@@ -639,7 +532,7 @@ exports.get_a_address = async(req, res) => {
 };
 
 // function auto check deposit 
-async function checkDeposit(coin,address,walletName,preBalance,intervalObject,res) {
+async function checkDeposit(coin,address,walletName,preBalance,intervalObject,res,service) {
   console.log('coin:', coin)
   console.log('addr:', address)
 
@@ -741,7 +634,7 @@ async function checkDeposit(coin,address,walletName,preBalance,intervalObject,re
     new_address.balance_string = String(balance - preBalance)
     new_address.mtime = new Date().toISOString().replace('T', ' ').replace('Z', '')
     // update address's balance
-    await Addr.findOneAndUpdate({ addr: address }, new_address, function(err, add){
+    await Addr.findOneAndUpdate({ service: service, addr: address }, new_address, function(err, add){
       if (err) {
         re.errorResponse('error_update_transaction', res, 500)
         return
@@ -756,6 +649,7 @@ async function checkDeposit(coin,address,walletName,preBalance,intervalObject,re
     trans._id = uuidv1()
     trans.sender = address
     trans.coin_type = coin
+    trans.service = service
     trans.total_exchanged = balance - preBalance
     trans.total_exchanged_string = String(trans.total_exchanged)
     trans.is_deposit = true
