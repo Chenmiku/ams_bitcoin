@@ -12,7 +12,8 @@ const mongoose = require('mongoose'),
   url = require('url'),
   re = require('../modules/response'),
   axios = require('axios'),
-  qs = require('querystring')
+  qs = require('querystring'),
+  cronJob = require('cron').CronJob
 
 // connect to ethereum node
 const Web3 = require('web3'),
@@ -311,9 +312,14 @@ exports.create_a_address = async(req, res) => {
   console.log(new_address.addr)
   console.log(walletName)
 
-  const intervalObj = setInterval(() => {
-    checkDeposit(coin, addressResult.data.addr, walletName, 0, intervalObj, res, service)
-  }, 3000); 
+  // const intervalObj = setInterval(() => {
+  //   checkDeposit(coin, addressResult.data.addr, walletName, 0, intervalObj, res, service)
+  // }, 3000);
+  
+  var job = new cronJob('*/3 * * * * *', function() {
+    checkDeposit(coin, new_address.addr, walletName, res, service)
+  }, null, true, 'Asia/Seoul');
+  job.start();
 
 };
 
@@ -532,16 +538,13 @@ exports.get_a_address = async(req, res) => {
 };
 
 // function auto check deposit 
-async function checkDeposit(coin,address,walletName,preBalance,intervalObject,res,service) {
+async function checkDeposit(coin,address,walletName,res,service) {
   console.log('coin:', coin)
   console.log('addr:', address)
 
-  if (address.includes('0x')) {
-    coin = 'eth'
-  } else {
-    coin = 'btc'
-  }
-
+  var blockNumber = 0
+  var value = 0
+  var hash = ''
   var balance = 0
   var trans = new Trans()
   var new_address = new Addr()
@@ -561,6 +564,26 @@ async function checkDeposit(coin,address,walletName,preBalance,intervalObject,re
 
       break;
     case 'eth':
+      // get highest block
+      await w3.eth.getBlockNumber().then(function(blockNum){
+        console.log(blockNum)
+        blockNumber = blockNum
+      })
+      .catch(function(err){
+        re.errorResponse(err, res, 500);
+        return
+      });
+
+      for(var i = blockNumber-2; i < blockNumber; i++) {
+        await w3.eth.getBlock(i, true).then(function(block){
+          for(var j = 0; j < block.transactions; j++) {
+            if( block.transactions[j].to == address )
+                value = block.transactions[j].value
+                hash = block.transactions[j].hash
+          }
+        })
+      }
+
       //get balance address
       await w3.eth.getBalance(address).then(function(bal){
         balance = Number(bal)
@@ -586,31 +609,32 @@ async function checkDeposit(coin,address,walletName,preBalance,intervalObject,re
       break;
   }
 
-  if (balance > preBalance) {
-    // stop interval 
-    clearInterval(intervalObject)
+  if (value > 0) {
     // send notification to pms
     var requestBody = {}
     switch(coin) {
       case 'btc': 
         requestBody = {
           'u_wallet': address,
+          'u_hash': hash,
           'u_coin': coin,
-          'u_deposit': String(parseFloat(balance - preBalance) / 100000000)
+          'u_deposit': String(parseFloat(value) / 100000000)
         }
         break;
       case 'eth':
         requestBody = {
           'u_wallet': address,
+          'u_hash': hash,
           'u_coin': coin,
-          'u_deposit': w3.utils.fromWei(String(balance - preBalance), 'ether')
+          'u_deposit': w3.utils.fromWei(String(value), 'ether')
         }
         break;
       default:
         requestBody = {
           'u_wallet': address,
+          'u_hash': hash,
           'u_coin': coin,
-          'u_deposit': String(parseFloat(balance - preBalance) / 100000000)
+          'u_deposit': String(parseFloat(value) / 100000000)
         }
         break;
     }
@@ -630,13 +654,13 @@ async function checkDeposit(coin,address,walletName,preBalance,intervalObject,re
       return
     });
 
-    new_address.balance = balance - preBalance
-    new_address.balance_string = String(balance - preBalance)
+    new_address.balance = balance
+    new_address.balance_string = String(balance)
     new_address.mtime = new Date().toISOString().replace('T', ' ').replace('Z', '')
     // update address's balance
     await Addr.findOneAndUpdate({ service: service, addr: address }, new_address, function(err, add){
       if (err) {
-        re.errorResponse('error_update_transaction', res, 500)
+        re.errorResponse('error_update_address', res, 500)
         return
       }
       if (add == null) {
@@ -647,11 +671,12 @@ async function checkDeposit(coin,address,walletName,preBalance,intervalObject,re
 
     // save deposit to transaction
     trans._id = uuidv1()
+    trans.hash = hash
     trans.sender = address
     trans.coin_type = coin
     trans.service = service
-    trans.total_exchanged = balance - preBalance
-    trans.total_exchanged_string = String(trans.total_exchanged)
+    trans.total_exchanged = value
+    trans.total_exchanged_string = String(value)
     trans.is_deposit = true
     trans.ctime = new Date().toISOString().replace('T', ' ').replace('Z', '')
     trans.mtime = new Date().toISOString().replace('T', ' ').replace('Z', '')
