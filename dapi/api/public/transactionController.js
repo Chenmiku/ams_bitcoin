@@ -69,7 +69,7 @@ exports.check_deposit_history = async(req, res) => {
 
   if (addr != "") {
     // check exists address
-    await Addr.findOne({ service: service, addr: addr }, function(err, add){
+    await Addr.findOne({ addr: addr }, function(err, add){
       if (err) {
         re.errorResponse(err, res, 500);
         return
@@ -79,7 +79,7 @@ exports.check_deposit_history = async(req, res) => {
         return
       }
     });
-    await AddrKey.findOne({ service: service, addr: addr }, function(err, addrKey){
+    await AddrKey.findOne({ addr: addr }, function(err, addrKey){
       if (err) {
         re.errorResponse(err, res, 500);
         return
@@ -91,7 +91,7 @@ exports.check_deposit_history = async(req, res) => {
     });
 
     // get count transaction
-    await Trans.countDocuments({ service: service, receiver: addr, is_deposit: true }, function(err, ct){
+    await Trans.countDocuments({ receiver: addr, is_deposit: true }, function(err, ct){
       if (err) {
         res.status(500).send(err)
       }
@@ -99,7 +99,7 @@ exports.check_deposit_history = async(req, res) => {
     })
 
     // get transaction
-    await Trans.find({ service: service, receiver: addr, is_deposit: true }, function(err, transaction) {
+    await Trans.find({ receiver: addr, is_deposit: true }, function(err, transaction) {
       if (err) {
         re.errorResponse(err, res, 500);
         return
@@ -123,7 +123,7 @@ exports.check_deposit_history = async(req, res) => {
     res.json(transactionHistory);
   } else {
     // get count transaction
-    await Trans.countDocuments({ service: service, is_deposit: true }, function(err, ct){
+    await Trans.countDocuments({ is_deposit: true }, function(err, ct){
       if (err) {
         res.status(500).send(err)
       }
@@ -131,7 +131,7 @@ exports.check_deposit_history = async(req, res) => {
     })
 
     // get transaction
-    await Trans.find({ service: service, is_deposit: true }, function(err, transaction) {
+    await Trans.find({ is_deposit: true }, function(err, transaction) {
       if (err) {
         re.errorResponse(err, res, 500);
         return
@@ -173,7 +173,7 @@ exports.check_transaction_history = async(req, res) => {
 
   if (addr != "") {
     // check exists address
-    await Addr.findOne({ service: service, addr: addr }, function(err, add){
+    await Addr.findOne({ addr: addr }, function(err, add){
       if (err) {
         re.errorResponse(err, res, 500);
         return
@@ -184,7 +184,7 @@ exports.check_transaction_history = async(req, res) => {
       }
     });
 
-    await AddrKey.findOne({ service: service, addr: addr }, function(err, addrKey){
+    await AddrKey.findOne({ addr: addr }, function(err, addrKey){
       if (err) {
         re.errorResponse(err, res, 500);
         return
@@ -196,7 +196,7 @@ exports.check_transaction_history = async(req, res) => {
     });
 
     // get count transaction
-    await Trans.countDocuments({ service: service, sender: addr, is_deposit: false }, function(err, ct){
+    await Trans.countDocuments({ sender: addr, is_deposit: false }, function(err, ct){
       if (err) {
         res.status(500).send(err)
       }
@@ -204,7 +204,7 @@ exports.check_transaction_history = async(req, res) => {
     })
 
     // get transaction
-    await Trans.find({ service: service, sender: addr, is_deposit: false }, function(err, transaction) {
+    await Trans.find({ sender: addr, is_deposit: false }, function(err, transaction) {
       if (err) {
         re.errorResponse(err, res, 500);
         return
@@ -228,7 +228,7 @@ exports.check_transaction_history = async(req, res) => {
     res.json(transactionHistory);
   } else {
     // get count transaction
-    await Trans.countDocuments({ service: service, is_deposit: false }, function(err, ct){
+    await Trans.countDocuments({ is_deposit: false }, function(err, ct){
       if (err) {
         res.status(500).send(err)
       }
@@ -236,7 +236,7 @@ exports.check_transaction_history = async(req, res) => {
     })
 
     // get transaction
-    await Trans.find({ service: service, is_deposit: false }, function(err, transaction) {
+    await Trans.find({ is_deposit: false }, function(err, transaction) {
       if (err) {
         re.errorResponse(err, res, 500);
         return
@@ -662,7 +662,7 @@ exports.check_deposit_state = async(req, res) => {
   }
 
   // check exists address
-  await Addr.findOne({ service: service, addr: addr }, function(err, add){
+  await Addr.findOne({ addr: addr }, function(err, add){
     if (err) {
       re.errorResponse(err, res, 404);
       return
@@ -819,7 +819,7 @@ exports.check_deposit_state = async(req, res) => {
 
     new_address.mtime = new Date().toISOString().replace('T', ' ').replace('Z', '')
     // update address
-    await Addr.findOneAndUpdate({ service: service, addr: addr }, new_address, function(err, ad) {
+    await Addr.findOneAndUpdate({ addr: addr }, new_address, function(err, ad) {
       if (err) {
         re.errorResponse(err, res, 500);
         return
@@ -876,7 +876,7 @@ exports.check_transaction = async(req, res) => {
   }
 
   // check exists transaction
-  await Trans.findOne({ service: service, hash: hash }, function(err, tran){
+  await Trans.findOne({ hash: hash }, function(err, tran){
     if (err) {
       re.errorResponse(err, res, 404);
       return
@@ -1028,7 +1028,7 @@ exports.check_transaction = async(req, res) => {
     depositStateResult.success = true
 
     // update transaction
-    Trans.findOneAndUpdate({ service: service, hash: hash }, trans, function(err){
+    Trans.findOneAndUpdate({ hash: hash }, trans, function(err){
       if (err) {
         re.errorResponse(err, res, 500);
         return

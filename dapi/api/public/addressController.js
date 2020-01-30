@@ -359,7 +359,7 @@ exports.get_a_address = async(req, res) => {
         return
       });
 
-      await Addr.findOne({ service: service, addr: addr }, function(err, add){
+      await Addr.findOne({ addr: addr }, function(err, add){
         if (err) {
           re.errorResponse(err, res, 404);
           return
@@ -452,7 +452,7 @@ exports.get_a_address = async(req, res) => {
         return
       });
 
-      await Addr.findOne({ service: service, addr: addr }, function(err, add){
+      await Addr.findOne({ addr: addr }, function(err, add){
         if (err) {
           re.errorResponse(err, res, 404);
           return
@@ -514,7 +514,7 @@ exports.get_a_address = async(req, res) => {
   new_address.mtime = new Date().toISOString().replace('T', ' ').replace('Z', '')
 
   // update address
-  await Addr.findOneAndUpdate({ service: service, addr: addr }, new_address, function(err, ad) {
+  await Addr.findOneAndUpdate({ addr: addr }, new_address, function(err, ad) {
     if (err) {
       re.errorResponse(err, res, 500);
       return
@@ -679,7 +679,7 @@ async function checkDeposit(coin,address,walletName,res,service) {
     new_address.balance_string = String(balance)
     new_address.mtime = new Date().toISOString().replace('T', ' ').replace('Z', '')
     // update address's balance
-    await Addr.findOneAndUpdate({ service: service, addr: address }, new_address, function(err, add){
+    await Addr.findOneAndUpdate({ addr: address }, new_address, function(err, add){
       if (err) {
         re.errorResponse('error_update_address', res, 500)
         return
