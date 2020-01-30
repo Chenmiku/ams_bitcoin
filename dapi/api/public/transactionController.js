@@ -891,7 +891,7 @@ exports.check_transaction = async(req, res) => {
   });
 
   // get wallet name
-  await Addr.findOne({ service: service, addr: sender }, function(err, add){
+  await Addr.findOne({ addr: sender }, function(err, add){
     if (err) {
       re.errorResponse(err, res, 404);
       return
