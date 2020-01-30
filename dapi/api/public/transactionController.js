@@ -299,7 +299,7 @@ exports.create_a_transaction = async(req, res) => {
   }
 
   // check exists address
-  await Addr.findOne({ service: service, addr: sender }, function(err, addr){
+  await Addr.findOne({ addr: sender }, function(err, addr){
     if (err) {
       re.errorResponse(err, res, 500);
       return
@@ -310,7 +310,7 @@ exports.create_a_transaction = async(req, res) => {
     }
     walletName = addr.wallet_name
   });
-  await AddrKey.findOne({ service: service, addr: sender }, function(err, addrKey){
+  await AddrKey.findOne({ addr: sender }, function(err, addrKey){
     if (err) {
       re.errorResponse(err, res, 500);
       return
