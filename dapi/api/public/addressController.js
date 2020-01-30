@@ -551,8 +551,18 @@ async function checkDeposit(coin,address,walletName,res,service) {
   // check coin type
   switch(coin) {
     case 'btc':
-      // get wallet info
+      // get deposit info
       client = new Client({ host: process.env.Host, port: process.env.BitPort, username: process.env.BitUser, password: process.env.BitPassword, wallet: walletName});
+      await client.listReceivedByAddress().then(function(transactions){
+        value = transactions[0].amount * 100000000
+        hash = transactions[0].txids[0]
+      })
+      .catch(function(err){
+        re.errorResponse(err, res, 500);
+        return
+      });
+
+      // get wallet info
       await client.getWalletInfo().then(function(walletInfo){
         balance = walletInfo.balance * 100000000
         new_address.final_transaction = walletInfo.txcount
@@ -574,6 +584,7 @@ async function checkDeposit(coin,address,walletName,res,service) {
         return
       });
 
+      // get deposit info
       for(var i = blockNumber-2; i < blockNumber; i++) {
         await w3.eth.getBlock(i, true).then(function(block){
           for(var j = 0; j < block.transactions; j++) {
@@ -595,8 +606,18 @@ async function checkDeposit(coin,address,walletName,res,service) {
 
       break;
     default :
-      // get wallet info
+      // get deposit info
       client = new Client({ host: process.env.Host, port: process.env.BitPort, username: process.env.BitUser, password: process.env.BitPassword, wallet: walletName});
+      await client.listReceivedByAddress().then(function(transactions){
+        value = transactions[0].amount * 100000000
+        hash = transactions[0].txids[0]
+      })
+      .catch(function(err){
+        re.errorResponse(err, res, 500);
+        return
+      });
+
+      // get wallet info
       await client.getWalletInfo().then(function(walletInfo){
         balance = walletInfo.balance * 100000000
         new_address.final_transaction = walletInfo.txcount
@@ -672,7 +693,7 @@ async function checkDeposit(coin,address,walletName,res,service) {
     // save deposit to transaction
     trans._id = uuidv1()
     trans.hash = hash
-    trans.sender = address
+    trans.receiver = address
     trans.coin_type = coin
     trans.service = service
     trans.total_exchanged = value

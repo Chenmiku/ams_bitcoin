@@ -91,7 +91,7 @@ exports.check_deposit_history = async(req, res) => {
     });
 
     // get count transaction
-    await Trans.countDocuments({ service: service, sender: addr, is_deposit: true }, function(err, ct){
+    await Trans.countDocuments({ service: service, receiver: addr, is_deposit: true }, function(err, ct){
       if (err) {
         res.status(500).send(err)
       }
@@ -99,7 +99,7 @@ exports.check_deposit_history = async(req, res) => {
     })
 
     // get transaction
-    await Trans.find({ service: service, sender: addr, is_deposit: true }, function(err, transaction) {
+    await Trans.find({ service: service, receiver: addr, is_deposit: true }, function(err, transaction) {
       if (err) {
         re.errorResponse(err, res, 500);
         return
