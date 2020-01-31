@@ -623,15 +623,18 @@ async function checkDeposit(coin,address,walletName,res,service) {
         return
       });
 
+      console.log(prevBlock)
       // get deposit info
       for(var i = blockNumber-1; i <= blockNumber; i++) {
         console.log(i)
         await w3.eth.getBlock(i, true).then(function(block){
           for(var j = 0; j < block.transactions.length; j++) {
-            if( block.transactions[j].to == address && !prevBlock.includes(block.transactions[j].blockNumber)) {
+            if( block.transactions[j].to == address ) {
+              if (!prevBlock.includes(block.transactions[j].blockNumber)) {
                 includeBlock = block.transactions[j].blockNumber
                 value = block.transactions[j].value
                 hash = block.transactions[j].hash
+              }
             }
           }
         })
