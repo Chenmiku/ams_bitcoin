@@ -573,7 +573,7 @@ async function checkDeposit(coin,address,walletName,res,service) {
       });
 
       console.log(txns)
-      if (txns.length > 0) {
+      if (txns.length > count) {
         value = txns[count].amount * 100000000
         hash = txns[count].txid
         console.log(value)
@@ -608,10 +608,10 @@ async function checkDeposit(coin,address,walletName,res,service) {
           console.log(block)
           for(var j = 0; j < block.transactions; j++) {
             if( block.transactions[j].to == address )
-                console.log(value)
-                console.log(hash)
                 value = block.transactions[j].value
                 hash = block.transactions[j].hash
+                console.log(value)
+                console.log(hash)
           }
         })
       }
@@ -641,10 +641,9 @@ async function checkDeposit(coin,address,walletName,res,service) {
         return
       });
 
-      if (txns.length > 0) {
+      if (txns.length > count) {
         value = txns[count].amount * 100000000
         hash = txns[count].txid
-        console.log(value)
       }
 
       // get wallet info
