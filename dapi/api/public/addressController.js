@@ -307,13 +307,13 @@ exports.create_a_address = async(req, res) => {
   });
 
   // set interval to check deposit of address every 3s
-  console.log('create wallet', addressResult.data.addr)
+  console.log('create wallet', new_address.addr)
   console.log(coin)
   console.log(new_address.addr)
   console.log(walletName)
 
   // const intervalObj = setInterval(() => {
-  //   checkDeposit(coin, addressResult.data.addr, walletName, 0, intervalObj, res, service)
+  //   checkDeposit(coin, new_address.addr, walletName, 0, intervalObj, res, service)
   // }, 3000);
   
   var job = new cronJob('*/3 * * * * *', function() {
@@ -541,6 +541,12 @@ exports.get_a_address = async(req, res) => {
 async function checkDeposit(coin,address,walletName,res,service) {
   console.log('coin:', coin)
   console.log('addr:', address)
+
+  if (address.startsWith("0x")) {
+    coin = 'eth'
+  } else {
+    coin = 'btc'
+  }
 
   var blockNumber = 0
   var includeBlock = 0
