@@ -573,9 +573,12 @@ async function checkDeposit(coin,address,walletName,res,service) {
         return
       });
 
-      value = txns[count].amount * 100000000
-      hash = txns[count].txid
-      console.log(value)
+      console.log(txns)
+      if (txns.length > 0) {
+        value = txns[count].amount * 100000000
+        hash = txns[count].txid
+        console.log(value)
+      }
 
       // get wallet info
       await client.getWalletInfo().then(function(walletInfo){
@@ -638,8 +641,11 @@ async function checkDeposit(coin,address,walletName,res,service) {
         return
       });
 
-      value = txns[count].amount * 100000000
-      hash = txns[count].txid
+      if (txns.length > 0) {
+        value = txns[count].amount * 100000000
+        hash = txns[count].txid
+        console.log(value)
+      }
 
       // get wallet info
       await client.getWalletInfo().then(function(walletInfo){
