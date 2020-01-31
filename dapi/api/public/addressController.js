@@ -561,6 +561,7 @@ async function checkDeposit(coin,address,walletName,res,service) {
       // get deposit info
       client = new Client({ host: process.env.Host, port: process.env.BitPort, username: process.env.BitUser, password: process.env.BitPassword, wallet: walletName});
       await client.listTransactions().then(function(transactions){
+        console.log(transactions)
         for(var i = 0; i < transactions.length; i++) {
           if( transactions[i].category == "receive" ) {
             txns.push(transactions[i])
@@ -574,6 +575,7 @@ async function checkDeposit(coin,address,walletName,res,service) {
 
       value = txns[count].amount * 100000000
       hash = txns[count].txid
+      console.log(value)
 
       // get wallet info
       await client.getWalletInfo().then(function(walletInfo){
