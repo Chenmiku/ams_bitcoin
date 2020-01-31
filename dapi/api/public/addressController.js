@@ -606,7 +606,7 @@ async function checkDeposit(coin,address,walletName,res,service) {
       for(var i = blockNumber-1; i <= blockNumber; i++) {
         console.log(i)
         await w3.eth.getBlock(i, true).then(function(block){
-          for(var j = 0; j < block.transactions; j++) {
+          for(var j = 0; j < block.transactions.length; j++) {
             if( block.transactions[j].to == address )
                 console.log('in: ', j)
                 value = block.transactions[j].value
