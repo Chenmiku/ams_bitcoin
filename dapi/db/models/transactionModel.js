@@ -46,6 +46,9 @@ var transactionSchema = new schema({
     block_hash: {
         type: String
     },
+    block_number: {
+        type: String
+    },
     block_index: {
         type: Number
     },

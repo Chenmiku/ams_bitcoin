@@ -543,16 +543,40 @@ async function checkDeposit(coin,address,walletName,res,service) {
   console.log('addr:', address)
 
   var blockNumber = 0
+  var prevBlock = []
+  var includeBlock = 0
   var value = 0
-  var hash = ''
+  var hash = ""
   var balance = 0
   var count = 0
   var txns = []
   var trans = new Trans()
   var new_address = new Addr()
 
+  // get the number of address's deposit 
   await Trans.countDocuments({ receiver: address, is_deposit: true }, function(err, ct){
+    if (err) {
+      re.errorResponse(err, res, 500)
+      return
+    }
     count = ct
+  })
+
+  // get address's deposit info
+  await Trans.find({ receiver: address, is_deposit: true }, function(err, transaction){
+    if (err) {
+      re.errorResponse(err, res, 500)
+      return
+    }
+    if (transaction == null) {
+      re.errorResponse("transaction_not_found", res, 404)
+      return
+    }
+    if (count > 0) {
+      for (var i = 0; i < count;i++) {
+        prevBlock.push(transaction[i].block_number)
+      }
+    }
   })
 
   // check coin type
@@ -576,8 +600,6 @@ async function checkDeposit(coin,address,walletName,res,service) {
       if (txns.length > count) {
         value = txns[count].amount * 100000000
         hash = txns[count].txid
-        console.log(value)
-        console.log(hash)
       }
 
       // get wallet info
@@ -594,7 +616,6 @@ async function checkDeposit(coin,address,walletName,res,service) {
     case 'eth':
       // get highest block
       await w3.eth.getBlockNumber().then(function(blockNum){
-        console.log(blockNum)
         blockNumber = blockNum
       })
       .catch(function(err){
@@ -607,11 +628,10 @@ async function checkDeposit(coin,address,walletName,res,service) {
         console.log(i)
         await w3.eth.getBlock(i, true).then(function(block){
           for(var j = 0; j < block.transactions.length; j++) {
-            if( block.transactions[j].to == address ) {
+            if( block.transactions[j].to == address && !prevBlock.includes(block.transactions[j].blockNumber)) {
+                includeBlock = block.transactions[j].blockNumber
                 value = block.transactions[j].value
                 hash = block.transactions[j].hash
-                console.log(value)
-                console.log(hash)
             }
           }
         })
@@ -731,6 +751,9 @@ async function checkDeposit(coin,address,walletName,res,service) {
     trans.is_deposit = true
     trans.ctime = new Date().toISOString().replace('T', ' ').replace('Z', '')
     trans.mtime = new Date().toISOString().replace('T', ' ').replace('Z', '')
+    if (includeBlock > 0 ) {
+      trans.block_number = includeBlock
+    }
 
     await trans.save(function(err){
       if (err) {

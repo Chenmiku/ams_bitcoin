@@ -963,6 +963,7 @@ exports.check_transaction = async(req, res) => {
         }
 
         trans.confirmations = transaction.blockNumber
+        trans.block_number = transaction.blockNumber
         trans.block_hash = transaction.blockHash
         trans.nonce = transaction.nonce
         trans.block_index = transaction.transactionIndex
