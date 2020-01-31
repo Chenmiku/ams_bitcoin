@@ -543,12 +543,12 @@ async function checkDeposit(coin,address,walletName,res,service) {
   console.log('addr:', address)
 
   var blockNumber = 0
-  var prevBlock = []
   var includeBlock = 0
   var value = 0
   var hash = ""
   var balance = 0
   var count = 0
+  var countTran = 0
   var txns = []
   var trans = new Trans()
   var new_address = new Addr()
@@ -560,23 +560,6 @@ async function checkDeposit(coin,address,walletName,res,service) {
       return
     }
     count = ct
-  })
-
-  // get address's deposit info
-  await Trans.find({ receiver: address, is_deposit: true }, function(err, transaction){
-    if (err) {
-      re.errorResponse(err, res, 500)
-      return
-    }
-    if (transaction == null) {
-      re.errorResponse("transaction_not_found", res, 404)
-      return
-    }
-    if (count > 0) {
-      for (var i = 0; i < count;i++) {
-        prevBlock.push(transaction[i].block_number)
-      }
-    }
   })
 
   // check coin type
@@ -627,7 +610,7 @@ async function checkDeposit(coin,address,walletName,res,service) {
       for(var i = blockNumber-1; i <= blockNumber; i++) {
         await w3.eth.getBlock(i, true).then(function(block){
           for(var j = 0; j < block.transactions.length; j++) {
-            if( block.transactions[j].to == address && prevBlock.includes(block.transactions[j].blockNumber) == false ) {
+            if( block.transactions[j].to == address ) {
               includeBlock = block.transactions[j].blockNumber
               value = block.transactions[j].value
               hash = block.transactions[j].hash
@@ -680,88 +663,99 @@ async function checkDeposit(coin,address,walletName,res,service) {
   }
 
   if (value > 0) {
-    // send notification to pms
-    var requestBody = {}
-    switch(coin) {
-      case 'btc': 
-        requestBody = {
-          'u_wallet': address,
-          'u_hash': hash,
-          'u_coin': coin,
-          'u_deposit': String(parseFloat(value) / 100000000)
-        }
-        break;
-      case 'eth':
-        requestBody = {
-          'u_wallet': address,
-          'u_hash': hash,
-          'u_coin': coin,
-          'u_deposit': w3.utils.fromWei(String(value), 'ether')
-        }
-        break;
-      default:
-        requestBody = {
-          'u_wallet': address,
-          'u_hash': hash,
-          'u_coin': coin,
-          'u_deposit': String(parseFloat(value) / 100000000)
-        }
-        break;
-    }
-
-    const config = {
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded'
+    // check duplicate transaction
+    await Trans.countDocuments({ hash: hash, receiver: address, is_deposit: true }, function(err, ct){
+      if (err) {
+        re.errorResponse(err, res, 500)
+        return
       }
-    }
-
-    await axios.post(process.env.NotificationURL, qs.stringify(requestBody), config)
-    .then(function(noti){
-    	
+      countTran = ct
     })
-    .catch(function(err){
-    	re.errorResponse('cant_send_notification', res, 500);
-      return
-    });
 
-    new_address.balance = balance
-    new_address.balance_string = String(balance)
-    new_address.mtime = new Date().toISOString().replace('T', ' ').replace('Z', '')
-    // update address's balance
-    await Addr.findOneAndUpdate({ addr: address }, new_address, function(err, add){
-      if (err) {
-        re.errorResponse('error_update_address', res, 500)
-        return
+    if (countTran == 0) {
+      // send notification to pms
+      var requestBody = {}
+      switch(coin) {
+        case 'btc': 
+          requestBody = {
+            'u_wallet': address,
+            'u_hash': hash,
+            'u_coin': coin,
+            'u_deposit': String(parseFloat(value) / 100000000)
+          }
+          break;
+        case 'eth':
+          requestBody = {
+            'u_wallet': address,
+            'u_hash': hash,
+            'u_coin': coin,
+            'u_deposit': w3.utils.fromWei(String(value), 'ether')
+          }
+          break;
+        default:
+          requestBody = {
+            'u_wallet': address,
+            'u_hash': hash,
+            'u_coin': coin,
+            'u_deposit': String(parseFloat(value) / 100000000)
+          }
+          break;
       }
-      if (add == null) {
-        re.errorResponse('address_not_found', res, 500)
-        return
-      }
-    });
 
-    // save deposit to transaction
-    trans._id = uuidv1()
-    trans.hash = hash
-    trans.receiver = address
-    trans.coin_type = coin
-    trans.service = service
-    trans.total_exchanged = value
-    trans.total_exchanged_string = String(value)
-    trans.is_deposit = true
-    trans.ctime = new Date().toISOString().replace('T', ' ').replace('Z', '')
-    trans.mtime = new Date().toISOString().replace('T', ' ').replace('Z', '')
-    if (includeBlock > 0 ) {
-      trans.block_number = includeBlock
+      const config = {
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded'
+        }
+      }
+
+      await axios.post(process.env.NotificationURL, qs.stringify(requestBody), config)
+      .then(function(noti){
+        
+      })
+      .catch(function(err){
+        re.errorResponse('cant_send_notification', res, 500);
+        return
+      });
+
+      new_address.balance = balance
+      new_address.balance_string = String(balance)
+      new_address.mtime = new Date().toISOString().replace('T', ' ').replace('Z', '')
+      // update address's balance
+      await Addr.findOneAndUpdate({ addr: address }, new_address, function(err, add){
+        if (err) {
+          re.errorResponse('error_update_address', res, 500)
+          return
+        }
+        if (add == null) {
+          re.errorResponse('address_not_found', res, 500)
+          return
+        }
+      });
+
+      // save deposit to transaction
+      trans._id = uuidv1()
+      trans.hash = hash
+      trans.receiver = address
+      trans.coin_type = coin
+      trans.service = service
+      trans.total_exchanged = value
+      trans.total_exchanged_string = String(value)
+      trans.is_deposit = true
+      trans.ctime = new Date().toISOString().replace('T', ' ').replace('Z', '')
+      trans.mtime = new Date().toISOString().replace('T', ' ').replace('Z', '')
+      if (includeBlock > 0 ) {
+        trans.block_number = includeBlock
+      }
+
+      await trans.save(function(err){
+        if (err) {
+          re.errorResponse('error_create_transaction', res, 500)
+          return
+        }
+      });
+
+      console.log('create deposit', address)
     }
-
-    await trans.save(function(err){
-      if (err) {
-        re.errorResponse('error_create_transaction', res, 500)
-        return
-      }
-    });
-
-    console.log('create deposit', address)
   }
 
 }
