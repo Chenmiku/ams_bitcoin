@@ -546,23 +546,34 @@ async function checkDeposit(coin,address,walletName,res,service) {
   var value = 0
   var hash = ''
   var balance = 0
+  var count = 0
+  var txns = []
   var trans = new Trans()
   var new_address = new Addr()
+
+  await Trans.countDocuments({ receiver: address }, function(err, ct){
+    count = ct
+  })
+
   // check coin type
   switch(coin) {
     case 'btc':
       // get deposit info
       client = new Client({ host: process.env.Host, port: process.env.BitPort, username: process.env.BitUser, password: process.env.BitPassword, wallet: walletName});
-      await client.listReceivedbyaddress().then(function(transactions){
-        console.log(value)
-        console.log(hash)
-        value = transactions[0].amount * 100000000
-        hash = transactions[0].txids[0]
+      await client.listTransactions().then(function(transactions){
+        for(var i = 0; i < transactions.length; i++) {
+          if( transactions[i].category == "receive" ) {
+            txns.push(transactions[i])
+          }
+        }
       })
       .catch(function(err){
         re.errorResponse(err, res, 500);
         return
       });
+
+      value = txns[count].amount * 100000000
+      hash = txns[count].txid
 
       // get wallet info
       await client.getWalletInfo().then(function(walletInfo){
@@ -587,8 +598,9 @@ async function checkDeposit(coin,address,walletName,res,service) {
       });
 
       // get deposit info
-      for(var i = blockNumber-2; i < blockNumber; i++) {
+      for(var i = blockNumber-1; i < blockNumber; i++) {
         await w3.eth.getBlock(i, true).then(function(block){
+          console.log(block)
           for(var j = 0; j < block.transactions; j++) {
             if( block.transactions[j].to == address )
                 console.log(value)
@@ -612,14 +624,20 @@ async function checkDeposit(coin,address,walletName,res,service) {
     default :
       // get deposit info
       client = new Client({ host: process.env.Host, port: process.env.BitPort, username: process.env.BitUser, password: process.env.BitPassword, wallet: walletName});
-      await client.listReceivedbyaddress().then(function(transactions){
-        value = transactions[0].amount * 100000000
-        hash = transactions[0].txids[0]
+      await client.listTransactions().then(function(transactions){
+        for(var i = 0; i < transactions.length; i++) {
+          if( transactions[i].category == "receive" ) {
+            txns.push(transactions[i])
+          }
+        }
       })
       .catch(function(err){
         re.errorResponse(err, res, 500);
         return
       });
+
+      value = txns[count].amount * 100000000
+      hash = txns[count].txid
 
       // get wallet info
       await client.getWalletInfo().then(function(walletInfo){
