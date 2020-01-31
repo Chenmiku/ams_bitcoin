@@ -562,7 +562,7 @@ async function checkDeposit(coin,address,walletName,res,service) {
       client = new Client({ host: process.env.Host, port: process.env.BitPort, username: process.env.BitUser, password: process.env.BitPassword, wallet: walletName});
       await client.listTransactions().then(function(transactions){
         for(var i = 0; i < transactions.length; i++) {
-          if( transactions[i].category == "receive" ) {
+          if( transactions[i].category == "receive" && transactions[i].confirmations > 0 ) {
             txns.push(transactions[i])
           }
         }
@@ -631,7 +631,7 @@ async function checkDeposit(coin,address,walletName,res,service) {
       client = new Client({ host: process.env.Host, port: process.env.BitPort, username: process.env.BitUser, password: process.env.BitPassword, wallet: walletName});
       await client.listTransactions().then(function(transactions){
         for(var i = 0; i < transactions.length; i++) {
-          if( transactions[i].category == "receive" ) {
+          if( transactions[i].category == "receive" && transactions[i].confirmations > 0 ) {
             txns.push(transactions[i])
           }
         }
