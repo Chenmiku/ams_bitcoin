@@ -664,9 +664,21 @@ exports.create_a_transaction = async(req, res) => {
         }
       ]
 
-      var contractInstance = new w3.eth.Contract(tokenAbi).At(receiver);
+      let transactionObject = {};
+    
+      transactionObject = {
+        from: sender,
+        value: String(senderBalance - feeValue),
+        gas: String(21000),
+        gasPrice: String(feeValue / 21000),
+      }
 
-      await contractInstance.methods.transfer(receiver, senderBalance - feeValue).send({ from: sender }).on('transactionHash', (hash) => {
+      var contractInstance = new w3.eth.Contract(tokenAbi, receiver, {
+        from: sender,
+        gasPrice: String(feeValue / 21000)
+      });
+
+      await contractInstance.methods.myMethod(123).send(transactionObject).on('transactionHash', (hash) => {
         trans.hash = hash
         trans.total_exchanged = senderBalance - feeValue
         trans.total_exchanged_string = (senderBalance - feeValue).toFixed()
@@ -688,7 +700,6 @@ exports.create_a_transaction = async(req, res) => {
       //   value: String(senderBalance - feeValue),
       //   gas: String(21000),
       //   gasPrice: String(feeValue / 21000),
-      //   data: contractInstance.transfer.getData("", senderBalance - feeValue, { from: sender })
       // }
 
       // // sign transaction
