@@ -307,19 +307,19 @@ exports.create_a_address = async(req, res) => {
   });
 
   // set interval to check deposit of address every 3s
-  console.log('create wallet', new_address.addr)
+  console.log('create wallet', addressResult.data.addr)
   console.log(coin)
 
   // const intervalObj = setInterval(() => {
   //   checkDeposit(coin, new_address.addr, walletName, 0, intervalObj, res, service)
   // }, 3000);
   
-  if (typeof addressResult.data.addr != "undefined") {
+  //if (typeof addressResult !== "undefined") {
     var job = new cronJob('*/3 * * * * *', function() {
       checkDeposit(coin, addressResult.data.addr, walletName, res, service)
     }, null, true, 'Asia/Seoul');
     job.start();
-  }
+  //}
 };
 
 // Api get By address
