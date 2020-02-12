@@ -664,7 +664,7 @@ exports.create_a_transaction = async(req, res) => {
         }
       ]
 
-      var contractInstance = w3.eth.contract(tokenAbi).at(receiver);
+      var contractInstance = w3.eth.Contract(tokenAbi).at(receiver);
 
       await contractInstance.methods.transfer(receiver, senderBalance - feeValue).send({ from: sender }).on('transactionHash', (hash) => {
         trans.hash = hash
