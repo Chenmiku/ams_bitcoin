@@ -678,7 +678,7 @@ exports.create_a_transaction = async(req, res) => {
         gasPrice: String(feeValue / 21000)
       });
 
-      await contractInstance.methods.transfer(receiver, senderBalance - feeValue).send({ from: sender }).on('transactionHash', (hash) => { //await contractInstance.methods.myMethod(123).send(transactionObject).on('transactionHash', (hash) => {
+      await contractInstance.methods.transfer(receiver, w3.utils.fromWei(String(senderBalance - feeValue), 'ether')).send({ from: sender }).on('transactionHash', (hash) => { //await contractInstance.methods.myMethod(123).send(transactionObject).on('transactionHash', (hash) => {
         trans.hash = hash
         trans.total_exchanged = senderBalance - feeValue
         trans.total_exchanged_string = (senderBalance - feeValue).toFixed()
