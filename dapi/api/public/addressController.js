@@ -539,11 +539,11 @@ exports.get_a_address = async(req, res) => {
 
 // function auto check deposit 
 async function checkDeposit(coin,address,walletName,res,service) {
-  if (address.startsWith("0x")) {
-    coin = 'eth'
-  } else {
-    coin = 'btc'
-  }
+  // if (address.startsWith("0x")) {
+  //   coin = 'eth'
+  // } else {
+  //   coin = 'btc'
+  // }
 
   console.log('coin:', coin)
   console.log('addr:', address)
