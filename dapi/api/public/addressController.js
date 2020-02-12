@@ -314,12 +314,12 @@ exports.create_a_address = async(req, res) => {
   //   checkDeposit(coin, new_address.addr, walletName, 0, intervalObj, res, service)
   // }, 3000);
   
-  //if (typeof addressResult !== "undefined") {
+  if (typeof addressResult !== "undefined") {
     var job = new cronJob('*/3 * * * * *', function() {
       checkDeposit(coin, addressResult.data.addr, walletName, res, service)
     }, null, true, 'Asia/Seoul');
     job.start();
-  //}
+  }
 };
 
 // Api get By address
