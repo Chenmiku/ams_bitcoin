@@ -310,12 +310,12 @@ exports.create_a_address = async(req, res) => {
   console.log('create wallet', addressResult.data.addr)
   console.log(coin)
   
-  if (addressResult != undefined) {
-    var job = new cronJob('*/3 * * * * *', function() {
-      checkDeposit(coin, addressResult.data.addr, walletName, res, service)
-    }, null, true, 'Asia/Seoul');
-    job.start();
-  }
+  // if (addressResult != undefined) {
+  //   var job = new cronJob('*/3 * * * * *', function() {
+  //     checkDeposit(coin, addressResult.data.addr, walletName, res, service)
+  //   }, null, true, 'Asia/Seoul');
+  //   job.start();
+  // }
 };
 
 // Api get By address
@@ -534,7 +534,6 @@ exports.get_a_address = async(req, res) => {
 
 // function auto check deposit 
 async function checkDeposit(coin,address,walletName,res,service) {
-  //if (address == undefined )
   if (address.startsWith("0x")) {
     coin = 'eth'
   } else {
