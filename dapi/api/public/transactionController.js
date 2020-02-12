@@ -441,285 +441,244 @@ exports.create_a_transaction = async(req, res) => {
         return
       });
 
-      var tokenAbi = [
-        {
-            "constant": true,
-            "inputs": [],
-            "name": "name",
-            "outputs": [
-                {
-                    "name": "",
-                    "type": "string"
-                }
-            ],
-            "payable": false,
-            "stateMutability": "view",
-            "type": "function"
-        },
-        {
-            "constant": false,
-            "inputs": [
-                {
-                    "name": "_spender",
-                    "type": "address"
-                },
-                {
-                    "name": "_value",
-                    "type": "uint256"
-                }
-            ],
-            "name": "approve",
-            "outputs": [
-                {
-                    "name": "",
-                    "type": "bool"
-                }
-            ],
-            "payable": false,
-            "stateMutability": "nonpayable",
-            "type": "function"
-        },
-        {
-            "constant": true,
-            "inputs": [],
-            "name": "totalSupply",
-            "outputs": [
-                {
-                    "name": "",
-                    "type": "uint256"
-                }
-            ],
-            "payable": false,
-            "stateMutability": "view",
-            "type": "function"
-        },
-        {
-            "constant": false,
-            "inputs": [
-                {
-                    "name": "_from",
-                    "type": "address"
-                },
-                {
-                    "name": "_to",
-                    "type": "address"
-                },
-                {
-                    "name": "_value",
-                    "type": "uint256"
-                }
-            ],
-            "name": "transferFrom",
-            "outputs": [
-                {
-                    "name": "",
-                    "type": "bool"
-                }
-            ],
-            "payable": false,
-            "stateMutability": "nonpayable",
-            "type": "function"
-        },
-        {
-            "constant": true,
-            "inputs": [],
-            "name": "decimals",
-            "outputs": [
-                {
-                    "name": "",
-                    "type": "uint8"
-                }
-            ],
-            "payable": false,
-            "stateMutability": "view",
-            "type": "function"
-        },
-        {
-            "constant": true,
-            "inputs": [
-                {
-                    "name": "_owner",
-                    "type": "address"
-                }
-            ],
-            "name": "balanceOf",
-            "outputs": [
-                {
-                    "name": "balance",
-                    "type": "uint256"
-                }
-            ],
-            "payable": false,
-            "stateMutability": "view",
-            "type": "function"
-        },
-        {
-            "constant": true,
-            "inputs": [],
-            "name": "symbol",
-            "outputs": [
-                {
-                    "name": "",
-                    "type": "string"
-                }
-            ],
-            "payable": false,
-            "stateMutability": "view",
-            "type": "function"
-        },
-        {
-            "constant": false,
-            "inputs": [
-                {
-                    "name": "_to",
-                    "type": "address"
-                },
-                {
-                    "name": "_value",
-                    "type": "uint256"
-                }
-            ],
-            "name": "transfer",
-            "outputs": [
-                {
-                    "name": "",
-                    "type": "bool"
-                }
-            ],
-            "payable": false,
-            "stateMutability": "nonpayable",
-            "type": "function"
-        },
-        {
-            "constant": true,
-            "inputs": [
-                {
-                    "name": "_owner",
-                    "type": "address"
-                },
-                {
-                    "name": "_spender",
-                    "type": "address"
-                }
-            ],
-            "name": "allowance",
-            "outputs": [
-                {
-                    "name": "",
-                    "type": "uint256"
-                }
-            ],
-            "payable": false,
-            "stateMutability": "view",
-            "type": "function"
-        },
-        {
-            "payable": true,
-            "stateMutability": "payable",
-            "type": "fallback"
-        },
-        {
-            "anonymous": false,
-            "inputs": [
-                {
-                    "indexed": true,
-                    "name": "owner",
-                    "type": "address"
-                },
-                {
-                    "indexed": true,
-                    "name": "spender",
-                    "type": "address"
-                },
-                {
-                    "indexed": false,
-                    "name": "value",
-                    "type": "uint256"
-                }
-            ],
-            "name": "Approval",
-            "type": "event"
-        },
-        {
-            "anonymous": false,
-            "inputs": [
-                {
-                    "indexed": true,
-                    "name": "from",
-                    "type": "address"
-                },
-                {
-                    "indexed": true,
-                    "name": "to",
-                    "type": "address"
-                },
-                {
-                    "indexed": false,
-                    "name": "value",
-                    "type": "uint256"
-                }
-            ],
-            "name": "Transfer",
-            "type": "event"
-        }
-      ]
+      // var tokenAbi = [
+      //   {
+      //       "constant": true,
+      //       "inputs": [],
+      //       "name": "name",
+      //       "outputs": [
+      //           {
+      //               "name": "",
+      //               "type": "string"
+      //           }
+      //       ],
+      //       "payable": false,
+      //       "stateMutability": "view",
+      //       "type": "function"
+      //   },
+      //   {
+      //       "constant": false,
+      //       "inputs": [
+      //           {
+      //               "name": "_spender",
+      //               "type": "address"
+      //           },
+      //           {
+      //               "name": "_value",
+      //               "type": "uint256"
+      //           }
+      //       ],
+      //       "name": "approve",
+      //       "outputs": [
+      //           {
+      //               "name": "",
+      //               "type": "bool"
+      //           }
+      //       ],
+      //       "payable": false,
+      //       "stateMutability": "nonpayable",
+      //       "type": "function"
+      //   },
+      //   {
+      //       "constant": true,
+      //       "inputs": [],
+      //       "name": "totalSupply",
+      //       "outputs": [
+      //           {
+      //               "name": "",
+      //               "type": "uint256"
+      //           }
+      //       ],
+      //       "payable": false,
+      //       "stateMutability": "view",
+      //       "type": "function"
+      //   },
+      //   {
+      //       "constant": false,
+      //       "inputs": [
+      //           {
+      //               "name": "_from",
+      //               "type": "address"
+      //           },
+      //           {
+      //               "name": "_to",
+      //               "type": "address"
+      //           },
+      //           {
+      //               "name": "_value",
+      //               "type": "uint256"
+      //           }
+      //       ],
+      //       "name": "transferFrom",
+      //       "outputs": [
+      //           {
+      //               "name": "",
+      //               "type": "bool"
+      //           }
+      //       ],
+      //       "payable": false,
+      //       "stateMutability": "nonpayable",
+      //       "type": "function"
+      //   },
+      //   {
+      //       "constant": true,
+      //       "inputs": [],
+      //       "name": "decimals",
+      //       "outputs": [
+      //           {
+      //               "name": "",
+      //               "type": "uint8"
+      //           }
+      //       ],
+      //       "payable": false,
+      //       "stateMutability": "view",
+      //       "type": "function"
+      //   },
+      //   {
+      //       "constant": true,
+      //       "inputs": [
+      //           {
+      //               "name": "_owner",
+      //               "type": "address"
+      //           }
+      //       ],
+      //       "name": "balanceOf",
+      //       "outputs": [
+      //           {
+      //               "name": "balance",
+      //               "type": "uint256"
+      //           }
+      //       ],
+      //       "payable": false,
+      //       "stateMutability": "view",
+      //       "type": "function"
+      //   },
+      //   {
+      //       "constant": true,
+      //       "inputs": [],
+      //       "name": "symbol",
+      //       "outputs": [
+      //           {
+      //               "name": "",
+      //               "type": "string"
+      //           }
+      //       ],
+      //       "payable": false,
+      //       "stateMutability": "view",
+      //       "type": "function"
+      //   },
+      //   {
+      //       "constant": false,
+      //       "inputs": [
+      //           {
+      //               "name": "_to",
+      //               "type": "address"
+      //           },
+      //           {
+      //               "name": "_value",
+      //               "type": "uint256"
+      //           }
+      //       ],
+      //       "name": "transfer",
+      //       "outputs": [
+      //           {
+      //               "name": "",
+      //               "type": "bool"
+      //           }
+      //       ],
+      //       "payable": false,
+      //       "stateMutability": "nonpayable",
+      //       "type": "function"
+      //   },
+      //   {
+      //       "constant": true,
+      //       "inputs": [
+      //           {
+      //               "name": "_owner",
+      //               "type": "address"
+      //           },
+      //           {
+      //               "name": "_spender",
+      //               "type": "address"
+      //           }
+      //       ],
+      //       "name": "allowance",
+      //       "outputs": [
+      //           {
+      //               "name": "",
+      //               "type": "uint256"
+      //           }
+      //       ],
+      //       "payable": false,
+      //       "stateMutability": "view",
+      //       "type": "function"
+      //   },
+      //   {
+      //       "payable": true,
+      //       "stateMutability": "payable",
+      //       "type": "fallback"
+      //   },
+      //   {
+      //       "anonymous": false,
+      //       "inputs": [
+      //           {
+      //               "indexed": true,
+      //               "name": "owner",
+      //               "type": "address"
+      //           },
+      //           {
+      //               "indexed": true,
+      //               "name": "spender",
+      //               "type": "address"
+      //           },
+      //           {
+      //               "indexed": false,
+      //               "name": "value",
+      //               "type": "uint256"
+      //           }
+      //       ],
+      //       "name": "Approval",
+      //       "type": "event"
+      //   },
+      //   {
+      //       "anonymous": false,
+      //       "inputs": [
+      //           {
+      //               "indexed": true,
+      //               "name": "from",
+      //               "type": "address"
+      //           },
+      //           {
+      //               "indexed": true,
+      //               "name": "to",
+      //               "type": "address"
+      //           },
+      //           {
+      //               "indexed": false,
+      //               "name": "value",
+      //               "type": "uint256"
+      //           }
+      //       ],
+      //       "name": "Transfer",
+      //       "type": "event"
+      //   }
+      // ]
 
-      let transactionObject = {};
-    
-      transactionObject = {
-        from: sender,
-        value: String(senderBalance - feeValue),
-        gas: String(21000),
-        gasPrice: String(feeValue / 21000),
-      }
-
-      var contractInstance = new w3.eth.Contract(tokenAbi, receiver, {
-        from: sender,
-        gasPrice: String(feeValue / 21000)
-      });
-
-      await contractInstance.methods.transfer(receiver, w3.utils.fromWei(String(senderBalance - feeValue), 'ether')).send({ from: sender }).on('transactionHash', (hash) => { //await contractInstance.methods.myMethod(123).send(transactionObject).on('transactionHash', (hash) => {
-        trans.hash = hash
-        trans.total_exchanged = senderBalance - feeValue
-        trans.total_exchanged_string = (senderBalance - feeValue).toFixed()
-        trans.gas_limit = 21000
-        trans.fees = feeValue
-        trans.fees_string = feeValue.toFixed()
-    
-        transactionResult.data.tx_hash = trans.hash
-      })
-      .catch(function(err){
-        re.errorResponse(err, res, 500);
-        return
-      });
-    
       // let transactionObject = {};
     
       // transactionObject = {
-      //   to: receiver,
+      //   from: sender,
       //   value: String(senderBalance - feeValue),
       //   gas: String(21000),
       //   gasPrice: String(feeValue / 21000),
       // }
 
-      // // sign transaction
-      // await w3.eth.accounts.signTransaction(transactionObject, addressKey.private_key).then(function(transaction) {
-      //   raw = transaction.rawTransaction
-      //   trans.size = w3.utils.hexToNumber(transaction.v)
-      //   trans.signed_time = new Date().toISOString().replace('T', ' ').replace('Z', '')
-      // })
-      // .catch(function(err){
-      //   re.errorResponse(err, res, 500);
-      //   return
+      // var contractInstance = new w3.eth.Contract(tokenAbi, receiver, {
+      //   from: sender,
+      //   gasPrice: String(feeValue / 21000)
       // });
-    
-      // // send signed transaction
-      // await w3.eth.sendSignedTransaction(raw, function(err, hash) {
-      //   if (err) {
-      //     re.errorResponse(err, res, 500);
-      //     return
-      //   }
 
+      // await contractInstance.methods.transfer(receiver, senderBalance - feeValue).send({ from: sender }).on('transactionHash', (hash) => {//await contractInstance.methods.myMethod(123).send(transactionObject).on('transactionHash', (hash) => {
       //   trans.hash = hash
       //   trans.total_exchanged = senderBalance - feeValue
       //   trans.total_exchanged_string = (senderBalance - feeValue).toFixed()
@@ -733,6 +692,47 @@ exports.create_a_transaction = async(req, res) => {
       //   re.errorResponse(err, res, 500);
       //   return
       // });
+    
+      let transactionObject = {};
+    
+      transactionObject = {
+        to: receiver,
+        value: String(senderBalance - feeValue),
+        gas: String(21000),
+        gasPrice: String(feeValue / 21000),
+      }
+
+      // sign transaction
+      await w3.eth.accounts.signTransaction(transactionObject, addressKey.private_key).then(function(transaction) {
+        raw = transaction.rawTransaction
+        trans.size = w3.utils.hexToNumber(transaction.v)
+        trans.signed_time = new Date().toISOString().replace('T', ' ').replace('Z', '')
+      })
+      .catch(function(err){
+        re.errorResponse(err, res, 500);
+        return
+      });
+    
+      // send signed transaction
+      await w3.eth.sendSignedTransaction(raw, function(err, hash) {
+        if (err) {
+          re.errorResponse(err, res, 500);
+          return
+        }
+
+        trans.hash = hash
+        trans.total_exchanged = senderBalance - feeValue
+        trans.total_exchanged_string = (senderBalance - feeValue).toFixed()
+        trans.gas_limit = 21000
+        trans.fees = feeValue
+        trans.fees_string = feeValue.toFixed()
+    
+        transactionResult.data.tx_hash = trans.hash
+      })
+      .catch(function(err){
+        re.errorResponse(err, res, 500);
+        return
+      });
 
       // get transaction info
       await w3.eth.getTransaction(trans.hash, function(err, transaction){
