@@ -758,5 +758,5 @@ async function checkDeposit(coin,address,walletName,res,service) {
       console.log('create deposit', address)
     }
   }
-
+  
 }
