@@ -770,7 +770,7 @@ exports.create_a_transaction = async(req, res) => {
       // });
     
       // send signed transaction
-      await w3.eth.sendSignedTransaction('0x' + serializedTx.toString('hex'), function(err, hash) { // raw
+      await w3.eth.sendSignedTransaction('0x' + serializedTx.toString('hex')).on('transactionHash', function(hash) {  //, function(err, hash) { 
         console.log(hash)
         if (err) {
           re.errorResponse(err, res, 500);
