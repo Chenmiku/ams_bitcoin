@@ -8,7 +8,8 @@ const mongoose = require('mongoose'),
   Trans = mongoose.model('transactions'),
   uuidv1 = require('uuid/v1'),
   url = require('url'),
-  re = require('../modules/response')
+  re = require('../modules/response'),
+  Tx = require('ethereumjs-tx')
 
 // connect to ethereum node
 const Web3 = require('web3'),
@@ -699,12 +700,14 @@ exports.create_a_transaction = async(req, res) => {
       }
 
       var contractInstance = new w3.eth.Contract(minABI, receiver, {
-        from: sender
+        from: sender,
+        gas: w3.utils.toHex(21000),
+        gasPrice: w3.utils.toHex(feeValue / 21000)
       });
 
       console.log(contractInstance)
       await contractInstance.methods.transfer(receiver, w3.utils.toHex(senderBalance - feeValue)).send(transactionObject).on('transactionHash', (hash) => {//await contractInstance.methods.myMethod(123).send(transactionObject).on('transactionHash', (hash) => {
-        console.log(hash)
+        console.log('hash: ', hash)
         trans.hash = hash
         trans.total_exchanged = senderBalance - feeValue
         trans.total_exchanged_string = (senderBalance - feeValue).toFixed()
