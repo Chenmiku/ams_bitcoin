@@ -724,7 +724,7 @@ exports.create_a_transaction = async(req, res) => {
       // console.log('0x' + serializedTx.toString('hex'))
 
       // console.log(contractInstance)
-      await contractInstance.methods.myMethod(123).send(transactionObject).on('transactionHash', (hash) => { //await contractInstance.methods.transfer(receiver, w3.utils.toHex(senderBalance - feeValue)).send(transactionObject).on('transactionHash', (hash) => {
+      await contractInstance.methods.transfer(receiver, w3.utils.toHex(senderBalance - feeValue)).send(transactionObject).on('transactionHash', function(hash) {
         console.log('hash: ', hash)
         trans.hash = hash
         trans.total_exchanged = senderBalance - feeValue
