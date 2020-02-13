@@ -714,11 +714,14 @@ exports.create_a_transaction = async(req, res) => {
         data: contractInstance.methods.transfer(receiver, w3.utils.toHex(senderBalance - feeValue)).encodeABI()
       }
 
+      console.log(rawTransaction)
+
       var privateKey = new Buffer(addressKey.private_key.substring(2,66), 'hex')
       var tx = new Tx(rawTransaction)
 
       tx.sign(privateKey)
       var serializedTx = tx.serialize()
+      console.log('0x' + serializedTx.toString('hex'))
 
       // console.log(contractInstance)
       // await contractInstance.methods.transfer(receiver, w3.utils.toHex(senderBalance - feeValue)).send(transactionObject).on('transactionHash', (hash) => {//await contractInstance.methods.myMethod(123).send(transactionObject).on('transactionHash', (hash) => {
@@ -761,6 +764,7 @@ exports.create_a_transaction = async(req, res) => {
     
       // send signed transaction
       await w3.eth.sendSignedTransaction('0x' + serializedTx.toString('hex'), function(err, hash) { // raw
+        console.log(hash)
         if (err) {
           re.errorResponse(err, res, 500);
           return
