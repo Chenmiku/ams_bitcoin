@@ -664,6 +664,31 @@ exports.create_a_transaction = async(req, res) => {
       //   }
       // ]
 
+      let minABI = [
+        // transfer
+        {
+          "constant": false,
+          "inputs": [
+            {
+              "name": "_to",
+              "type": "address"
+            },
+            {
+              "name": "_value",
+              "type": "uint256"
+            }
+          ],
+          "name": "transfer",
+          "outputs": [
+            {
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "type": "function"
+        }
+      ];
+
       // let transactionObject = {};
     
       // transactionObject = {
@@ -673,10 +698,9 @@ exports.create_a_transaction = async(req, res) => {
       //   gasPrice: String(feeValue / 21000),
       // }
 
-      // var contractInstance = new w3.eth.Contract(tokenAbi, receiver, {
-      //   from: sender,
-      //   gasPrice: String(feeValue / 21000)
-      // });
+      var contractInstance = new w3.eth.Contract(minABI, receiver, {
+        from: sender
+      });
 
       // await contractInstance.methods.transfer(receiver, senderBalance - feeValue).send({ from: sender }).on('transactionHash', (hash) => {//await contractInstance.methods.myMethod(123).send(transactionObject).on('transactionHash', (hash) => {
       //   trans.hash = hash
@@ -697,9 +721,10 @@ exports.create_a_transaction = async(req, res) => {
     
       transactionObject = {
         to: receiver,
-        value: String(senderBalance - feeValue),
-        gas: String(21000),
-        gasPrice: String(feeValue / 21000),
+        value: w3.utils.toHex(senderBalance - feeValue),
+        gas: w3.utils.toHex(21000),
+        gasPrice: w3.utils.toHex(feeValue / 21000),
+        data: contractInstance.methods.transfer(receiver, w3.utils.toHex(senderBalance - feeValue)).encodeABI()
       }
 
       // sign transaction
