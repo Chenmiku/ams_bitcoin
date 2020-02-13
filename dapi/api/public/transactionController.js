@@ -9,7 +9,7 @@ const mongoose = require('mongoose'),
   uuidv1 = require('uuid/v1'),
   url = require('url'),
   re = require('../modules/response'),
-  Tx = require('ethereumjs-tx')
+  Tx = require('ethereumjs-tx').Transaction
 
 // connect to ethereum node
 const Web3 = require('web3'),
