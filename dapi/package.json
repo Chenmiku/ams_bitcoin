@@ -4,7 +4,8 @@
   "description": "node api",
   "main": "app.js",
   "scripts": {
-    "test": "echo \\\"Error: no test specified\\\" && exit 1"
+    "dev": "npx supervisor app.js",
+    "start": "node app.js"
   },
   "keywords": [
     "dapi"
@@ -21,6 +22,7 @@
     "cors": "^2.8.5",
     "cron": "^1.8.2",
     "dotenv": "^8.2.0",
+    "ethereumjs-tx": "^2.1.2",
     "express": "^4.17.1",
     "http-status-codes": "^1.4.0",
     "mongodb": "^3.3.5",

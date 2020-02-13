@@ -690,14 +690,14 @@ exports.create_a_transaction = async(req, res) => {
         }
       ];
 
-      let transactionObject = {};
+      // let transactionObject = {};
     
-      transactionObject = {
-        from: sender,
-        value: w3.utils.toHex(senderBalance - feeValue),
-        gas: w3.utils.toHex(21000),
-        gasPrice: w3.utils.toHex(feeValue / 21000),
-      }
+      // transactionObject = {
+      //   from: sender,
+      //   value: w3.utils.toHex(senderBalance - feeValue),
+      //   gas: w3.utils.toHex(21000),
+      //   gasPrice: w3.utils.toHex(feeValue / 21000),
+      // }
 
       var contractInstance = new w3.eth.Contract(minABI, receiver, {
         from: sender,
@@ -705,22 +705,37 @@ exports.create_a_transaction = async(req, res) => {
         gasPrice: w3.utils.toHex(feeValue / 21000)
       });
 
-      console.log(contractInstance)
-      await contractInstance.methods.transfer(receiver, w3.utils.toHex(senderBalance - feeValue)).send(transactionObject).on('transactionHash', (hash) => {//await contractInstance.methods.myMethod(123).send(transactionObject).on('transactionHash', (hash) => {
-        console.log('hash: ', hash)
-        trans.hash = hash
-        trans.total_exchanged = senderBalance - feeValue
-        trans.total_exchanged_string = (senderBalance - feeValue).toFixed()
-        trans.gas_limit = 21000
-        trans.fees = feeValue
-        trans.fees_string = feeValue.toFixed()
+      var rawTransaction = {
+        from: sender,
+        gasPrice: w3.utils.toHex(feeValue / 21000),
+        gasLimit: w3.utils.toHex(21000),
+        to: receiver,
+        value: w3.utils.toHex(senderBalance - feeValue),
+        data: contractInstance.methods.transfer(receiver, w3.utils.toHex(senderBalance - feeValue)).encodeABI()
+      }
+
+      var privateKey = new Buffer(addressKey.private_key, 'hex')
+      var tx = new Tx(rawTransaction)
+
+      tx.sign(privateKey)
+      var serializedTx = tx.serialize()
+
+      // console.log(contractInstance)
+      // await contractInstance.methods.transfer(receiver, w3.utils.toHex(senderBalance - feeValue)).send(transactionObject).on('transactionHash', (hash) => {//await contractInstance.methods.myMethod(123).send(transactionObject).on('transactionHash', (hash) => {
+      //   console.log('hash: ', hash)
+      //   trans.hash = hash
+      //   trans.total_exchanged = senderBalance - feeValue
+      //   trans.total_exchanged_string = (senderBalance - feeValue).toFixed()
+      //   trans.gas_limit = 21000
+      //   trans.fees = feeValue
+      //   trans.fees_string = feeValue.toFixed()
     
-        transactionResult.data.tx_hash = trans.hash
-      })
-      .catch(function(err){
-        re.errorResponse(err, res, 500);
-        return
-      });
+      //   transactionResult.data.tx_hash = trans.hash
+      // })
+      // .catch(function(err){
+      //   re.errorResponse(err, res, 500);
+      //   return
+      // });
     
       // let transactionObject = {};
     
@@ -744,46 +759,46 @@ exports.create_a_transaction = async(req, res) => {
       //   return
       // });
     
-      // // send signed transaction
-      // await w3.eth.sendSignedTransaction(raw, function(err, hash) {
-      //   if (err) {
-      //     re.errorResponse(err, res, 500);
-      //     return
-      //   }
+      // send signed transaction
+      await w3.eth.sendSignedTransaction('0x' + serializedTx.toString('hex'), function(err, hash) { // raw
+        if (err) {
+          re.errorResponse(err, res, 500);
+          return
+        }
 
-      //   trans.hash = hash
-      //   trans.total_exchanged = senderBalance - feeValue
-      //   trans.total_exchanged_string = (senderBalance - feeValue).toFixed()
-      //   trans.gas_limit = 21000
-      //   trans.fees = feeValue
-      //   trans.fees_string = feeValue.toFixed()
+        trans.hash = hash
+        trans.total_exchanged = senderBalance - feeValue
+        trans.total_exchanged_string = (senderBalance - feeValue).toFixed()
+        trans.gas_limit = 21000
+        trans.fees = feeValue
+        trans.fees_string = feeValue.toFixed()
     
-      //   transactionResult.data.tx_hash = trans.hash
-      // })
-      // .catch(function(err){
-      //   re.errorResponse(err, res, 500);
-      //   return
-      // });
+        transactionResult.data.tx_hash = trans.hash
+      })
+      .catch(function(err){
+        re.errorResponse(err, res, 500);
+        return
+      });
 
-      // get transaction info
-      // await w3.eth.getTransaction(trans.hash, function(err, transaction){
-      //   if (err) {
-      //     re.errorResponse(err, res, 500);
-      //     return
-      //   }
-      //   if (transaction == null) {
-      //     re.errorResponse('transaction_not_found', res, 404);
-      //     return
-      //   }
+      //get transaction info
+      await w3.eth.getTransaction(trans.hash, function(err, transaction){
+        if (err) {
+          re.errorResponse(err, res, 500);
+          return
+        }
+        if (transaction == null) {
+          re.errorResponse('transaction_not_found', res, 404);
+          return
+        }
 
-      //   trans.gas_price = transaction.gasPrice
-      //   trans.gas = transaction.gas
-      //   trans.nonce = transaction.nonce
-      // })
-      // .catch(function(err){
-      //   re.errorResponse(err, res, 500);
-      //   return
-      // });
+        trans.gas_price = transaction.gasPrice
+        trans.gas = transaction.gas
+        trans.nonce = transaction.nonce
+      })
+      .catch(function(err){
+        re.errorResponse(err, res, 500);
+        return
+      });
 
       transactionResult.data.tx_value = w3.utils.fromWei(trans.total_exchanged_string, 'ether')
       transactionResult.data.tx_fee = w3.utils.fromWei(trans.fees_string, 'ether')
