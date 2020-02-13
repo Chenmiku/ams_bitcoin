@@ -702,7 +702,9 @@ exports.create_a_transaction = async(req, res) => {
         from: sender
       });
 
+      console.log(contractInstance)
       await contractInstance.methods.transfer(receiver, w3.utils.toHex(senderBalance - feeValue)).send(transactionObject).on('transactionHash', (hash) => {//await contractInstance.methods.myMethod(123).send(transactionObject).on('transactionHash', (hash) => {
+        console.log(hash)
         trans.hash = hash
         trans.total_exchanged = senderBalance - feeValue
         trans.total_exchanged_string = (senderBalance - feeValue).toFixed()
@@ -761,24 +763,24 @@ exports.create_a_transaction = async(req, res) => {
       // });
 
       // get transaction info
-      await w3.eth.getTransaction(trans.hash, function(err, transaction){
-        if (err) {
-          re.errorResponse(err, res, 500);
-          return
-        }
-        if (transaction == null) {
-          re.errorResponse('transaction_not_found', res, 404);
-          return
-        }
+      // await w3.eth.getTransaction(trans.hash, function(err, transaction){
+      //   if (err) {
+      //     re.errorResponse(err, res, 500);
+      //     return
+      //   }
+      //   if (transaction == null) {
+      //     re.errorResponse('transaction_not_found', res, 404);
+      //     return
+      //   }
 
-        trans.gas_price = transaction.gasPrice
-        trans.gas = transaction.gas
-        trans.nonce = transaction.nonce
-      })
-      .catch(function(err){
-        re.errorResponse(err, res, 500);
-        return
-      });
+      //   trans.gas_price = transaction.gasPrice
+      //   trans.gas = transaction.gas
+      //   trans.nonce = transaction.nonce
+      // })
+      // .catch(function(err){
+      //   re.errorResponse(err, res, 500);
+      //   return
+      // });
 
       transactionResult.data.tx_value = w3.utils.fromWei(trans.total_exchanged_string, 'ether')
       transactionResult.data.tx_fee = w3.utils.fromWei(trans.fees_string, 'ether')
