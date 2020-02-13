@@ -714,7 +714,7 @@ exports.create_a_transaction = async(req, res) => {
         data: contractInstance.methods.transfer(receiver, w3.utils.toHex(senderBalance - feeValue)).encodeABI()
       }
 
-      var privateKey = new Buffer(addressKey.private_key, 'utf8')
+      var privateKey = new Buffer(addressKey.private_key.substring(2,66), 'hex')
       var tx = new Tx(rawTransaction)
 
       tx.sign(privateKey)
