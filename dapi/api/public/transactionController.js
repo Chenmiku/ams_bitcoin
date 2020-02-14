@@ -696,39 +696,39 @@ exports.create_a_transaction = async(req, res) => {
         }
       ];
 
-      let transactionObject = {};
+      // let transactionObject = {};
     
-      transactionObject = {
-        from: sender,
-        value: w3.utils.toHex(senderBalance - feeValue),
-        gas: w3.utils.toHex(21000),
-        gasPrice: w3.utils.toHex(feeValue / 21000),
-      }
+      // transactionObject = {
+      //   from: sender,
+      //   value: w3.utils.toHex(senderBalance - feeValue),
+      //   gas: w3.utils.toHex(21000),
+      //   gasPrice: w3.utils.toHex(feeValue / 21000),
+      // }
 
-      var contractInstance = new w3.eth.Contract(tokenAbi, receiver, {
-        from: sender,
-        gas: w3.utils.toHex(21000),
-        gasPrice: w3.utils.toHex(feeValue / 21000)
-      });
+      // var contractInstance = new w3.eth.Contract(tokenAbi, receiver, {
+      //   from: sender,
+      //   gas: w3.utils.toHex(21000),
+      //   gasPrice: w3.utils.toHex(feeValue / 21000)
+      // });
 
-      var rawTransaction = {
-        nonce: w3.utils.toHex(nonce),
-        from: sender,
-        gasPrice: w3.utils.toHex(feeValue / 21000),
-        gasLimit: w3.utils.toHex(21000),
-        to: receiver,
-        value: w3.utils.toHex(senderBalance - feeValue),
-        data: contractInstance.methods.transfer(receiver, w3.utils.toHex(senderBalance - feeValue)).encodeABI()
-      }
+      // var rawTransaction = {
+      //   nonce: w3.utils.toHex(nonce),
+      //   from: sender,
+      //   gasPrice: w3.utils.toHex(feeValue / 21000),
+      //   gasLimit: w3.utils.toHex(21000),
+      //   to: receiver,
+      //   value: w3.utils.toHex(senderBalance - feeValue),
+      //   data: contractInstance.methods.transfer(receiver, w3.utils.toHex(senderBalance - feeValue)).encodeABI()
+      // }
 
-      console.log(rawTransaction)
+      // console.log(rawTransaction)
 
-      var privateKey = new Buffer(addressKey.private_key.substring(2,66), 'hex')
-      var tx = new Tx(rawTransaction)
+      // var privateKey = new Buffer(addressKey.private_key.substring(2,66), 'hex')
+      // var tx = new Tx(rawTransaction)
 
-      tx.sign(privateKey)
-      var serializedTx = tx.serialize()
-      console.log('0x' + serializedTx.toString('hex'))
+      // tx.sign(privateKey)
+      // var serializedTx = tx.serialize()
+      // console.log('0x' + serializedTx.toString('hex'))
 
       // console.log(contractInstance)
       // await contractInstance.methods.transfer(receiver, w3.utils.toHex(senderBalance - feeValue)).send(transactionObject).on('transactionHash', function(hash) {
@@ -747,31 +747,30 @@ exports.create_a_transaction = async(req, res) => {
       //   return
       // });
     
-      // let transactionObject = {};
+      let transactionObject = {};
     
-      // transactionObject = {
-      //   to: receiver,
-      //   value: w3.utils.toHex(senderBalance - feeValue),
-      //   gas: w3.utils.toHex(21000),
-      //   gasPrice: w3.utils.toHex(feeValue / 21000),
-      //   data: contractInstance.methods.transfer(receiver, w3.utils.toHex(senderBalance - feeValue)).encodeABI()
-      // }
+      transactionObject = {
+        to: receiver,
+        value: String(senderBalance - feeValue),
+        gas: String(21000),
+        gasPrice: String(feeValue / 21000)
+      }
 
-      // // sign transaction
-      // await w3.eth.accounts.signTransaction(transactionObject, addressKey.private_key).then(function(transaction) {
-      //   console.log(transaction)
-      //   raw = transaction.rawTransaction
-      //   trans.size = w3.utils.hexToNumber(transaction.v)
-      //   trans.signed_time = new Date().toISOString().replace('T', ' ').replace('Z', '')
-      // })
-      // .catch(function(err){
-      //   re.errorResponse(err, res, 500);
-      //   return
-      // });
+      // sign transaction
+      await w3.eth.accounts.signTransaction(transactionObject, addressKey.private_key).then(function(transaction) {
+        //console.log(transaction)
+        raw = transaction.rawTransaction
+        trans.size = w3.utils.hexToNumber(transaction.v)
+        trans.signed_time = new Date().toISOString().replace('T', ' ').replace('Z', '')
+      })
+      .catch(function(err){
+        re.errorResponse(err, res, 500);
+        return
+      });
     
       // send signed transaction
-      await w3.eth.sendSignedTransaction('0x' + serializedTx.toString('hex')).on('transactionHash', function(hash) {  //, function(err, hash) { 
-        console.log(hash)
+      await w3.eth.sendSignedTransaction('0x' + serializedTx.toString('hex'), function(err, hash) { // raw
+        //console.log(hash)
         if (err) {
           re.errorResponse(err, res, 500);
           return

@@ -709,14 +709,25 @@ async function checkDeposit(coin,address,walletName,res,service) {
         }
       }
 
-      await axios.post(process.env.NotificationURL, qs.stringify(requestBody), config)
-      .then(function(noti){
-        
-      })
-      .catch(function(err){
-        re.errorResponse('cant_send_notification', res, 500);
-        return
-      });
+      if (service == 'polebit') {
+        await axios.post(process.env.PolebitNotificationURL, qs.stringify(requestBody), config)
+        .then(function(noti){
+          
+        })
+        .catch(function(err){
+          re.errorResponse('cant_send_notification', res, 500);
+          return
+        })
+      } else {
+        await axios.post(process.env.GobitNotificationURL, qs.stringify(requestBody), config)
+        .then(function(noti){
+          
+        })
+        .catch(function(err){
+          re.errorResponse('cant_send_notification', res, 500);
+          return
+        })
+      }
 
       new_address.balance = balance
       new_address.balance_string = String(balance)
