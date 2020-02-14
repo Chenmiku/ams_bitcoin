@@ -124,7 +124,7 @@ exports.check_deposit_history = async(req, res) => {
     res.json(transactionHistory);
   } else {
     // get count transaction
-    await Trans.countDocuments({ is_deposit: true }, function(err, ct){
+    await Trans.countDocuments({ is_deposit: true, service: service }, function(err, ct){
       if (err) {
         res.status(500).send(err)
       }
@@ -132,7 +132,7 @@ exports.check_deposit_history = async(req, res) => {
     })
 
     // get transaction
-    await Trans.find({ is_deposit: true }, function(err, transaction) {
+    await Trans.find({ is_deposit: true, service: service }, function(err, transaction) {
       if (err) {
         re.errorResponse(err, res, 500);
         return
@@ -229,7 +229,7 @@ exports.check_transaction_history = async(req, res) => {
     res.json(transactionHistory);
   } else {
     // get count transaction
-    await Trans.countDocuments({ is_deposit: false }, function(err, ct){
+    await Trans.countDocuments({ is_deposit: false, service: service }, function(err, ct){
       if (err) {
         res.status(500).send(err)
       }
@@ -237,7 +237,7 @@ exports.check_transaction_history = async(req, res) => {
     })
 
     // get transaction
-    await Trans.find({ is_deposit: false }, function(err, transaction) {
+    await Trans.find({ is_deposit: false, service: service }, function(err, transaction) {
       if (err) {
         re.errorResponse(err, res, 500);
         return
@@ -900,25 +900,6 @@ exports.create_a_transaction = async(req, res) => {
 
       break;
   }
-
-  // get chk fee value
-
-  // const requestBody = {
-  //   'search_type': coinType
-  // }
-  // const config = {
-  //   headers: {
-  //     'Content-Type': 'application/x-www-form-urlencoded'
-  //   }
-  // }
-	// await axios.post(process.env.GetFeeURL, qs.stringify(requestBody), config)
-	// .then(function(res){
-	// 	chkFeeValue = Number(res.data.resp[0].chk_fee_value)
-	// })
-	// .catch(function(err){
-	// 	re.errorResponse('cant_get_fee', res, 500);
-  //   return
-  // });
 
   trans._id = uuidv1()
   trans.sender = sender
