@@ -156,7 +156,7 @@ exports.check_deposit_history = async(req, res) => {
     res.json(transactionHistory);
   }
 
-  console.log('check deposit history', trans.hash)
+  console.log('check deposit history')
 };
 
 // api check transaction history
@@ -261,7 +261,7 @@ exports.check_transaction_history = async(req, res) => {
     res.json(transactionHistory);
   }
 
-  console.log('check transaction history', trans.hash)
+  console.log('check transaction history')
 };
 
 // api get all transaction 
