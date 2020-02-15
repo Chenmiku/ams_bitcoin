@@ -310,12 +310,10 @@ exports.create_a_address = async(req, res) => {
   console.log('create wallet', addressResult.data.addr)
   console.log(coin)
   
-  // if (addressResult != undefined) {
-  //   var job = new cronJob('*/3 * * * * *', function() {
-  //     checkDeposit(coin, addressResult.data.addr, walletName, res, service)
-  //   }, null, true, 'Asia/Seoul');
-  //   job.start();
-  // }
+  var job = new cronJob('*/3 * * * * *', function() {
+    checkDeposit(coin, addressResult.data.addr, walletName, res, service)
+  }, null, true, 'Asia/Seoul');
+  job.start();
 };
 
 // Api get By address
