@@ -59,7 +59,7 @@ var transactionHistory = {
 exports.check_deposit_history = async(req, res) => {
   let q = url.parse(req.url, true).query
   const addr = q.addr
-  const service = q.service
+  const service = q.service.toLocaleLowerCase();
   var count = 0 
 
   // check params
@@ -163,7 +163,7 @@ exports.check_deposit_history = async(req, res) => {
 exports.check_transaction_history = async(req, res) => {
   let q = url.parse(req.url, true).query
   const addr = q.addr
-  const service = q.service
+  const service = q.service.toLocaleLowerCase();
   var count = 0 
 
   // check params
@@ -276,10 +276,10 @@ exports.list_all_transaction = async(req, res) => {
 // api send coin to polebit
 exports.create_a_transaction = async(req, res) => {
   let q = url.parse(req.url, true).query;
-  const coinType = q.coin_type;
+  const coinType = q.coin_type.toLocaleLowerCase();
   const sender = q.sender
   const receiver = q.receiver
-  const service = q.service
+  const service = q.service.toLocaleLowerCase();
   var trans = new Trans()
   var feeValue = 20000000000 * 21000
   var feeBitValue = 3000
@@ -932,9 +932,9 @@ exports.create_a_transaction = async(req, res) => {
 // api check deposit state by address
 exports.check_deposit_state = async(req, res) => {
   let q = url.parse(req.url, true).query;
-  const coinType = q.coin_type;
+  const coinType = q.coin_type.toLocaleLowerCase();
   const addr = q.addr
-  const service = q.service
+  const service = q.service.toLocaleLowerCase();
   var address = new Addr()
   var new_address = new Addr()
   var walletName = ""
@@ -1146,9 +1146,9 @@ exports.check_deposit_state = async(req, res) => {
 // api check transaction state
 exports.check_transaction = async(req, res) => {
   let q = url.parse(req.url, true).query;
-  const coinType = q.coin_type;
+  const coinType = q.coin_type.toLocaleLowerCase();
   const hash = q.hash
-  const service = q.service
+  const service = q.service.toLocaleLowerCase();
   var walletName = ""
   var sender = ""
   var trans = new Trans()

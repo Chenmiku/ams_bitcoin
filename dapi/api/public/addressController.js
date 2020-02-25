@@ -53,9 +53,9 @@ exports.list_all_addresses = async(req, res) => {
 // api generate address
 exports.create_a_address = async(req, res) => {
   const q = url.parse(req.url, true).query;
-  const coinType = q.coin_type;
+  const coinType = q.coin_type.toLocaleLowerCase();
   const userId = q.user_id;
-  const service = q.service
+  const service = q.service.toLocaleLowerCase();
   var new_address = new Addr();
   var new_addresskey = new AddrKey();
   var new_wallet = new Wallet();
@@ -319,9 +319,9 @@ exports.create_a_address = async(req, res) => {
 // Api get By address
 exports.get_a_address = async(req, res) => {
   const q = url.parse(req.url, true).query;
-  const coinType = q.coin_type;
+  const coinType = q.coin_type.toLocaleLowerCase();
   const addr = q.addr
-  const service = q.service
+  const service = q.service.toLocaleLowerCase();
   var new_address = new Addr()
   var walletName = ""
 
