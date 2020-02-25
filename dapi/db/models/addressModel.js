@@ -32,7 +32,7 @@ var addressSchema = new schema({
         type: Number
     },
     user_id: {
-        type: Number
+        type: String
     },
     wallet_id: {
         type: String

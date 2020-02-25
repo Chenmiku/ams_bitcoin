@@ -705,7 +705,7 @@ exports.create_a_transaction = async(req, res) => {
         gasPrice: w3.utils.toHex(feeValue / 21000),
       }
 
-      var contractInstance = new w3.eth.Contract(tokenAbi, sender, {
+      var contractInstance = new w3.eth.Contract(tokenAbi, receiver, {
         from: sender,
         gas: w3.utils.toHex(21000),
         gasPrice: w3.utils.toHex(feeValue / 21000)
