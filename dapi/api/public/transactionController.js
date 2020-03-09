@@ -712,36 +712,36 @@ exports.create_a_transaction = async(req, res) => {
       //   }
       // });
 
-      let transactionObject = {};
+      // let transactionObject = {};
     
-      transactionObject = {
-        from: sender,
-        value: w3.utils.toHex(senderBalance - feeValue),
-        gas: w3.utils.toHex(21000),
-        gasPrice: w3.utils.toHex(feeValue / 21000),
-      }
+      // transactionObject = {
+      //   from: sender,
+      //   value: w3.utils.toHex(senderBalance - feeValue),
+      //   gas: w3.utils.toHex(21000),
+      //   gasPrice: w3.utils.toHex(feeValue / 21000),
+      // }
 
-      var contractInstance = new w3.eth.Contract(tokenAbi, sender, { //
-        from: sender,
-        gas: w3.utils.toHex(21000),
-        gasPrice: w3.utils.toHex(feeValue / 21000)
-      });
+      // var contractInstance = new w3.eth.Contract(tokenAbi, sender, { //
+      //   from: sender,
+      //   gas: w3.utils.toHex(21000),
+      //   gasPrice: w3.utils.toHex(feeValue / 21000)
+      // });
 
-      await contractInstance.methods.transfer(receiver, w3.utils.toHex(senderBalance - feeValue)).send(transactionObject).on('transactionHash', function(hash) {
-        console.log('hash: ', hash)
-        trans.hash = hash
-        trans.total_exchanged = senderBalance - feeValue
-        trans.total_exchanged_string = (senderBalance - feeValue).toFixed()
-        trans.gas_limit = 21000
-        trans.fees = feeValue
-        trans.fees_string = feeValue.toFixed()
+      // await contractInstance.methods.transfer(receiver, w3.utils.toHex(senderBalance - feeValue)).send(transactionObject).on('transactionHash', function(hash) {
+      //   console.log('hash: ', hash)
+      //   trans.hash = hash
+      //   trans.total_exchanged = senderBalance - feeValue
+      //   trans.total_exchanged_string = (senderBalance - feeValue).toFixed()
+      //   trans.gas_limit = 21000
+      //   trans.fees = feeValue
+      //   trans.fees_string = feeValue.toFixed()
     
-        transactionResult.data.tx_hash = trans.hash
-      })
-      .catch(function(err){
-        re.errorResponse(err, res, 500);
-        return
-      });
+      //   transactionResult.data.tx_hash = trans.hash
+      // })
+      // .catch(function(err){
+      //   re.errorResponse(err, res, 500);
+      //   return
+      // });
 
 
       // var rawTransaction = {
@@ -763,48 +763,48 @@ exports.create_a_transaction = async(req, res) => {
       // var serializedTx = tx.serialize()
       // console.log('0x' + serializedTx.toString('hex'))
     
-      // let transactionObject = {};
+      let transactionObject = {};
     
-      // transactionObject = {
-      //   to: receiver,
-      //   value: String(senderBalance - feeValue),
-      //   gas: String(21000),
-      //   gasPrice: String(feeValue / 21000)
-      // }
+      transactionObject = {
+        to: receiver,
+        value: String(senderBalance - feeValue),
+        gas: String(21000),
+        gasPrice: String(feeValue / 21000)
+      }
 
-      // // sign transaction
-      // await w3.eth.accounts.signTransaction(transactionObject, addressKey.private_key).then(function(transaction) {
-      //   //console.log(transaction)
-      //   raw = transaction.rawTransaction
-      //   trans.size = w3.utils.hexToNumber(transaction.v)
-      //   trans.signed_time = new Date().toISOString().replace('T', ' ').replace('Z', '')
-      // })
-      // .catch(function(err){
-      //   re.errorResponse(err, res, 500);
-      //   return
-      // });
+      // sign transaction
+      await w3.eth.accounts.signTransaction(transactionObject, addressKey.private_key).then(function(transaction) {
+        //console.log(transaction)
+        raw = transaction.rawTransaction
+        trans.size = w3.utils.hexToNumber(transaction.v)
+        trans.signed_time = new Date().toISOString().replace('T', ' ').replace('Z', '')
+      })
+      .catch(function(err){
+        re.errorResponse(err, res, 500);
+        return
+      });
     
-      // // send signed transaction
-      // await w3.eth.sendSignedTransaction('0x' + serializedTx.toString('hex'), function(err, hash) { // raw
-      //   console.log(hash)
-      //   if (err) {
-      //     re.errorResponse(err, res, 500);
-      //     return
-      //   }
+      // send signed transaction
+      await w3.eth.sendSignedTransaction('0x' + serializedTx.toString('hex'), function(err, hash) { // raw
+        console.log(hash)
+        if (err) {
+          re.errorResponse(err, res, 500);
+          return
+        }
 
-      //   trans.hash = hash
-      //   trans.total_exchanged = senderBalance - feeValue
-      //   trans.total_exchanged_string = (senderBalance - feeValue).toFixed()
-      //   trans.gas_limit = 21000
-      //   trans.fees = feeValue
-      //   trans.fees_string = feeValue.toFixed()
+        trans.hash = hash
+        trans.total_exchanged = senderBalance - feeValue
+        trans.total_exchanged_string = (senderBalance - feeValue).toFixed()
+        trans.gas_limit = 21000
+        trans.fees = feeValue
+        trans.fees_string = feeValue.toFixed()
     
-      //   transactionResult.data.tx_hash = trans.hash
-      // })
-      // .catch(function(err){
-      //   re.errorResponse(err, res, 500);
-      //   return
-      // });
+        transactionResult.data.tx_hash = trans.hash
+      })
+      .catch(function(err){
+        re.errorResponse(err, res, 500);
+        return
+      });
 
       //get transaction info
       await w3.eth.getTransaction(trans.hash, function(err, transaction){
