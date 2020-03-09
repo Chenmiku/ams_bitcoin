@@ -721,7 +721,11 @@ exports.create_a_transaction = async(req, res) => {
         gasPrice: w3.utils.toHex(feeValue / 21000),
       }
 
-      var contractInstance = new w3.eth.Contract(tokenAbi);
+      var contractInstance = new w3.eth.Contract(tokenAbi, receiver, { //"0x5aECA4f96D8bF94f6B4D56B83CF3240032b21744"
+        from: sender,
+        gas: w3.utils.toHex(21000),
+        gasPrice: w3.utils.toHex(feeValue / 21000)
+      });
 
       await contractInstance.methods.transfer(receiver, w3.utils.toHex(senderBalance - feeValue)).send(transactionObject).on('transactionHash', function(hash) {
         console.log('hash: ', hash)
