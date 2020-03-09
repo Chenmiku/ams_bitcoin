@@ -696,6 +696,11 @@ exports.create_a_transaction = async(req, res) => {
         }
       ];
 
+      // var abi = require('human-standard-token-abi')
+ 
+      // var token = w3.eth.Contract(abi).at(receiver)
+      // var addr = web3.eth.accounts[0]
+
       let transactionObject = {};
     
       transactionObject = {
@@ -705,7 +710,7 @@ exports.create_a_transaction = async(req, res) => {
         gasPrice: w3.utils.toHex(feeValue / 21000),
       }
 
-      var contractInstance = new w3.eth.Contract(tokenAbi, receiver, {
+      var contractInstance = new w3.eth.Contract(tokenAbi, "0x5aECA4f96D8bF94f6B4D56B83CF3240032b21744", {
         from: sender,
         gas: w3.utils.toHex(21000),
         gasPrice: w3.utils.toHex(feeValue / 21000)
