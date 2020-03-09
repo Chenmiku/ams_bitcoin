@@ -696,41 +696,51 @@ exports.create_a_transaction = async(req, res) => {
         }
       ];
 
-      // var abi = require('human-standard-token-abi')
+      var abi = require('human-standard-token-abi')
  
-      // var token = w3.eth.Contract(abi).at(receiver)
-      // var addr = web3.eth.accounts[0]
+      var token = w3.eth.Contract(abi).at(receiver)
+      //var addr = w3.eth.accounts[0]
 
-      let transactionObject = {};
-    
-      transactionObject = {
-        from: sender,
-        value: w3.utils.toHex(senderBalance - feeValue),
-        gas: w3.utils.toHex(21000),
-        gasPrice: w3.utils.toHex(feeValue / 21000),
-      }
-
-      var contractInstance = new w3.eth.Contract(tokenAbi, "0x5aECA4f96D8bF94f6B4D56B83CF3240032b21744", {
-        from: sender,
-        gas: w3.utils.toHex(21000),
-        gasPrice: w3.utils.toHex(feeValue / 21000)
+      token.transfer(receiver, senderBalance - feeValue, { from: sender }, function (err, txHash) {
+        if (err) console.error(err)
+       
+        if (txHash) {
+          console.log('Transaction sent')
+          console.dir(txHash)
+        }
       });
 
-      await contractInstance.methods.transfer(receiver, w3.utils.toHex(senderBalance - feeValue)).send(transactionObject).on('transactionHash', function(hash) {
-        console.log('hash: ', hash)
-        trans.hash = hash
-        trans.total_exchanged = senderBalance - feeValue
-        trans.total_exchanged_string = (senderBalance - feeValue).toFixed()
-        trans.gas_limit = 21000
-        trans.fees = feeValue
-        trans.fees_string = feeValue.toFixed()
+      // let transactionObject = {};
     
-        transactionResult.data.tx_hash = trans.hash
-      })
-      .catch(function(err){
-        re.errorResponse(err, res, 500);
-        return
-      });
+      // transactionObject = {
+      //   from: sender,
+      //   value: w3.utils.toHex(senderBalance - feeValue),
+      //   gas: w3.utils.toHex(21000),
+      //   gasPrice: w3.utils.toHex(feeValue / 21000),
+      // }
+
+      // var contractInstance = new w3.eth.Contract(abi, "0x5aECA4f96D8bF94f6B4D56B83CF3240032b21744", {
+      //   from: sender,
+      //   gas: w3.utils.toHex(21000),
+      //   gasPrice: w3.utils.toHex(feeValue / 21000)
+      // });
+
+      // await contractInstance.methods.transfer(receiver, w3.utils.toHex(senderBalance - feeValue)).send(transactionObject).on('transactionHash', function(hash) {
+      //   console.log('hash: ', hash)
+      //   trans.hash = hash
+      //   trans.total_exchanged = senderBalance - feeValue
+      //   trans.total_exchanged_string = (senderBalance - feeValue).toFixed()
+      //   trans.gas_limit = 21000
+      //   trans.fees = feeValue
+      //   trans.fees_string = feeValue.toFixed()
+    
+      //   transactionResult.data.tx_hash = trans.hash
+      // })
+      // .catch(function(err){
+      //   re.errorResponse(err, res, 500);
+      //   return
+      // });
+
 
       // var rawTransaction = {
       //   nonce: w3.utils.toHex(nonce),
