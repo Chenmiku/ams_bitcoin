@@ -492,7 +492,7 @@ exports.create_a_transaction = async(req, res) => {
 
       //Console.log(contractInstance.balanceOf(sender));
 
-      await contractInstance.methods.transfer(receiver, String(w3.utils.toWei(1,'ether'))).send({ from: sender }).on('transactionHash', function(hash) {
+      await contractInstance.methods.transfer(receiver, '10').send({ from: sender }).on('transactionHash', function(hash) {
         console.log('hash: ', hash)
         trans.hash = hash
         trans.total_exchanged = senderBalance - feeValue
