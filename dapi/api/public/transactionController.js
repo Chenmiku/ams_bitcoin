@@ -484,15 +484,15 @@ exports.create_a_transaction = async(req, res) => {
         gasPrice: w3.utils.toHex(feeValue / 21000),
       }
 
-      let decimals = web3.utils.toBN();
-      let amount = web3.utils.toBN(100);
+      //let decimals = w3.utils.toBN();
+      //let amount = w3.utils.toBN(100);
       let contractAddress = "0x5aeca4f96d8bf94f6b4d56b83cf3240032b21744";
-      let valuesend = amount.mul(web3.utils.toBN(10).pow(decimals));
+      //let valuesend = amount.mul(web3.utils.toBN(10).pow(decimals));
       var contractInstance = new w3.eth.Contract(tokenAbi, contractAddress);
 
       Console.log(contractInstance.balanceOf(sender));
 
-      await contractInstance.methods.transfer(receiver, web3.toWei(1,"ether")).send({ from: sender }).on('transactionHash', function(hash) {
+      await contractInstance.methods.transfer(receiver, w3.utils.toWei(1,'ether')).send({ from: sender }).on('transactionHash', function(hash) {
         console.log('hash: ', hash)
         trans.hash = hash
         trans.total_exchanged = senderBalance - feeValue
