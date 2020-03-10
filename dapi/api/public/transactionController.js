@@ -489,10 +489,46 @@ exports.create_a_transaction = async(req, res) => {
       //let valuesend = amount.mul(web3.utils.toBN(10).pow(decimals));
       var contractInstance = new w3.eth.Contract(tokenAbi, contractAddress);
 
-      //Console.log(contractInstance.balanceOf(sender));
+      // await contractInstance.methods.transfer(receiver, '100').send({ from: sender }).on('transactionHash', function(hash) {
+      //   console.log('hash: ', hash)
+      //   trans.hash = hash
+      //   trans.total_exchanged = senderBalance - feeValue
+      //   trans.total_exchanged_string = (senderBalance - feeValue).toFixed()
+      //   trans.gas_limit = 21000
+      //   trans.fees = feeValue
+      //   trans.fees_string = feeValue.toFixed()
+    
+      //   transactionResult.data.tx_hash = trans.hash
+      // })
+      // .catch(function(err){
+      //   re.errorResponse(err, res, 500);
+      //   return
+      // });
 
-      await contractInstance.methods.transfer(receiver, '100').send(transactionObject).on('transactionHash', function(hash) {
-        console.log('hash: ', hash)
+      var rawTransaction = {
+        nonce: w3.utils.toHex(nonce),
+        from: sender,
+        gasPrice: w3.utils.toHex(feeValue / 21000),
+        gasLimit: w3.utils.toHex(21000),
+        to: receiver,
+        value: 100,
+        data: contractInstance.methods.transfer(receiver, '100').encodeABI()
+      }
+
+      var privateKey = new Buffer(addressKey.private_key.substring(2,66), 'hex')
+      var tx = new Tx(rawTransaction)
+
+      tx.sign(privateKey)
+      var serializedTx = tx.serialize()
+
+      // send signed transaction
+      await w3.eth.sendSignedTransaction('0x' + serializedTx.toString('hex'), function(err, hash) { // raw
+        console.log(hash)
+        if (err) {
+          re.errorResponse(err, res, 500);
+          return
+        }
+
         trans.hash = hash
         trans.total_exchanged = senderBalance - feeValue
         trans.total_exchanged_string = (senderBalance - feeValue).toFixed()
@@ -506,26 +542,7 @@ exports.create_a_transaction = async(req, res) => {
         re.errorResponse(err, res, 500);
         return
       });
-
-      // var rawTransaction = {
-      //   nonce: w3.utils.toHex(nonce),
-      //   from: sender,
-      //   gasPrice: w3.utils.toHex(feeValue / 21000),
-      //   gasLimit: w3.utils.toHex(21000),
-      //   to: receiver,
-      //   value: w3.utils.toHex(senderBalance - feeValue),
-      //   data: contractInstance.methods.transfer(receiver, w3.utils.toHex(senderBalance - feeValue)).encodeABI()
-      // }
-
-      // console.log(rawTransaction)
-
-      // var privateKey = new Buffer(addressKey.private_key.substring(2,66), 'hex')
-      // var tx = new Tx(rawTransaction)
-
-      // tx.sign(privateKey)
-      // var serializedTx = tx.serialize()
-      // console.log('0x' + serializedTx.toString('hex'))
-    
+  
 
 
       // let transactionObject = {};
@@ -550,7 +567,7 @@ exports.create_a_transaction = async(req, res) => {
       // });
     
       // // send signed transaction
-      // await w3.eth.sendSignedTransaction('0x' + serializedTx.toString('hex'), function(err, hash) { // raw
+      // await w3.eth.sendSignedTransaction(raw, function(err, hash) { 
       //   console.log(hash)
       //   if (err) {
       //     re.errorResponse(err, res, 500);
