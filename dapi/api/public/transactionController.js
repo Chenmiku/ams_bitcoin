@@ -59,7 +59,7 @@ var transactionHistory = {
 exports.check_deposit_history = async(req, res) => {
   let q = url.parse(req.url, true).query
   const addr = q.addr
-  const service = q.service.toLocaleLowerCase();
+  var service = q.service;
   var count = 0 
 
   // check params
@@ -67,6 +67,8 @@ exports.check_deposit_history = async(req, res) => {
     re.errorResponse('service_empty', res, 400)
     return
   }
+
+  service = service.toLocaleLowerCase();
 
   if (addr != "") {
     // check exists address
@@ -163,7 +165,7 @@ exports.check_deposit_history = async(req, res) => {
 exports.check_transaction_history = async(req, res) => {
   let q = url.parse(req.url, true).query
   const addr = q.addr
-  const service = q.service.toLocaleLowerCase();
+  var service = q.service;
   var count = 0 
 
   // check params
@@ -171,6 +173,8 @@ exports.check_transaction_history = async(req, res) => {
     re.errorResponse('service_empty', res, 400)
     return
   }
+
+  service = service.toLocaleLowerCase();
 
   if (addr != "") {
     // check exists address
@@ -276,10 +280,10 @@ exports.list_all_transaction = async(req, res) => {
 // api send coin to polebit
 exports.create_a_transaction = async(req, res) => {
   let q = url.parse(req.url, true).query;
-  const coinType = q.coin_type.toLocaleLowerCase();
+  var coinType = q.coin_type;
   const sender = q.sender
   const receiver = q.receiver
-  const service = q.service.toLocaleLowerCase();
+  var service = q.service;
   var trans = new Trans()
   var feeValue = 20000000000 * 21000
   var feeBitValue = 3000
@@ -299,6 +303,14 @@ exports.create_a_transaction = async(req, res) => {
     re.errorResponse('sender_or_receiver_empty', res, 400)
     return
   }
+
+  if (coinType == "") {
+    re.errorResponse('cointype_empty', res, 400)
+    return
+  }
+
+  coinType = coinType.toLocaleLowerCase();
+  service = service.toLocaleLowerCase();
 
   // check exists address
   await Addr.findOne({ addr: sender }, function(err, addr){
@@ -731,9 +743,9 @@ exports.create_a_transaction = async(req, res) => {
 // api check deposit state by address
 exports.check_deposit_state = async(req, res) => {
   let q = url.parse(req.url, true).query;
-  const coinType = q.coin_type.toLocaleLowerCase();
+  var coinType = q.coin_type;
   const addr = q.addr
-  const service = q.service.toLocaleLowerCase();
+  var service = q.service;
   var address = new Addr()
   var new_address = new Addr()
   var walletName = ""
@@ -747,6 +759,13 @@ exports.check_deposit_state = async(req, res) => {
     errorMessage('address_empty', res, 400)
     return
   }
+  if (coinType == "") {
+    re.errorResponse('cointype_empty', res, 400)
+    return
+  }
+
+  coinType = coinType.toLocaleLowerCase();
+  service = service.toLocaleLowerCase();
 
   // check exists address
   await Addr.findOne({ addr: addr }, function(err, add){
@@ -945,9 +964,9 @@ exports.check_deposit_state = async(req, res) => {
 // api check transaction state
 exports.check_transaction = async(req, res) => {
   let q = url.parse(req.url, true).query;
-  const coinType = q.coin_type.toLocaleLowerCase();
+  var coinType = q.coin_type;
   const hash = q.hash
-  const service = q.service.toLocaleLowerCase();
+  var service = q.service;
   var walletName = ""
   var sender = ""
   var trans = new Trans()
@@ -961,6 +980,14 @@ exports.check_transaction = async(req, res) => {
     errorMessage('transaction_hash_empty', res, 400)
     return
   }
+
+  if (coinType == "") {
+    re.errorResponse('cointype_empty', res, 400)
+    return
+  }
+
+  coinType = coinType.toLocaleLowerCase();
+  service = service.toLocaleLowerCase();
 
   // check exists transaction
   await Trans.findOne({ hash: hash }, function(err, tran){

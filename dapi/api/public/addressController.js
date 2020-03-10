@@ -53,9 +53,9 @@ exports.list_all_addresses = async(req, res) => {
 // api generate address
 exports.create_a_address = async(req, res) => {
   const q = url.parse(req.url, true).query;
-  const coinType = q.coin_type.toLocaleLowerCase();
+  var coinType = q.coin_type;
   const userId = q.user_id;
-  const service = q.service.toLocaleLowerCase();
+  var service = q.service;
   var new_address = new Addr();
   var new_addresskey = new AddrKey();
   var new_wallet = new Wallet();
@@ -67,6 +67,13 @@ exports.create_a_address = async(req, res) => {
     re.errorResponse('service_empty', res, 400)
     return
   }
+  if (coinType == "") {
+    re.errorResponse('cointype_empty', res, 400)
+    return
+  }
+
+  coinType = coinType.toLocaleLowerCase();
+  service = service.toLocaleLowerCase();
 
   // check coin type
   switch(coinType) {
@@ -319,9 +326,9 @@ exports.create_a_address = async(req, res) => {
 // Api get By address
 exports.get_a_address = async(req, res) => {
   const q = url.parse(req.url, true).query;
-  const coinType = q.coin_type.toLocaleLowerCase();
+  var coinType = q.coin_type;
   const addr = q.addr
-  const service = q.service.toLocaleLowerCase();
+  var service = q.service;
   var new_address = new Addr()
   var walletName = ""
 
@@ -335,6 +342,14 @@ exports.get_a_address = async(req, res) => {
     re.errorResponse('address_empty', res, 400)
     return
   }
+
+  if (coinType == "") {
+    re.errorResponse('cointype_empty', res, 400)
+    return
+  }
+
+  coinType = coinType.toLocaleLowerCase();
+  service = service.toLocaleLowerCase();
 
   // check coin type
   switch(coinType) {
