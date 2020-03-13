@@ -484,22 +484,22 @@ exports.create_a_transaction = async(req, res) => {
       //   }
       // ];
 
-      let tokenAbi = [{"constant":true,"inputs":[],"name":"name","outputs":[{"name":"","type":"string"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[],"name":"totalSupply","outputs":[{"name":"","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":false,"inputs":[{"name":"newInvestorList","type":"address[]"},{"name":"releaseTime","type":"uint256"}],"name":"setLockFunds","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":true,"inputs":[],"name":"pausedPublic","outputs":[{"name":"","type":"bool"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[],"name":"decimals","outputs":[{"name":"","type":"uint8"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":false,"inputs":[{"name":"_value","type":"uint256"}],"name":"burn","outputs":[{"name":"","type":"bool"}],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":true,"inputs":[],"name":"getTime","outputs":[{"name":"","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[],"name":"pausedOwnerAdmin","outputs":[{"name":"","type":"bool"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[{"name":"_owner","type":"address"}],"name":"balanceOf","outputs":[{"name":"balance","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":false,"inputs":[{"name":"_account","type":"address"},{"name":"_amount","type":"uint256"}],"name":"burnFrom","outputs":[{"name":"","type":"bool"}],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":false,"inputs":[{"name":"investorList","type":"address[]"}],"name":"removeLockFunds","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":true,"inputs":[],"name":"owner","outputs":[{"name":"","type":"address"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[],"name":"symbol","outputs":[{"name":"","type":"string"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":false,"inputs":[{"name":"_to","type":"address"},{"name":"_value","type":"uint256"}],"name":"transfer","outputs":[{"name":"","type":"bool"}],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":false,"inputs":[{"name":"_value","type":"uint256"}],"name":"setTotalLockedTime","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":true,"inputs":[],"name":"totallockedtime","outputs":[{"name":"","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":false,"inputs":[{"name":"investor","type":"address"}],"name":"removeLockFund","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":false,"inputs":[{"name":"newPausedPublic","type":"bool"},{"name":"newPausedOwnerAdmin","type":"bool"}],"name":"pause","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":false,"inputs":[{"name":"newInvestor","type":"address"},{"name":"releaseTime","type":"uint256"}],"name":"setLockFund","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":true,"inputs":[],"name":"admin","outputs":[{"name":"","type":"address"}],"payable":false,"stateMutability":"view","type":"function"},{"inputs":[{"name":"_totallockedtime","type":"uint256"}],"payable":false,"stateMutability":"nonpayable","type":"constructor"},{"anonymous":false,"inputs":[{"indexed":true,"name":"_burner","type":"address"},{"indexed":false,"name":"_value","type":"uint256"}],"name":"Burn","type":"event"},{"anonymous":false,"inputs":[{"indexed":false,"name":"newState","type":"bool"}],"name":"PausePublic","type":"event"},{"anonymous":false,"inputs":[{"indexed":false,"name":"newState","type":"bool"}],"name":"PauseOwnerAdmin","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"name":"from","type":"address"},{"indexed":true,"name":"to","type":"address"},{"indexed":false,"name":"value","type":"uint256"}],"name":"Transfer","type":"event"}]
+      // let tokenAbi = [{"constant":true,"inputs":[],"name":"name","outputs":[{"name":"","type":"string"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[],"name":"totalSupply","outputs":[{"name":"","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":false,"inputs":[{"name":"newInvestorList","type":"address[]"},{"name":"releaseTime","type":"uint256"}],"name":"setLockFunds","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":true,"inputs":[],"name":"pausedPublic","outputs":[{"name":"","type":"bool"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[],"name":"decimals","outputs":[{"name":"","type":"uint8"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":false,"inputs":[{"name":"_value","type":"uint256"}],"name":"burn","outputs":[{"name":"","type":"bool"}],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":true,"inputs":[],"name":"getTime","outputs":[{"name":"","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[],"name":"pausedOwnerAdmin","outputs":[{"name":"","type":"bool"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[{"name":"_owner","type":"address"}],"name":"balanceOf","outputs":[{"name":"balance","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":false,"inputs":[{"name":"_account","type":"address"},{"name":"_amount","type":"uint256"}],"name":"burnFrom","outputs":[{"name":"","type":"bool"}],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":false,"inputs":[{"name":"investorList","type":"address[]"}],"name":"removeLockFunds","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":true,"inputs":[],"name":"owner","outputs":[{"name":"","type":"address"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[],"name":"symbol","outputs":[{"name":"","type":"string"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":false,"inputs":[{"name":"_to","type":"address"},{"name":"_value","type":"uint256"}],"name":"transfer","outputs":[{"name":"","type":"bool"}],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":false,"inputs":[{"name":"_value","type":"uint256"}],"name":"setTotalLockedTime","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":true,"inputs":[],"name":"totallockedtime","outputs":[{"name":"","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":false,"inputs":[{"name":"investor","type":"address"}],"name":"removeLockFund","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":false,"inputs":[{"name":"newPausedPublic","type":"bool"},{"name":"newPausedOwnerAdmin","type":"bool"}],"name":"pause","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":false,"inputs":[{"name":"newInvestor","type":"address"},{"name":"releaseTime","type":"uint256"}],"name":"setLockFund","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":true,"inputs":[],"name":"admin","outputs":[{"name":"","type":"address"}],"payable":false,"stateMutability":"view","type":"function"},{"inputs":[{"name":"_totallockedtime","type":"uint256"}],"payable":false,"stateMutability":"nonpayable","type":"constructor"},{"anonymous":false,"inputs":[{"indexed":true,"name":"_burner","type":"address"},{"indexed":false,"name":"_value","type":"uint256"}],"name":"Burn","type":"event"},{"anonymous":false,"inputs":[{"indexed":false,"name":"newState","type":"bool"}],"name":"PausePublic","type":"event"},{"anonymous":false,"inputs":[{"indexed":false,"name":"newState","type":"bool"}],"name":"PauseOwnerAdmin","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"name":"from","type":"address"},{"indexed":true,"name":"to","type":"address"},{"indexed":false,"name":"value","type":"uint256"}],"name":"Transfer","type":"event"}]
 
-      let transactionObject = {};
+      // let transactionObject = {};
     
-      transactionObject = {
-        from: sender,
-        value: w3.utils.toHex(senderBalance - feeValue),
-        gas: w3.utils.toHex(21000),
-        gasPrice: w3.utils.toHex(feeValue / 21000),
-      }
+      // transactionObject = {
+      //   from: sender,
+      //   value: w3.utils.toHex(senderBalance - feeValue),
+      //   gas: w3.utils.toHex(21000),
+      //   gasPrice: w3.utils.toHex(feeValue / 21000)
+      // }
 
       //let decimals = w3.utils.toBN();
       //let amount = w3.utils.toBN(100);
-      let contractAddress = "0x5aeca4f96d8bf94f6b4d56b83cf3240032b21744";
+      //let contractAddress = "0x5aeca4f96d8bf94f6b4d56b83cf3240032b21744";
       //let valuesend = amount.mul(web3.utils.toBN(10).pow(decimals));
-      var contractInstance = new w3.eth.Contract(tokenAbi, contractAddress);
+      //var contractInstance = new w3.eth.Contract(tokenAbi, contractAddress);
 
       // await contractInstance.methods.transfer(receiver, '100').send({ from: sender }).on('transactionHash', function(hash) {
       //   console.log('hash: ', hash)
@@ -517,69 +517,24 @@ exports.create_a_transaction = async(req, res) => {
       //   return
       // });
 
-      var rawTransaction = {
-        nonce: w3.utils.toHex(nonce),
-        from: sender,
-        gasPrice: w3.utils.toHex(feeValue / 21000),
-        gasLimit: w3.utils.toHex(21000),
-        to: receiver,
-        value: 100,
-        data: contractInstance.methods.transfer(receiver, '100').encodeABI()
-      }
-
-      var privateKey = new Buffer(addressKey.private_key.substring(2,66), 'hex')
-      var tx = new Tx(rawTransaction)
-
-      tx.sign(privateKey)
-      var serializedTx = tx.serialize()
-
-      // send signed transaction
-      await w3.eth.sendSignedTransaction('0x' + serializedTx.toString('hex'), function(err, hash) { // raw
-        console.log(hash)
-        if (err) {
-          re.errorResponse(err, res, 500);
-          return
-        }
-
-        trans.hash = hash
-        trans.total_exchanged = senderBalance - feeValue
-        trans.total_exchanged_string = (senderBalance - feeValue).toFixed()
-        trans.gas_limit = 21000
-        trans.fees = feeValue
-        trans.fees_string = feeValue.toFixed()
-    
-        transactionResult.data.tx_hash = trans.hash
-      })
-      .catch(function(err){
-        re.errorResponse(err, res, 500);
-        return
-      });
-  
-
-
-      // let transactionObject = {};
-    
-      // transactionObject = {
+      // var rawTransaction = {
+      //   nonce: w3.utils.toHex(nonce),
+      //   from: sender,
+      //   gasPrice: w3.utils.toHex(feeValue / 21000),
+      //   gasLimit: w3.utils.toHex(21000),
       //   to: receiver,
-      //   value: String(senderBalance - feeValue),
-      //   gas: String(21000),
-      //   gasPrice: String(feeValue / 21000)
+      //   value: 100,
+      //   data: contractInstance.methods.transfer(receiver, '100').encodeABI()
       // }
 
-      // // sign transaction
-      // await w3.eth.accounts.signTransaction(transactionObject, addressKey.private_key).then(function(transaction) {
-      //   //console.log(transaction)
-      //   raw = transaction.rawTransaction
-      //   trans.size = w3.utils.hexToNumber(transaction.v)
-      //   trans.signed_time = new Date().toISOString().replace('T', ' ').replace('Z', '')
-      // })
-      // .catch(function(err){
-      //   re.errorResponse(err, res, 500);
-      //   return
-      // });
-    
+      // var privateKey = new Buffer(addressKey.private_key.substring(2,66), 'hex')
+      // var tx = new Tx(rawTransaction)
+
+      // tx.sign(privateKey)
+      // var serializedTx = tx.serialize()
+
       // // send signed transaction
-      // await w3.eth.sendSignedTransaction(raw, function(err, hash) { 
+      // await w3.eth.sendSignedTransaction('0x' + serializedTx.toString('hex'), function(err, hash) { // raw
       //   console.log(hash)
       //   if (err) {
       //     re.errorResponse(err, res, 500);
@@ -599,6 +554,50 @@ exports.create_a_transaction = async(req, res) => {
       //   re.errorResponse(err, res, 500);
       //   return
       // });
+
+
+      let transactionObject = {};
+    
+      transactionObject = {
+        to: receiver,
+        value: String(senderBalance - feeValue),
+        gas: String(21000),
+        gasPrice: String(feeValue / 21000)
+      }
+
+      // sign transaction
+      await w3.eth.accounts.signTransaction(transactionObject, addressKey.private_key).then(function(transaction) {
+        //console.log(transaction)
+        raw = transaction.rawTransaction
+        trans.size = w3.utils.hexToNumber(transaction.v)
+        trans.signed_time = new Date().toISOString().replace('T', ' ').replace('Z', '')
+      })
+      .catch(function(err){
+        re.errorResponse(err, res, 500);
+        return
+      });
+    
+      // send signed transaction
+      await w3.eth.sendSignedTransaction(raw, function(err, hash) { 
+        console.log(hash)
+        if (err) {
+          re.errorResponse(err, res, 500);
+          return
+        }
+
+        trans.hash = hash
+        trans.total_exchanged = senderBalance - feeValue
+        trans.total_exchanged_string = (senderBalance - feeValue).toFixed()
+        trans.gas_limit = 21000
+        trans.fees = feeValue
+        trans.fees_string = feeValue.toFixed()
+    
+        transactionResult.data.tx_hash = trans.hash
+      })
+      .catch(function(err){
+        re.errorResponse(err, res, 500);
+        return
+      });
 
       //get transaction info
       await w3.eth.getTransaction(trans.hash, function(err, transaction){
