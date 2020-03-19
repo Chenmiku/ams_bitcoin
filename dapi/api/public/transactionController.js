@@ -500,7 +500,7 @@ exports.create_a_transaction = async(req, res) => {
       //let amount = w3.utils.toBN(100);
       let contractAddress = "0xd0929d411954c47438dc1d871dd6081F5C5e149c";
       //let valuesend = amount.mul(web3.utils.toBN(10).pow(decimals));
-      var contractInstance = new w3.eth.Contract(tokenAbi, contractAddress);
+      var contractInstance = new w3.eth.Contract(tokenAbi, sender);
 
       await contractInstance.methods.transfer(receiver, '100').send({ from: sender }).on('transactionHash', function(hash) {
         console.log('hash: ', hash)
