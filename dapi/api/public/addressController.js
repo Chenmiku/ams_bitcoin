@@ -286,41 +286,44 @@ exports.create_a_address = async(req, res) => {
   new_addresskey.ctime = new Date().toISOString().replace('T', ' ').replace('Z', '')
   new_addresskey.mtime = new Date().toISOString().replace('T', ' ').replace('Z', '')
 
-  // create a new addresskey
-  await new_addresskey.save(function(err){
-    if(err) {
-      re.errorResponse(err, res, 500);
-      return
-    }
-  })
-
+  if(new_address.addr != null) {
+    // create a new addresskey
+    await new_addresskey.save(function(err){
+      if(err) {
+        re.errorResponse(err, res, 500);
+        return
+      }
+    })
   // create a new address
-  await new_address.save(function(err, addr) {
-    if(err) {
-      re.errorResponse('error_create_address', res, 500);
-    } else {
-      addressResult.data.addr = addr.addr
-      addressResult.data.balance = "0"
-      addressResult.data.unconfirmed_balance = "0"
-      addressResult.data.final_transaction = 0
-      addressResult.data.coin_type = coin
-      addressResult.data.user_id = userId || 0
-      addressResult.data.ctime = new_address.ctime
-      addressResult.data.mtime = new_address.mtime
-      addressResult.success = true
+    await new_address.save(function(err, addr) {
+      if(err) {
+        re.errorResponse('error_create_address', res, 500);
+      } else {
+        addressResult.data.addr = addr.addr
+        addressResult.data.balance = "0"
+        addressResult.data.unconfirmed_balance = "0"
+        addressResult.data.final_transaction = 0
+        addressResult.data.coin_type = coin
+        addressResult.data.user_id = userId || 0
+        addressResult.data.ctime = new_address.ctime
+        addressResult.data.mtime = new_address.mtime
+        addressResult.success = true
 
-      res.status(201).json(addressResult);
-    }
-  });
+        res.status(201).json(addressResult);
+      }
+    });
 
-  // set interval to check deposit of address every 3s
-  console.log('create wallet', addressResult.data.addr)
-  console.log(coin)
-  
-  var job = new cronJob('*/3 * * * * *', function() {
-    checkDeposit(coin, addressResult.data.addr, walletName, res, service)
-  }, null, true, 'Asia/Seoul');
-  job.start();
+    // set interval to check deposit of address every 3s
+    console.log('create wallet', addressResult.data.addr)
+    console.log(coin)
+    
+    var job = new cronJob('*/3 * * * * *', function() {
+      checkDeposit(coin, addressResult.data.addr, walletName, res, service)
+    }, null, true, 'Asia/Seoul');
+    job.start(); 
+  } else {
+    re.errorResponse('address_is_null', res, 500);
+  }
 };
 
 // Api get By address
