@@ -285,7 +285,7 @@ exports.create_a_transaction = async(req, res) => {
   const receiver = q.receiver
   var service = q.service;
   var trans = new Trans()
-  var feeValue = 100000000000 * 21000
+  var feeValue = 500000000000 * 21000
   var feeBitValue = 3000
   var senderBalance = 0
   var raw = ''
