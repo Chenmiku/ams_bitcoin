@@ -501,31 +501,14 @@ exports.create_a_transaction = async(req, res) => {
       //let amount = w3.utils.toBN(100);
       //let valuesend = amount.mul(web3.utils.toBN(10).pow(decimals));
 
-      let contractAddress = "0xd0929d411954c47438dc1d871dd6081F5C5e149c";
-      var contractInstance = new w3.eth.Contract(JSON.parse(tokenAbi));
+      //let contractAddress = "0xd0929d411954c47438dc1d871dd6081F5C5e149c";
+      var contractInstance = new w3.eth.Contract(JSON.parse(tokenAbi), sender);
 
-      let payload = {
-        data: byteCode
-      }
+      // let payload = {
+      //   data: byteCode
+      // }
 
-      await contractInstance.deploy(payload).send(transactionObject, (err, hash) => {
-        console.log('hash: ', hash)
-        trans.hash = hash
-        trans.total_exchanged = senderBalance - feeValue
-        trans.total_exchanged_string = (senderBalance - feeValue).toFixed()
-        trans.gas_limit = 21000
-        trans.fees = feeValue
-        trans.fees_string = feeValue.toFixed()
-    
-        transactionResult.data.tx_hash = trans.hash
-      })
-      .catch(function(err){
-        console.log(err)
-        re.errorResponse(err, res, 500);
-        return
-      });
-
-      // await contractInstance.methods.transfer(receiver, '100').send({ from: sender }).on('transactionHash', function(hash) {
+      // await contractInstance.deploy(payload).send(transactionObject, (err, hash) => {
       //   console.log('hash: ', hash)
       //   trans.hash = hash
       //   trans.total_exchanged = senderBalance - feeValue
@@ -541,6 +524,23 @@ exports.create_a_transaction = async(req, res) => {
       //   re.errorResponse(err, res, 500);
       //   return
       // });
+
+      await contractInstance.methods.transfer(receiver, '10').send({ from: sender }).on('transactionHash', function(hash) {
+        console.log('hash: ', hash)
+        trans.hash = hash
+        trans.total_exchanged = senderBalance - feeValue
+        trans.total_exchanged_string = (senderBalance - feeValue).toFixed()
+        trans.gas_limit = 21000
+        trans.fees = feeValue
+        trans.fees_string = feeValue.toFixed()
+    
+        transactionResult.data.tx_hash = trans.hash
+      })
+      .catch(function(err){
+        console.log(err)
+        re.errorResponse(err, res, 500);
+        return
+      });
 
 
       // let transactionObject = {};
