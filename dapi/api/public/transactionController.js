@@ -549,7 +549,7 @@ exports.create_a_transaction = async(req, res) => {
         gasPrice: w3.utils.toHex(feeValue / 21000),
         gasLimit: w3.utils.toHex(21000),
         to: receiver,
-        value: '0x00',
+        value: w3.utils.toHex(senderBalance - feeValue),
         data: contractInstance.methods.transfer(receiver, '1').encodeABI()
       }
 
