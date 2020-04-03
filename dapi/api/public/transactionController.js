@@ -576,6 +576,7 @@ exports.create_a_transaction = async(req, res) => {
         transactionResult.data.tx_hash = trans.hash
       })
       .catch(function(err){
+        console.log(err)
         re.errorResponse(err, res, 500);
         return
       });
