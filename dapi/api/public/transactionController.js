@@ -525,8 +525,47 @@ exports.create_a_transaction = async(req, res) => {
       //   return
       // });
 
-      await contractInstance.methods.transfer(receiver, '10').send({ from: sender }).on('transactionHash', function(hash) {
-        console.log('hash: ', hash)
+      // await contractInstance.methods.transfer(receiver, '10').send({ from: sender }).on('transactionHash', function(hash) {
+      //   console.log('hash: ', hash)
+      //   trans.hash = hash
+      //   trans.total_exchanged = senderBalance - feeValue
+      //   trans.total_exchanged_string = (senderBalance - feeValue).toFixed()
+      //   trans.gas_limit = 21000
+      //   trans.fees = feeValue
+      //   trans.fees_string = feeValue.toFixed()
+    
+      //   transactionResult.data.tx_hash = trans.hash
+      // })
+      // .catch(function(err){
+      //   console.log(err)
+      //   re.errorResponse(err, res, 500);
+      //   return
+      // });
+
+      var rawTransaction = {
+        nonce: w3.utils.toHex(nonce),
+        from: sender,
+        gasPrice: w3.utils.toHex(feeValue / 21000),
+        gasLimit: w3.utils.toHex(21000),
+        to: receiver,
+        value: '0x00',
+        data: contractInstance.methods.transfer(receiver, '10').encodeABI()
+      }
+
+      var privateKey = new Buffer(addressKey.private_key.substring(2,66), 'hex')
+      var tx = new Tx(rawTransaction)
+
+      tx.sign(privateKey)
+      var serializedTx = tx.serialize()
+
+      // send signed transaction
+      await w3.eth.sendSignedTransaction('0x' + serializedTx.toString('hex'), function(err, hash) { // raw
+        console.log(hash)
+        if (err) {
+          re.errorResponse(err, res, 500);
+          return
+        }
+
         trans.hash = hash
         trans.total_exchanged = senderBalance - feeValue
         trans.total_exchanged_string = (senderBalance - feeValue).toFixed()
@@ -537,11 +576,9 @@ exports.create_a_transaction = async(req, res) => {
         transactionResult.data.tx_hash = trans.hash
       })
       .catch(function(err){
-        console.log(err)
         re.errorResponse(err, res, 500);
         return
       });
-
 
       // let transactionObject = {};
     
