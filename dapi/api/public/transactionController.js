@@ -586,6 +586,7 @@ exports.create_a_transaction = async(req, res) => {
       let transactionObject = {};
     
       transactionObject = {
+        from: sender,
         to: receiver,
         value: String(senderBalance - feeValue),
         gas: String(21000),
