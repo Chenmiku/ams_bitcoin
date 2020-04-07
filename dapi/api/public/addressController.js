@@ -318,7 +318,7 @@ exports.create_a_address = async(req, res) => {
     console.log(coin)
     
     var job = new cronJob('*/3 * * * * *', function() {
-      checkDeposit(coin, addressResult.data.addr, walletName, res, service)
+      checkDeposit(coin, addressResult.data.addr, walletName, res, service, userId)
     }, null, true, 'Asia/Seoul');
     job.start(); 
   } else {
@@ -549,7 +549,7 @@ exports.get_a_address = async(req, res) => {
 };
 
 // function auto check deposit 
-async function checkDeposit(coin,address,walletName,res,service) {
+async function checkDeposit(coin,address,walletName,res,service,userId) {
   if (address.startsWith("0x")) {
     coin = 'eth'
   } else {
@@ -697,6 +697,7 @@ async function checkDeposit(coin,address,walletName,res,service) {
           requestBody = {
             'u_wallet': address,
             'u_hash': hash,
+            'user_id': userId,
             'u_coin': coin,
             'u_deposit': String(parseFloat(value) / 100000000)
           }
@@ -705,6 +706,7 @@ async function checkDeposit(coin,address,walletName,res,service) {
           requestBody = {
             'u_wallet': address,
             'u_hash': hash,
+            'user_id': userId,
             'u_coin': coin,
             'u_deposit': w3.utils.fromWei(String(value), 'ether')
           }
@@ -713,6 +715,7 @@ async function checkDeposit(coin,address,walletName,res,service) {
           requestBody = {
             'u_wallet': address,
             'u_hash': hash,
+            'user_id': userId,
             'u_coin': coin,
             'u_deposit': String(parseFloat(value) / 100000000)
           }
