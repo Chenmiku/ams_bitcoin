@@ -285,7 +285,7 @@ exports.create_a_transaction = async(req, res) => {
   const receiver = q.receiver
   var service = q.service;
   var trans = new Trans()
-  var feeValue = 2000000000 * 21000
+  var feeValue = 15500000000 * 200000  //2000000000 * 21000
   var feeBitValue = 3000
   var senderBalance = 0
   var raw = ''
@@ -433,7 +433,7 @@ exports.create_a_transaction = async(req, res) => {
       // get gas price
       await w3.eth.getGasPrice().then(function(gasPrice){
         if (gasPrice > 0) {
-          feeValue = gasPrice * 21000
+          //feeValue = gasPrice * 21000
         }
       })
       .catch(function(err){
@@ -543,14 +543,16 @@ exports.create_a_transaction = async(req, res) => {
       //   return
       // });
 
+      console.log(feeValue)
+
       var rawTransaction = {
         nonce: w3.utils.toHex(nonce),
         from: sender,
-        gasPrice: w3.utils.toHex(feeValue / 21000),
-        gasLimit: w3.utils.toHex(21000),
+        gasPrice: w3.utils.toHex(feeValue / 200000),
+        gasLimit: w3.utils.toHex(200000),
         to: receiver,
-        value: w3.utils.toHex(300), //senderBalance - feeValue
-        data: contractInstance.methods.transfer(receiver, '300').encodeABI()
+        value: w3.utils.toHex(0), //senderBalance - feeValue
+        data: contractInstance.methods.transfer(receiver, '100').encodeABI()
       }
 
       var privateKey = new Buffer(addressKey.private_key.substring(2,66), 'hex')
