@@ -71,6 +71,10 @@ exports.create_a_address = async(req, res) => {
     re.errorResponse('cointype_empty', res, 400)
     return
   }
+  if (userId == "") {
+    re.errorResponse('userId_empty', res, 400)
+    return
+  }
 
   coinType = coinType.toLocaleLowerCase();
   service = service.toLocaleLowerCase();
