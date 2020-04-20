@@ -491,7 +491,7 @@ exports.create_a_transaction = async(req, res) => {
       let contractAddress = "0xd0929d411954c47438dc1d871dd6081f5c5e149c";
       var contractInstance = new w3.eth.Contract(tokenAbi, contractAddress, { from: sender });
 
-      console.log(contractInstance.balanceOf.call(sender))
+      console.log(contractInstance.methods.balanceOf(sender))
 
       // let transactionObject = {};
     
