@@ -443,6 +443,7 @@ exports.create_a_transaction = async(req, res) => {
       
       //get balance address
       await w3.eth.getBalance(sender).then(function(bal){
+        console.log(bal)
         if (Number(bal) <= feeValue) {
           re.errorResponse('not_enough_fund', res, 500);
           return
@@ -464,9 +465,13 @@ exports.create_a_transaction = async(req, res) => {
       let contractAddress = "0xd0929d411954c47438dc1d871dd6081f5c5e149c";
       var contractInstance = new w3.eth.Contract(tokenAbi, contractAddress, { from: sender });
 
-      await contractInstance.balanceOf(sender).then(function(value){
-        console.log(value)
+      await w3.eth.getBalance(contractAddress).then(function(bal){
+        console.log(bal)
       })
+      .catch(function(err){
+        re.errorResponse(err, res, 500);
+        return
+      });
 
       // let transactionObject = {};
     
