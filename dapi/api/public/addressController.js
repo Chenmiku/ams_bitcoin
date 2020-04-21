@@ -462,7 +462,7 @@ exports.get_a_address = async(req, res) => {
       });
 
       addressResult.data.balance = w3.utils.fromWei(new_address.balance_string, 'ether');
-      addressResult.data.token_balance = String(parseFloat(String(new_address.token_balance)) / 10000)
+      addressResult.data.token_balance = String(parseFloat(new_address.token_balance) / 10000)
       addressResult.data.unconfirmed_balance = 0
 
       break;
