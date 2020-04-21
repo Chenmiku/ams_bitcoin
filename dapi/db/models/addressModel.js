@@ -44,7 +44,7 @@ var addressSchema = new schema({
         type: String
     },
     token_balance: {
-        type: Number
+        type: String
     },
     ctime: {
         type: String,

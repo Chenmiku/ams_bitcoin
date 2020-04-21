@@ -282,7 +282,7 @@ exports.create_a_address = async(req, res) => {
   new_address.user_id = userId || 0
   new_address.coin_type = coin
   new_address.service = service
-  new_address.token_balance = 0
+  new_address.token_balance = "0"
   new_address.ctime = new Date().toISOString().replace('T', ' ').replace('Z', '')
   new_address.mtime = new Date().toISOString().replace('T', ' ').replace('Z', '')
 
@@ -458,7 +458,8 @@ exports.get_a_address = async(req, res) => {
       var contractInstance = new w3.eth.Contract(tokenAbi, contractAddress, { from: addr });
       var data = contractInstance.methods.balanceOf(addr).call()
       data.then(function(val){
-        console.log(w3.utils.toWei(val))
+        console.log(w3.utils.toWei(val, 'wei'))
+        console.log(w3.utils.toWei(val, 'wei') / 10000)
         //new_address.token_balance = parseInt(val)
         //addressResult.data.token_balance = String(parseFloat(val) / 10000)
       });
