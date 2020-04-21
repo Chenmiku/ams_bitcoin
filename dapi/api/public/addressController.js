@@ -31,7 +31,7 @@ var addressResult = {
   data: {
     addr: String,
     balance: String,
-    token_balance: Number,
+    token_balance: String,
     unconfirmed_balance: String,
     final_transaction: Number,
     coin_type: String,
@@ -307,7 +307,7 @@ exports.create_a_address = async(req, res) => {
       } else {
         addressResult.data.addr = addr.addr
         addressResult.data.balance = "0"
-        addressResult.data.token_balance = 0
+        addressResult.data.token_balance = "0"
         addressResult.data.unconfirmed_balance = "0"
         addressResult.data.final_transaction = 0
         addressResult.data.coin_type = coin
@@ -458,12 +458,11 @@ exports.get_a_address = async(req, res) => {
       var contractInstance = new w3.eth.Contract(tokenAbi, contractAddress, { from: addr });
       var data = contractInstance.methods.balanceOf(addr).call()
       data.then(function(val){
-        console.log(parseInt(val))
-        new_address.token_balance = parseInt(val) / 10000
+        new_address.token_balance = parseInt(val)
       });
 
       addressResult.data.balance = w3.utils.fromWei(new_address.balance_string, 'ether');
-      addressResult.data.token_balance = new_address.token_balance
+      addressResult.data.token_balance = String(parseFloat(String(new_address.token_balance)) / 10000)
       addressResult.data.unconfirmed_balance = 0
 
       break;
