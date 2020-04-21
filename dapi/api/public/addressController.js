@@ -459,9 +459,8 @@ exports.get_a_address = async(req, res) => {
       var data = contractInstance.methods.balanceOf(addr).call()
       data.then(function(val){
         console.log(w3.utils.toWei(val, 'wei'))
-        console.log(w3.utils.toWei(val, 'wei') / 10000)
-        //new_address.token_balance = parseInt(val)
-        //addressResult.data.token_balance = String(parseFloat(val) / 10000)
+        new_address.token_balance = String(w3.utils.toWei(val, 'wei') / 10000)
+        addressResult.data.token_balance = new_address.token_balance
       });
 
       addressResult.data.balance = w3.utils.fromWei(new_address.balance_string, 'ether');
