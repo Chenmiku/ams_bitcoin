@@ -43,12 +43,9 @@ var addressSchema = new schema({
     coin_type: {
         type: String
     },
-    // token_type: {
-    //     type: String
-    // },
-    // token_balance: {
-    //     type: Number
-    // },
+    token_balance: {
+        type: Number
+    },
     ctime: {
         type: String,
     }, 

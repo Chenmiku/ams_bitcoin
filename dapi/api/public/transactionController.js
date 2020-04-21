@@ -29,12 +29,15 @@ var transactionResult = {
     message:         String, 
     tx_hash:         String,  
     tx_type:         String,  
-    tx_value:        String, 
+    tx_value:        String,
     tx_fee:          String, 
     chk_fee_value:   Number, 
     tx_total_amount: String,     // Value + Fee
     pre_balance:     String,     // balance
     next_balance:    String,     // Current Balance in wallet - Total Transaction Amount
+    tx_token:        Number, 
+    pre_token_balance:     Number,    
+    next_token_balance:    Number,    
     tx_create_time:  String
   },
   success: Boolean,
@@ -44,6 +47,7 @@ var depositStateResult = {
   data: {
     coin_type:  String,  
     coin_value: String, 
+    token_value: Number,
     confirm:    Boolean,    
     message:    String, 
   },
