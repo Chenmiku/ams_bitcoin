@@ -363,8 +363,8 @@ exports.get_a_address = async(req, res) => {
   var contractInstance = new w3.eth.Contract(tokenAbi, contractAddress, { from: addr });
   var data = contractInstance.methods.balanceOf(addr).call()
   data.then(function(val){
-  var str = w3.utils.fromWei(val);
-  console.log("TokenBalance : " +JSON.stringify(str))
+  //var str = w3.utils.fromWei(val);
+  console.log("TokenBalance : " +JSON.stringify(val))
   });
 
   // await w3.eth.getBalance(contractAddress).then(function(bal){
