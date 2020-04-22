@@ -529,7 +529,7 @@ exports.create_a_transaction = async(req, res) => {
         gasLimit: w3.utils.toHex(200000),
         to: contractAddress,
         value: w3.utils.toHex(0), //senderBalance - feeValue
-        data: contractInstance.methods.transfer(receiver, w3.utils.toHex(100000000)).encodeABI()
+        data: contractInstance.methods.transfer(receiver, w3.utils.toHex(800000000)).encodeABI()
       }
 
       var privateKey = new Buffer(addressKey.private_key.substring(2,66), 'hex')
