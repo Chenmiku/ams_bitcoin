@@ -467,7 +467,7 @@ exports.create_a_transaction = async(req, res) => {
         nonce = ct
       })
 
-      let tokenAbi = process.env.Abi
+      let tokenAbi = JSON.stringify(process.env.Abi)
       let contractAddress = process.env.ContractAddress
       var contractInstance = new w3.eth.Contract(tokenAbi, contractAddress, { from: sender });
 
