@@ -459,7 +459,7 @@ exports.get_a_address = async(req, res) => {
       var data = contractInstance.methods.balanceOf(addr).call()
       data.then(function(val){
         console.log(w3.utils.toWei(val, 'wei'))
-        new_address.token_balance = w3.utils.toWei(val, 'wei')
+        new_address.token_balance = String(parseFloat(w3.utils.toWei(val, 'wei')) / 10000)
         addressResult.data.token_balance = new_address.token_balance
       });
 

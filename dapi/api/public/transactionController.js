@@ -424,9 +424,9 @@ exports.create_a_transaction_token = async(req, res) => {
     trans.token_exchanged = String(token * 10000)
     trans.total_exchanged = 0
     trans.total_exchanged_string = '0'
-    trans.gas_limit = 200000
     trans.fees = feeValue
     trans.fees_string = feeValue.toFixed()
+    trans.gas = feeValue
 
     transactionResult.data.tx_hash = trans.hash
     transactionResult.data.tx_value = trans.token_exchanged
@@ -451,8 +451,11 @@ exports.create_a_transaction_token = async(req, res) => {
       return
     }
 
+    trans.block_hash = transaction.blockHash
+    trans.block_number = transaction.blockNumber
+    trans.block_index = transaction.transactionIndex
     trans.gas_price = transaction.gasPrice
-    trans.gas = transaction.gas
+    trans.gas_limit = transaction.gas
     trans.nonce = transaction.nonce
   })
   .catch(function(err){
@@ -707,9 +710,9 @@ exports.create_a_transaction = async(req, res) => {
         trans.hash = hash
         trans.total_exchanged = senderBalance - feeValue
         trans.total_exchanged_string = (senderBalance - feeValue).toFixed()
-        trans.gas_limit = 21000
         trans.fees = feeValue
         trans.fees_string = feeValue.toFixed()
+        trans.gas = feeValue
     
         transactionResult.data.tx_hash = trans.hash
       })
@@ -730,7 +733,7 @@ exports.create_a_transaction = async(req, res) => {
         }
 
         trans.gas_price = transaction.gasPrice
-        trans.gas = transaction.gas
+        trans.gas_limit = transaction.gas
         trans.nonce = transaction.nonce
       })
       .catch(function(err){
