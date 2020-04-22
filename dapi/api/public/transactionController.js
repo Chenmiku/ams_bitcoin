@@ -117,7 +117,7 @@ exports.check_deposit_history = async(req, res) => {
             transactionHistory.data.push({ address: addr, coin_type: transaction[i].coin_type, coin_value: String(parseFloat(transaction[i].total_exchanged_string) / 100000000) })
             break;
           case 'eth':
-            if (parseInt(transaction[i].total_exchanged_string) > 0) {
+            if (transaction[i].total_exchanged > 0) {
               transactionHistory.data.push({ address: addr, coin_type: transaction[i].coin_type, coin_value: w3.utils.fromWei(transaction[i].total_exchanged_string, 'ether') }) 
             } else {
               transactionHistory.data.push({ address: addr, coin_type: transaction[i].coin_type, coin_value: transaction[i].token_exchanged })
@@ -153,7 +153,7 @@ exports.check_deposit_history = async(req, res) => {
             transactionHistory.data.push({ address: transaction[i].sender, coin_type: transaction[i].coin_type, coin_value: String(parseFloat(transaction[i].total_exchanged_string) / 100000000) })
             break;
           case 'eth':
-            if (parseInt(transaction[i].total_exchanged_string) > 0) {
+            if (transaction[i].total_exchanged > 0) {
               transactionHistory.data.push({ address: addr, coin_type: transaction[i].coin_type, coin_value: w3.utils.fromWei(transaction[i].total_exchanged_string, 'ether') }) 
             } else {
               transactionHistory.data.push({ address: addr, coin_type: transaction[i].coin_type, coin_value: transaction[i].token_exchanged })
@@ -217,7 +217,7 @@ exports.check_transaction_history = async(req, res) => {
     })
 
     // get transaction
-    await Trans.find({ sender: addr, is_deposit: false, service: service }, function(err, transaction) {
+    await Trans.find({ sender: addr, is_deposit: false, service: service }).sort({ ctime: 'descending' }, function(err, transaction) {
       if (err) {
         re.errorResponse(err, res, 500);
         return
@@ -232,7 +232,7 @@ exports.check_transaction_history = async(req, res) => {
             transactionHistory.data.push({ address: addr, coin_type: transaction[i].coin_type, coin_value: String(parseFloat(transaction[i].total_exchanged_string) / 100000000) })
             break;
           case 'eth':
-            if (parseInt(transaction[i].total_exchanged_string) > 0) {
+            if (transaction[i].total_exchanged > 0) {
               transactionHistory.data.push({ address: addr, coin_type: transaction[i].coin_type, coin_value: w3.utils.fromWei(transaction[i].total_exchanged_string, 'ether') }) 
             } else {
               transactionHistory.data.push({ address: addr, coin_type: transaction[i].coin_type, coin_value: transaction[i].token_exchanged })
@@ -268,7 +268,7 @@ exports.check_transaction_history = async(req, res) => {
             transactionHistory.data.push({ address: transaction[i].sender, coin_type: transaction[i].coin_type, coin_value: String(parseFloat(transaction[i].total_exchanged_string) / 100000000) })
             break;
           case 'eth':
-            if (parseInt(transaction[i].total_exchanged_string) > 0) {
+            if (transaction[i].total_exchanged > 0) {
               transactionHistory.data.push({ address: addr, coin_type: transaction[i].coin_type, coin_value: w3.utils.fromWei(transaction[i].total_exchanged_string, 'ether') }) 
             } else {
               transactionHistory.data.push({ address: addr, coin_type: transaction[i].coin_type, coin_value: transaction[i].token_exchanged })
@@ -400,7 +400,6 @@ exports.create_a_transaction_token = async(req, res) => {
 
   // get token balance address
   await contractInstance.methods.balanceOf(sender).call().then(function(val){
-    console.log(w3.utils.toWei(val, 'wei'))
     if (token * 10000 >= w3.utils.toWei(val, 'wei')) {
       re.errorResponse('token_not_enough', res, 500);
       return
