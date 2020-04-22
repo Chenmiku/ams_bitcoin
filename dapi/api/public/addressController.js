@@ -456,15 +456,14 @@ exports.get_a_address = async(req, res) => {
       let tokenAbi = JSON.parse(process.env.Abi)
       let contractAddress = process.env.ContractAddress
       var contractInstance = new w3.eth.Contract(tokenAbi, contractAddress, { from: addr });
-      var data = contractInstance.methods.balanceOf(addr).call()
-      data.then(function(val){
+      await contractInstance.methods.balanceOf(addr).call().then(function(val){
         console.log(w3.utils.toWei(val, 'wei'))
         new_address.token_balance = String(parseFloat(w3.utils.toWei(val, 'wei')) / 10000)
-        addressResult.data.token_balance = new_address.token_balance
       });
 
       addressResult.data.balance = w3.utils.fromWei(new_address.balance_string, 'ether');
       addressResult.data.unconfirmed_balance = 0
+      addressResult.data.token_balance = new_address.token_balance
 
       break;
     default :
