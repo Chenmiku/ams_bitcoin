@@ -1078,7 +1078,11 @@ exports.check_deposit_state = async(req, res) => {
   // check transaction state
   if (address.balance != new_address.balance && new_address.unconfirmed_balance == 0) {
     depositStateResult.data.coin_type = coin
-    depositStateResult.data.coin_value = String(parseFloat(Math.abs(new_address.balance - address.balance)) / 100000000)
+    if (coin == 'btc') {
+      depositStateResult.data.coin_value = String(parseFloat(Math.abs(new_address.balance - address.balance)) / 100000000)
+    } else {
+      depositStateResult.data.coin_value = w3.utils.fromWei(String(Math.abs(new_address.balance - address.balance)), 'ether')
+    }
     depositStateResult.data.confirm = true
     depositStateResult.data.message = "transaction_confirmed"
     depositStateResult.success = true
