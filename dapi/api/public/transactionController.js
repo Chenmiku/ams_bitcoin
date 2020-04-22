@@ -217,7 +217,7 @@ exports.check_transaction_history = async(req, res) => {
     })
 
     // get transaction
-    await Trans.find({ sender: addr, is_deposit: false, service: service }).sort({ ctime: 'descending' }, function(err, transaction) {
+    await Trans.find({ sender: addr, is_deposit: false, service: service }, function(err, transaction) {
       if (err) {
         re.errorResponse(err, res, 500);
         return
@@ -240,7 +240,7 @@ exports.check_transaction_history = async(req, res) => {
             break;
         }
       }
-    })
+    }).sort({ ctime: 'descending' })
 
     res.json(transactionHistory);
   } else {
