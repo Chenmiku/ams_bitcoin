@@ -1249,6 +1249,7 @@ exports.check_transaction = async(req, res) => {
       coin = 'eth';
       // get transaction info
       await w3.eth.getTransaction(trans.hash, function(err, transaction){
+        console.log(transaction)
         if (err) {
           re.errorResponse(err, res, 500);
           return
