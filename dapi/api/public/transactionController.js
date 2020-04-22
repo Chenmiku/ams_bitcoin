@@ -996,6 +996,8 @@ exports.check_deposit_state = async(req, res) => {
       //get balance address
       await w3.eth.getBalance(addr).then(function(bal){
         new_address.balance = Number(bal)
+        new_address.unconfirmed_balance = 0
+        new_address.unconfirmed_balance_string = "0"
       })
       .catch(function(err){
         re.errorResponse(err, res, 500);
@@ -1248,6 +1250,7 @@ exports.check_transaction = async(req, res) => {
     case 'eth':
       coin = 'eth';
       // get transaction info
+      let input = ''
       await w3.eth.getTransaction(trans.hash, function(err, transaction){
         console.log(transaction)
         if (err) {
@@ -1264,7 +1267,12 @@ exports.check_transaction = async(req, res) => {
         trans.block_hash = transaction.blockHash
         trans.nonce = transaction.nonce
         trans.block_index = transaction.transactionIndex
-        depositStateResult.data.coin_value = w3.utils.fromWei(transaction.value, 'ether')
+        input = transaction.input
+        if (input.length == 138) {
+          depositStateResult.data.coin_value = w3.utils.hexToNumberString(input.slice(73,138))
+        } else {
+          depositStateResult.data.coin_value = w3.utils.fromWei(transaction.value, 'ether')
+        }
       })
       .catch(function(err){
         re.errorResponse(err, res, 500);
