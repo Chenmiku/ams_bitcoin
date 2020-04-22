@@ -383,16 +383,19 @@ exports.create_a_transaction_token = async(req, res) => {
   });
 
   // get token balance address
-  var data = contractInstance.methods.balanceOf(sender).call()
-  data.then(function(val){
+  await contractInstance.methods.balanceOf(addr).call().then(function(val){
     if (token * 1000000 >= w3.utils.toWei(val, 'wei')) {
       re.errorResponse('token_not_enough', res, 500);
       return
     }
     console.log(w3.utils.toWei(val, 'wei'))
-    senderBalance = w3.utils.toWei(val, 'wei')
+    senderBalance = String(parseFloat(w3.utils.toWei(val, 'wei')) / 10000)
 
-    transactionResult.data.pre_balance = w3.utils.toWei(val, 'wei')
+    transactionResult.data.pre_balance = senderBalance
+  })
+  .catch(function(err){
+    re.errorResponse(err, res, 500);
+    return
   });
 
   // send token
@@ -451,6 +454,7 @@ exports.create_a_transaction_token = async(req, res) => {
       return
     }
 
+    console.log(w3.utils.hexToNumber(transaction.v))
     trans.block_hash = transaction.blockHash
     trans.block_number = transaction.blockNumber
     trans.block_index = transaction.transactionIndex
@@ -732,6 +736,10 @@ exports.create_a_transaction = async(req, res) => {
           return
         }
 
+        console.log(w3.utils.hexToNumber(transaction.v))
+        trans.block_hash = transaction.blockHash
+        trans.block_number = transaction.blockNumber
+        trans.block_index = transaction.transactionIndex
         trans.gas_price = transaction.gasPrice
         trans.gas_limit = transaction.gas
         trans.nonce = transaction.nonce

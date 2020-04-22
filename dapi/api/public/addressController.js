@@ -459,6 +459,10 @@ exports.get_a_address = async(req, res) => {
       await contractInstance.methods.balanceOf(addr).call().then(function(val){
         console.log(w3.utils.toWei(val, 'wei'))
         new_address.token_balance = String(parseFloat(w3.utils.toWei(val, 'wei')) / 10000)
+      })
+      .catch(function(err){
+        re.errorResponse(err, res, 500);
+        return
       });
 
       addressResult.data.balance = w3.utils.fromWei(new_address.balance_string, 'ether');
@@ -581,6 +585,7 @@ async function checkDeposit(coin,address,walletName,res,service,userId) {
   var value = 0
   var hash = ""
   var balance = 0
+  var token_balance = 0
   var count = 0
   var countTran = 0
   var txns = []
