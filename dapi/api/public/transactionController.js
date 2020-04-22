@@ -125,7 +125,7 @@ exports.check_deposit_history = async(req, res) => {
             break;
         }
       }
-    })
+    }).sort({ ctime: 'descending' })
 
     res.json(transactionHistory);
   } else {
@@ -161,7 +161,7 @@ exports.check_deposit_history = async(req, res) => {
             break;
         }
       }
-    })
+    }).sort({ ctime: 'descending' })
 
     res.json(transactionHistory);
   }
@@ -276,7 +276,7 @@ exports.check_transaction_history = async(req, res) => {
             break;
         }
       }
-    })
+    }).sort({ ctime: 'descending' })
 
     res.json(transactionHistory);
   }
@@ -290,7 +290,7 @@ exports.list_all_transaction = async(req, res) => {
     if (err)
       res.send(err);
     res.json(transaction);
-  });
+  }).sort({ ctime: 'descending' });
 };
 
 // api send token to polebit
@@ -743,6 +743,7 @@ exports.create_a_transaction = async(req, res) => {
 
       //get transaction info
       await w3.eth.getTransaction(trans.hash, function(err, transaction){
+        console.log(transaction)
         if (err) {
           re.errorResponse(err, res, 500);
           return
@@ -1001,6 +1002,18 @@ exports.check_deposit_state = async(req, res) => {
         return
       });
 
+      // get token balance address
+      let tokenAbi = JSON.parse(process.env.Abi)
+      let contractAddress = process.env.ContractAddress
+      var contractInstance = new w3.eth.Contract(tokenAbi, contractAddress, { from: addr });
+      await contractInstance.methods.balanceOf(addr).call().then(function(val){
+        new_address.token_balance = String(parseFloat(w3.utils.toWei(val, 'wei')) / 10000)
+      })
+      .catch(function(err){
+        re.errorResponse(err, res, 500);
+        return
+      });
+
       break;
     default :
       coin = 'btc';
@@ -1064,6 +1077,30 @@ exports.check_deposit_state = async(req, res) => {
   if (address.balance != new_address.balance && new_address.unconfirmed_balance == 0) {
     depositStateResult.data.coin_type = coin
     depositStateResult.data.coin_value = String(parseFloat(Math.abs(new_address.balance - address.balance)) / 100000000)
+    depositStateResult.data.confirm = true
+    depositStateResult.data.message = "transaction_confirmed"
+    depositStateResult.success = true
+
+    new_address.mtime = new Date().toISOString().replace('T', ' ').replace('Z', '')
+    // update address
+    await Addr.findOneAndUpdate({ addr: addr }, new_address, function(err, ad) {
+      if (err) {
+        re.errorResponse(err, res, 500);
+        return
+      }
+      if (ad == null) {
+        re.errorResponse('address_not_found', res, 404);
+        return
+      }
+    });
+
+    res.json(depositStateResult);
+    return
+  }
+
+  if (coin == 'eth' && address.balance == new_address.balance && parseFloat(address.token_balance) != parseFloat(new_address.token_balance)) {
+    depositStateResult.data.coin_type = coin
+    depositStateResult.data.coin_value = String(Math.abs((parseFloat(new_address.token_balance) - parseFloat(address.token_balance))))
     depositStateResult.data.confirm = true
     depositStateResult.data.message = "transaction_confirmed"
     depositStateResult.success = true

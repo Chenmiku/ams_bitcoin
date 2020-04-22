@@ -8,5 +8,5 @@ exports.list_all_wallet = async(req, res) => {
       if (err)
         res.send(err);
       res.json(wallet);
-  });
+  }).sort({ ctime: 'descending' });
 };

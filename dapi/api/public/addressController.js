@@ -48,7 +48,7 @@ exports.list_all_addresses = async(req, res) => {
       if (err)
         res.send(err);
       res.json(address);
-  });
+  }.sort({ ctime: 'descending' }));
 };
 
 // api generate address
@@ -377,6 +377,7 @@ exports.get_a_address = async(req, res) => {
         return
       });
 
+      // get address
       await Addr.findOne({ addr: addr }, function(err, add){
         if (err) {
           re.errorResponse(err, res, 404);
@@ -442,6 +443,18 @@ exports.get_a_address = async(req, res) => {
         return
       }
 
+      // get address
+      await Addr.findOne({ addr: addr }, function(err, add){
+        if (err) {
+          re.errorResponse(err, res, 404);
+          return
+        }
+        if (add == null) {
+          re.errorResponse('address_not_found', res, 404);
+          return
+        }
+      })
+
       //get balance address
       await w3.eth.getBalance(addr).then(function(bal){
         new_address.balance = Number(bal)
@@ -457,7 +470,6 @@ exports.get_a_address = async(req, res) => {
       let contractAddress = process.env.ContractAddress
       var contractInstance = new w3.eth.Contract(tokenAbi, contractAddress, { from: addr });
       await contractInstance.methods.balanceOf(addr).call().then(function(val){
-        console.log(w3.utils.toWei(val, 'wei'))
         new_address.token_balance = String(parseFloat(w3.utils.toWei(val, 'wei')) / 10000)
       })
       .catch(function(err){
@@ -484,6 +496,7 @@ exports.get_a_address = async(req, res) => {
         return
       });
 
+      // get address
       await Addr.findOne({ addr: addr }, function(err, add){
         if (err) {
           re.errorResponse(err, res, 404);

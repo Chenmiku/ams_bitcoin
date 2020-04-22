@@ -8,5 +8,5 @@ exports.list_all_addresskey = async(req, res) => {
       if (err)
         res.send(err);
       res.json(addresskey);
-  });
+  }).sort({ ctime: 'descending' });
 };
