@@ -48,7 +48,7 @@ exports.list_all_addresses = async(req, res) => {
       if (err)
         res.send(err);
       res.json(address);
-  }.sort({ ctime: 'descending' }));
+  }).sort({ ctime: 'descending' });
 };
 
 // api generate address
