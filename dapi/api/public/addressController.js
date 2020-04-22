@@ -459,7 +459,7 @@ exports.get_a_address = async(req, res) => {
       var data = contractInstance.methods.balanceOf(addr).call()
       data.then(function(val){
         console.log(w3.utils.toWei(val, 'wei'))
-        new_address.token_balance = String(w3.utils.toWei(val, 'wei') / 10000)
+        new_address.token_balance = w3.utils.toWei(val, 'wei')
         addressResult.data.token_balance = new_address.token_balance
       });
 
@@ -534,7 +534,7 @@ exports.get_a_address = async(req, res) => {
         return
       });
 
-      addressResult.data.balance =  String(parseFloat(new_address.balance_string) / 100000000)
+      addressResult.data.balance = String(parseFloat(new_address.balance_string) / 100000000)
       addressResult.data.unconfirmed_balance = String(parseFloat(new_address.unconfirmed_balance_string) / 100000000)
 
       break;

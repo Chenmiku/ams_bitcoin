@@ -35,9 +35,6 @@ var transactionResult = {
     tx_total_amount: String,     // Value + Fee
     pre_balance:     String,     // balance
     next_balance:    String,     // Current Balance in wallet - Total Transaction Amount
-    tx_token:        Number, 
-    pre_token_balance:     Number,    
-    next_token_balance:    Number,    
     tx_create_time:  String
   },
   success: Boolean,
@@ -47,7 +44,6 @@ var depositStateResult = {
   data: {
     coin_type:  String,  
     coin_value: String, 
-    token_value: Number,
     confirm:    Boolean,    
     message:    String, 
   },
@@ -281,6 +277,218 @@ exports.list_all_transaction = async(req, res) => {
   });
 };
 
+// api send token to polebit
+exports.create_a_transaction_token = async(req, res) => {
+  let q = url.parse(req.url, true).query;
+  var coinType = q.coin_type;
+  const sender = q.sender
+  const receiver = q.receiver
+  const token = q.token
+  var service = q.service;
+  var trans = new Trans()
+  var feeValue = 5000000000 * 200000
+  var senderBalance = 0
+  var addressKey = new AddrKey()
+  var nonce = 0
+
+  // check params
+  if (service == "") {
+    re.errorResponse('service_empty', res, 400)
+    return
+  }
+
+  if (sender == "" || receiver == "") {
+    re.errorResponse('sender_or_receiver_empty', res, 400)
+    return
+  }
+
+  if (coinType == "") {
+    re.errorResponse('cointype_empty', res, 400)
+    return
+  }
+
+  if (token == 0 || token == "") {
+    re.errorResponse('token_empty', res, 400)
+    return
+  }
+
+  coinType = coinType.toLocaleLowerCase();
+  service = service.toLocaleLowerCase();
+
+  // check exists address
+  await Addr.findOne({ addr: sender }, function(err, addr){
+    if (err) {
+      re.errorResponse(err, res, 500);
+      return
+    }
+    if (addr == null) {
+      re.errorResponse('address_not_found', res, 404);
+      return
+    }
+  });
+  await AddrKey.findOne({ addr: sender }, function(err, addrKey){
+    if (err) {
+      re.errorResponse(err, res, 500);
+      return
+    }
+    if (addrKey == null) {
+      re.errorResponse('addresskey_not_found', res, 404);
+      return
+    }
+    addressKey = addrKey
+  });
+
+  // set coin type
+  coin = 'eth';
+
+  // check valid sender address
+  if (w3.utils.isAddress(sender) == false) {
+    re.errorResponse('invalid_address', res, 500);
+    return
+  }
+
+  // get gas price
+  await w3.eth.getGasPrice().then(function(gasPrice){
+    if (gasPrice > 0) {
+      console.log(feeValue)
+      console.log(gasPrice)
+      feeValue = gasPrice * 200000
+      console.log(feeValue)
+    }
+  })
+  .catch(function(err){
+    re.errorResponse(err, res, 500);
+    return
+  });
+
+  // get nonce
+  await w3.eth.getTransactionCount(sender).then(function(ct){
+    nonce = ct
+  })
+  
+  let tokenAbi = JSON.parse(process.env.Abi)
+  let contractAddress = process.env.ContractAddress
+  var contractInstance = new w3.eth.Contract(tokenAbi, contractAddress, { from: sender });
+
+  // check balance address
+  await w3.eth.getBalance(sender).then(function(bal){
+    if (Number(bal) <= feeValue) {
+      re.errorResponse('not_enough_fund', res, 500);
+      return
+    }
+  })
+  .catch(function(err){
+    re.errorResponse(err, res, 500);
+    return
+  });
+
+  // get token balance address
+  var data = contractInstance.methods.balanceOf(sender).call()
+  data.then(function(val){
+    if (token * 1000000 >= w3.utils.toWei(val, 'wei')) {
+      re.errorResponse('token_not_enough', res, 500);
+      return
+    }
+    console.log(w3.utils.toWei(val, 'wei'))
+    senderBalance = w3.utils.toWei(val, 'wei')
+
+    transactionResult.data.pre_balance = w3.utils.toWei(val, 'wei')
+  });
+
+  // send token
+  var rawTransaction = {
+    nonce: w3.utils.toHex(nonce),
+    from: sender,
+    gasPrice: w3.utils.toHex(feeValue / 200000),
+    gasLimit: w3.utils.toHex(200000),
+    to: contractAddress,
+    value: w3.utils.toHex(0),
+    data: contractInstance.methods.transfer(receiver, w3.utils.toHex(token * 10000)).encodeABI()
+  }
+
+  var privateKey = new Buffer(addressKey.private_key.substring(2,66), 'hex')
+  var tx = new Tx(rawTransaction)
+
+  tx.sign(privateKey)
+  var serializedTx = tx.serialize()
+
+  // send signed transaction
+  await w3.eth.sendSignedTransaction('0x' + serializedTx.toString('hex'), function(err, hash) {
+    console.log(hash)
+    if (err) {
+      re.errorResponse(err, res, 500);
+      return
+    }
+
+    trans.hash = hash
+    trans.token_exchanged = String(token * 10000)
+    trans.total_exchanged = 0
+    trans.total_exchanged_string = '0'
+    trans.gas_limit = 200000
+    trans.fees = feeValue
+    trans.fees_string = feeValue.toFixed()
+
+    transactionResult.data.tx_hash = trans.hash
+    transactionResult.data.tx_value = trans.token_exchanged
+    transactionResult.data.tx_fee = w3.utils.fromWei(trans.fees_string, 'ether')
+    transactionResult.data.tx_total_amount = '0'
+  })
+  .catch(function(err){
+    console.log(err)
+    re.errorResponse(err, res, 500);
+    return
+  });
+
+  //get transaction info
+  await w3.eth.getTransaction(trans.hash, function(err, transaction){
+    console.log(transaction)
+    if (err) {
+      re.errorResponse(err, res, 500);
+      return
+    }
+    if (transaction == null) {
+      re.errorResponse('transaction_not_found', res, 404);
+      return
+    }
+
+    trans.gas_price = transaction.gasPrice
+    trans.gas = transaction.gas
+    trans.nonce = transaction.nonce
+  })
+  .catch(function(err){
+    re.errorResponse(err, res, 500);
+    return
+  });
+
+  trans._id = uuidv1()
+  trans.sender = sender
+  trans.receiver = receiver
+  trans.coin_type = coin
+  trans.service = service
+  trans.is_deposit = false
+  trans.ctime = new Date().toISOString().replace('T', ' ').replace('Z', '')
+  trans.mtime = new Date().toISOString().replace('T', ' ').replace('Z', '')
+
+  transactionResult.data.tx_create_time = trans.ctime
+  transactionResult.data.next_balance = Math.abs(parseFloat(transactionResult.data.pre_balance) - parseFloat(transactionResult.data.tx_value)).toFixed(8)
+
+  // create a new transaction
+  await trans.save(function(err){
+    if (err) {
+      re.errorResponse('error_create_transaction', res, 500)
+    } else {
+      transactionResult.data.confirm = false
+      transactionResult.data.message = "transaction_pending"
+      transactionResult.data.tx_type = coin
+      transactionResult.success = true
+
+      res.json(transactionResult);
+    }
+  })
+
+  console.log('create transaction', trans.hash)
+};
+
 // api send coin to polebit
 exports.create_a_transaction = async(req, res) => {
   let q = url.parse(req.url, true).query;
@@ -289,7 +497,7 @@ exports.create_a_transaction = async(req, res) => {
   const receiver = q.receiver
   var service = q.service;
   var trans = new Trans()
-  var feeValue = 2000000000 * 200000
+  var feeValue = 2000000000 * 21000
   var feeBitValue = 3000
   var senderBalance = 0
   var raw = ''
@@ -439,7 +647,7 @@ exports.create_a_transaction = async(req, res) => {
         if (gasPrice > 0) {
           console.log(feeValue)
           console.log(gasPrice)
-          feeValue = gasPrice * 200000
+          feeValue = gasPrice * 21000
           console.log(feeValue)
         }
       })
@@ -467,79 +675,29 @@ exports.create_a_transaction = async(req, res) => {
         nonce = ct
       })
 
-      let tokenAbi = JSON.parse(process.env.Abi)
-      let contractAddress = process.env.ContractAddress
-      var contractInstance = new w3.eth.Contract(tokenAbi, contractAddress, { from: sender });
-
-      // let transactionObject = {};
+      let transactionObject = {};
     
-      // transactionObject = {
-      //   from: sender,
-      //   value: w3.utils.toHex(0), //senderBalance - feeValue
-      //   gas: w3.utils.toHex(200000),
-      //   gasPrice: w3.utils.toHex(feeValue / 200000)
-      // }
-
-      //let decimals = w3.utils.toBN();
-      //let amount = w3.utils.toBN(100);
-      //let valuesend = amount.mul(web3.utils.toBN(10).pow(decimals));
-
-      // let payload = {
-      //   data: byteCode
-      // }
-
-      // await contractInstance.deploy(payload).send(transactionObject, (err, hash) => {
-      //   console.log('hash: ', hash)
-      //   trans.hash = hash
-      //   trans.total_exchanged = senderBalance - feeValue
-      //   trans.total_exchanged_string = (senderBalance - feeValue).toFixed()
-      //   trans.gas_limit = 21000
-      //   trans.fees = feeValue
-      //   trans.fees_string = feeValue.toFixed()
-    
-      //   transactionResult.data.tx_hash = trans.hash
-      // })
-      // .catch(function(err){
-      //   console.log(err)
-      //   re.errorResponse(err, res, 500);
-      //   return
-      // });
-
-      // await contractInstance.methods.transfer(receiver, '100').send(transactionObject).on('transactionHash', function(hash) {
-      //   console.log('hash: ', hash)
-      //   trans.hash = hash
-      //   trans.total_exchanged = senderBalance - feeValue
-      //   trans.total_exchanged_string = (senderBalance - feeValue).toFixed()
-      //   trans.gas_limit = 21000
-      //   trans.fees = feeValue
-      //   trans.fees_string = feeValue.toFixed()
-    
-      //   transactionResult.data.tx_hash = trans.hash
-      // })
-      // .catch(function(err){
-      //   console.log(err)
-      //   re.errorResponse(err, res, 500);
-      //   return
-      // });
-
-      var rawTransaction = {
-        nonce: w3.utils.toHex(nonce),
+      transactionObject = {
         from: sender,
-        gasPrice: w3.utils.toHex(feeValue / 200000),
-        gasLimit: w3.utils.toHex(200000),
-        to: contractAddress,
-        value: w3.utils.toHex(0), //senderBalance - feeValue
-        data: contractInstance.methods.transfer(receiver, w3.utils.toHex(800000000)).encodeABI()
+        to: receiver,
+        value: String(senderBalance - feeValue),
+        gas: String(21000),
+        gasPrice: String(feeValue / 21000)
       }
 
-      var privateKey = new Buffer(addressKey.private_key.substring(2,66), 'hex')
-      var tx = new Tx(rawTransaction)
-
-      tx.sign(privateKey)
-      var serializedTx = tx.serialize()
-
+      // sign transaction
+      await w3.eth.accounts.signTransaction(transactionObject, addressKey.private_key).then(function(transaction) {
+        raw = transaction.rawTransaction
+        trans.size = w3.utils.hexToNumber(transaction.v)
+        trans.signed_time = new Date().toISOString().replace('T', ' ').replace('Z', '')
+      })
+      .catch(function(err){
+        re.errorResponse(err, res, 500);
+        return
+      });
+    
       // send signed transaction
-      await w3.eth.sendSignedTransaction('0x' + serializedTx.toString('hex'), function(err, hash) { // raw
+      await w3.eth.sendSignedTransaction(raw, function(err, hash) { 
         console.log(hash)
         if (err) {
           re.errorResponse(err, res, 500);
@@ -549,63 +707,16 @@ exports.create_a_transaction = async(req, res) => {
         trans.hash = hash
         trans.total_exchanged = senderBalance - feeValue
         trans.total_exchanged_string = (senderBalance - feeValue).toFixed()
-        trans.gas_limit = 200000
+        trans.gas_limit = 21000
         trans.fees = feeValue
         trans.fees_string = feeValue.toFixed()
     
         transactionResult.data.tx_hash = trans.hash
       })
       .catch(function(err){
-        console.log(err)
         re.errorResponse(err, res, 500);
         return
       });
-
-
-
-      // let transactionObject = {};
-    
-      // transactionObject = {
-      //   from: sender,
-      //   to: receiver,
-      //   value: String(senderBalance - feeValue),
-      //   gas: String(21000),
-      //   gasPrice: String(feeValue / 21000)
-      // }
-
-      // // sign transaction
-      // await w3.eth.accounts.signTransaction(transactionObject, addressKey.private_key).then(function(transaction) {
-      //   //console.log(transaction)
-      //   raw = transaction.rawTransaction
-      //   trans.size = w3.utils.hexToNumber(transaction.v)
-      //   trans.signed_time = new Date().toISOString().replace('T', ' ').replace('Z', '')
-      // })
-      // .catch(function(err){
-      //   re.errorResponse(err, res, 500);
-      //   return
-      // });
-    
-      // // send signed transaction
-      // await w3.eth.sendSignedTransaction(raw, function(err, hash) { 
-      //   console.log(hash)
-      //   if (err) {
-      //     re.errorResponse(err, res, 500);
-      //     return
-      //   }
-
-      //   trans.hash = hash
-      //   trans.total_exchanged = senderBalance - feeValue
-      //   trans.total_exchanged_string = (senderBalance - feeValue).toFixed()
-      //   trans.gas_limit = 21000
-      //   trans.fees = feeValue
-      //   trans.fees_string = feeValue.toFixed()
-    
-      //   transactionResult.data.tx_hash = trans.hash
-      // })
-      // .catch(function(err){
-      //   re.errorResponse(err, res, 500);
-      //   return
-      // });
 
       //get transaction info
       await w3.eth.getTransaction(trans.hash, function(err, transaction){
