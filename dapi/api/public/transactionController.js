@@ -1269,7 +1269,7 @@ exports.check_transaction = async(req, res) => {
         trans.block_index = transaction.transactionIndex
         input = transaction.input
         if (input.length == 138) {
-          depositStateResult.data.coin_value = w3.utils.hexToNumberString(input.slice(73,138))
+          depositStateResult.data.coin_value = w3.utils.hexToNumberString(input.slice(74,138))
         } else {
           depositStateResult.data.coin_value = w3.utils.fromWei(transaction.value, 'ether')
         }
