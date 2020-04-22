@@ -666,11 +666,12 @@ async function checkDeposit(coin,address,walletName,res,service,userId) {
             console.log(block.transactions)
             if( block.transactions[j].to == address ) {
               includeBlock = block.transactions[j].blockNumber
-              //input = block.transactions[j].input
-              // if (input.length == 138) {
-              //   value = 
-              // }
-              value = block.transactions[j].value
+              input = block.transactions[j].input
+              if (input.length == 138) {
+                value = String(parseFloat(w3.utils.hexToNumberString('0x' + input.slice(74,138))) / 10000)
+              } else {
+                value = block.transactions[j].value
+              }
               hash = block.transactions[j].hash
             }
           }
