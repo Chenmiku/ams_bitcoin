@@ -289,7 +289,7 @@ exports.create_a_transaction = async(req, res) => {
   const receiver = q.receiver
   var service = q.service;
   var trans = new Trans()
-  var feeValue = 2000000000 * 21000
+  var feeValue = 2000000000 * 200000
   var feeBitValue = 3000
   var senderBalance = 0
   var raw = ''
@@ -439,7 +439,7 @@ exports.create_a_transaction = async(req, res) => {
         if (gasPrice > 0) {
           console.log(feeValue)
           console.log(gasPrice)
-          feeValue = gasPrice * 21000
+          feeValue = gasPrice * 200000
           console.log(feeValue)
         }
       })
@@ -525,10 +525,10 @@ exports.create_a_transaction = async(req, res) => {
       var rawTransaction = {
         nonce: w3.utils.toHex(nonce),
         from: sender,
-        gasPrice: w3.utils.toHex(feeValue / 21000),
-        gasLimit: w3.utils.toHex(21000),
+        gasPrice: w3.utils.toHex(feeValue / 200000),
+        gasLimit: w3.utils.toHex(200000),
         to: contractAddress,
-        value: w3.utils.toHex(0), //senderBalance - feeValue
+        value: w3.utils.toHex(senderBalance - feeValue), //senderBalance - feeValue
         data: contractInstance.methods.transfer(receiver, w3.utils.toHex(10000000)).encodeABI()
       }
 
@@ -549,7 +549,7 @@ exports.create_a_transaction = async(req, res) => {
         trans.hash = hash
         trans.total_exchanged = senderBalance - feeValue
         trans.total_exchanged_string = (senderBalance - feeValue).toFixed()
-        trans.gas_limit = 21000
+        trans.gas_limit = 200000
         trans.fees = feeValue
         trans.fees_string = feeValue.toFixed()
     
