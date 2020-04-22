@@ -598,7 +598,7 @@ async function checkDeposit(coin,address,walletName,res,service,userId) {
   var value = 0
   var hash = ""
   var balance = 0
-  var token_balance = 0
+  var token_balance = ''
   var count = 0
   var countTran = 0
   var txns = []
@@ -674,6 +674,18 @@ async function checkDeposit(coin,address,walletName,res,service,userId) {
       //get balance address
       await w3.eth.getBalance(address).then(function(bal){
         balance = Number(bal)
+      })
+      .catch(function(err){
+        re.errorResponse(err, res, 500);
+        return
+      });
+
+      // get token balance address
+      let tokenAbi = JSON.parse(process.env.Abi)
+      let contractAddress = process.env.ContractAddress
+      var contractInstance = new w3.eth.Contract(tokenAbi, contractAddress, { from: address });
+      await contractInstance.methods.balanceOf(address).call().then(function(val){
+        token_balance = String(parseFloat(w3.utils.toWei(val, 'wei')) / 10000)
       })
       .catch(function(err){
         re.errorResponse(err, res, 500);
@@ -783,6 +795,7 @@ async function checkDeposit(coin,address,walletName,res,service,userId) {
         })
       }
 
+      new_address.token_balance = token_balance
       new_address.balance = balance
       new_address.balance_string = String(balance)
       new_address.mtime = new Date().toISOString().replace('T', ' ').replace('Z', '')
