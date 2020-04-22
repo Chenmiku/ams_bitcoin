@@ -453,7 +453,7 @@ exports.get_a_address = async(req, res) => {
       });
 
       // get token balance address
-      let tokenAbi = JSON.stringify(process.env.Abi)
+      let tokenAbi = JSON.parse(process.env.Abi)
       let contractAddress = process.env.ContractAddress
       var contractInstance = new w3.eth.Contract(tokenAbi, contractAddress, { from: addr });
       var data = contractInstance.methods.balanceOf(addr).call()
