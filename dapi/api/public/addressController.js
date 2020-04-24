@@ -425,6 +425,7 @@ exports.get_a_address = async(req, res) => {
         new_address.unconfirmed_balance = walletInfo.unconfirmed_balance * 100000000
         new_address.unconfirmed_balance_string = new_address.unconfirmed_balance.toFixed()
         new_address.final_transaction = walletInfo.txcount
+        new_address.token_balance = "0"
       })
       .catch(function(err){
         re.errorResponse(err, res, 500);
@@ -433,6 +434,7 @@ exports.get_a_address = async(req, res) => {
 
       addressResult.data.balance =  String(parseFloat(new_address.balance_string) / 100000000)
       addressResult.data.unconfirmed_balance = String(parseFloat(new_address.unconfirmed_balance_string) / 100000000)
+      addressResult.data.token_balance = "0"
 
       break;
     case 'eth':
@@ -544,6 +546,7 @@ exports.get_a_address = async(req, res) => {
         new_address.unconfirmed_balance = walletInfo.unconfirmed_balance * 100000000
         new_address.unconfirmed_balance_string = new_address.unconfirmed_balance.toFixed()
         new_address.final_transaction = walletInfo.txcount
+        new_address.token_balance = "0"
       })
       .catch(function(err){
         re.errorResponse(err, res, 500);
@@ -552,6 +555,7 @@ exports.get_a_address = async(req, res) => {
 
       addressResult.data.balance = String(parseFloat(new_address.balance_string) / 100000000)
       addressResult.data.unconfirmed_balance = String(parseFloat(new_address.unconfirmed_balance_string) / 100000000)
+      addressResult.data.token_balance = "0"
 
       break;
   }
