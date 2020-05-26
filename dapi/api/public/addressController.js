@@ -24,24 +24,6 @@ const Web3 = require('web3'),
 const Client = require('bitcoin-core')
 var client = new Client({ host: process.env.Host, port: process.env.BitPort, username: process.env.BitUser, password: process.env.BitPassword })
 
-// variables
-var coin = 'eth'
-
-var addressResult = { 
-  data: {
-    addr: String,
-    balance: String,
-    token_balance: String,
-    unconfirmed_balance: String,
-    final_transaction: Number,
-    coin_type: String,
-    user_id: Number,
-    ctime: String,
-    mtime: String,
-  },
-  success: Boolean,
-}
-
 // api get all
 exports.list_all_addresses = async(req, res) => {
     await Addr.find({}, function(err, address) {
@@ -53,6 +35,24 @@ exports.list_all_addresses = async(req, res) => {
 
 // api generate address
 exports.create_a_address = async(req, res) => {
+
+  var coin = 'eth'
+
+  var addressResult = { 
+    data: {
+      addr: String,
+      balance: String,
+      token_balance: String,
+      unconfirmed_balance: String,
+      final_transaction: Number,
+      coin_type: String,
+      user_id: Number,
+      ctime: String,
+      mtime: String,
+    },
+    success: Boolean,
+  }
+
   const q = url.parse(req.url, true).query;
   var coinType = q.coin_type;
   const userId = q.user_id;
@@ -325,8 +325,8 @@ exports.create_a_address = async(req, res) => {
     console.log(coin)
     
     var job = new cronJob('*/3 * * * * *', function() {
-      checkDeposit(coin, addressResult.data.addr, walletName, res, service, userId)
-    }, null, true, 'Asia/Seoul');
+      checkDeposit(coin, new_address.addr, walletName, res, service, userId)
+     }, null, true, 'Asia/Seoul');
     job.start(); 
   } else {
     re.errorResponse('address_is_null', res, 500);
@@ -335,6 +335,24 @@ exports.create_a_address = async(req, res) => {
 
 // Api get By address
 exports.get_a_address = async(req, res) => {
+
+  var coin = 'eth'
+
+  var addressResult = { 
+    data: {
+      addr: String,
+      balance: String,
+      token_balance: String,
+      unconfirmed_balance: String,
+      final_transaction: Number,
+      coin_type: String,
+      user_id: Number,
+      ctime: String,
+      mtime: String,
+    },
+    success: Boolean,
+  }
+
   const q = url.parse(req.url, true).query;
   var coinType = q.coin_type;
   const addr = q.addr
@@ -588,6 +606,7 @@ exports.get_a_address = async(req, res) => {
 
 // function auto check deposit 
 async function checkDeposit(coin,address,walletName,res,service,userId) {
+
   if (address.startsWith("0x")) {
     coin = 'eth'
   } else {

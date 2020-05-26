@@ -20,43 +20,14 @@ const Web3 = require('web3'),
 const Client = require('bitcoin-core')
 var client = new Client({ host: process.env.Host, port: process.env.BitPort, username: process.env.BitUser, password: process.env.BitPassword })
 
-// variables
-var coin = 'eth'
-
-var transactionResult = {
-  data: {
-    confirm:         Boolean,    
-    message:         String, 
-    tx_hash:         String,  
-    tx_type:         String,  
-    tx_value:        String,
-    tx_fee:          String, 
-    chk_fee_value:   Number, 
-    tx_total_amount: String,     // Value + Fee
-    pre_balance:     String,     // balance
-    next_balance:    String,     // Current Balance in wallet - Total Transaction Amount
-    tx_create_time:  String
-  },
-  success: Boolean,
-};
-
-var depositStateResult = {
-  data: {
-    coin_type:  String,  
-    coin_value: String, 
-    confirm:    Boolean,    
-    message:    String, 
-  },
-  success: Boolean,
-};
-
-var transactionHistory = {
-  data: [],
-  success: Boolean
-};
-
 // api check deposit history
 exports.check_deposit_history = async(req, res) => {
+
+  var transactionHistory = {
+    data: [],
+    success: Boolean
+  };
+
   let q = url.parse(req.url, true).query
   const addr = q.addr
   var service = q.service;
@@ -171,6 +142,12 @@ exports.check_deposit_history = async(req, res) => {
 
 // api check transaction history
 exports.check_transaction_history = async(req, res) => {
+
+  var transactionHistory = {
+    data: [],
+    success: Boolean
+  };
+
   let q = url.parse(req.url, true).query
   const addr = q.addr
   var service = q.service;
@@ -295,6 +272,26 @@ exports.list_all_transaction = async(req, res) => {
 
 // api send token to polebit
 exports.create_a_transaction_token = async(req, res) => {
+
+  var coin = 'eth'
+
+  var transactionResult = {
+    data: {
+      confirm:         Boolean,    
+      message:         String, 
+      tx_hash:         String,  
+      tx_type:         String,  
+      tx_value:        String,
+      tx_fee:          String, 
+      chk_fee_value:   Number, 
+      tx_total_amount: String,     // Value + Fee
+      pre_balance:     String,     // balance
+      next_balance:    String,     // Current Balance in wallet - Total Transaction Amount
+      tx_create_time:  String
+    },
+    success: Boolean,
+  };
+
   let q = url.parse(req.url, true).query;
   var coinType = q.coin_type;
   const sender = q.sender
@@ -514,6 +511,26 @@ exports.create_a_transaction_token = async(req, res) => {
 
 // api send coin to polebit
 exports.create_a_transaction = async(req, res) => {
+
+  var coin = 'eth'
+
+  var transactionResult = {
+    data: {
+      confirm:         Boolean,    
+      message:         String, 
+      tx_hash:         String,  
+      tx_type:         String,  
+      tx_value:        String,
+      tx_fee:          String, 
+      chk_fee_value:   Number, 
+      tx_total_amount: String,     // Value + Fee
+      pre_balance:     String,     // balance
+      next_balance:    String,     // Current Balance in wallet - Total Transaction Amount
+      tx_create_time:  String
+    },
+    success: Boolean,
+  };
+
   let q = url.parse(req.url, true).query;
   var coinType = q.coin_type;
   const sender = q.sender
@@ -888,6 +905,20 @@ exports.create_a_transaction = async(req, res) => {
 
 // api check deposit state by address
 exports.check_deposit_state = async(req, res) => {
+
+  var coin = 'eth'
+
+  
+  var depositStateResult = {
+    data: {
+      coin_type:  String,  
+      coin_value: String, 
+      confirm:    Boolean,    
+      message:    String, 
+    },
+    success: Boolean,
+  };
+
   let q = url.parse(req.url, true).query;
   var coinType = q.coin_type;
   const addr = q.addr
@@ -1151,6 +1182,9 @@ exports.check_deposit_state = async(req, res) => {
 
 // api check transaction state
 exports.check_transaction = async(req, res) => {
+
+  var coin = 'eth'
+
   let q = url.parse(req.url, true).query;
   var coinType = q.coin_type;
   const hash = q.hash
