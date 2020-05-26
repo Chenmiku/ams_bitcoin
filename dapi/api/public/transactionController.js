@@ -397,11 +397,11 @@ exports.create_a_transaction_token = async(req, res) => {
 
   // get token balance address
   await contractInstance.methods.balanceOf(sender).call().then(function(val){
-    if (token * 10000 >= w3.utils.toWei(val, 'wei')) {
+    if (token * 100000000 >= w3.utils.toWei(val, 'wei')) {
       re.errorResponse('token_not_enough', res, 500);
       return
     }
-    senderBalance = String(parseFloat(w3.utils.toWei(val, 'wei')) / 10000)
+    senderBalance = String(parseFloat(w3.utils.toWei(val, 'wei')) / 100000000)
     console.log(senderBalance)
 
     transactionResult.data.pre_balance = senderBalance
@@ -419,7 +419,7 @@ exports.create_a_transaction_token = async(req, res) => {
     gasLimit: w3.utils.toHex(200000),
     to: contractAddress,
     value: w3.utils.toHex(0),
-    data: contractInstance.methods.transfer(receiver, w3.utils.toHex(token * 10000)).encodeABI()
+    data: contractInstance.methods.transfer(receiver, w3.utils.toHex(token * 100000000)).encodeABI()
   }
 
   var privateKey = new Buffer(addressKey.private_key.substring(2,66), 'hex')
@@ -908,7 +908,6 @@ exports.check_deposit_state = async(req, res) => {
 
   var coin = 'eth'
 
-  
   var depositStateResult = {
     data: {
       coin_type:  String,  
@@ -1040,7 +1039,7 @@ exports.check_deposit_state = async(req, res) => {
       let contractAddress = process.env.ContractAddress
       var contractInstance = new w3.eth.Contract(tokenAbi, contractAddress, { from: addr });
       await contractInstance.methods.balanceOf(addr).call().then(function(val){
-        new_address.token_balance = String(parseFloat(w3.utils.toWei(val, 'wei')) / 10000)
+        new_address.token_balance = String(parseFloat(w3.utils.toWei(val, 'wei')) / 100000000)
       })
       .catch(function(err){
         re.errorResponse(err, res, 500);
@@ -1307,7 +1306,7 @@ exports.check_transaction = async(req, res) => {
         trans.block_index = transaction.transactionIndex
         input = transaction.input
         if (input.length == 138) {
-          depositStateResult.data.coin_value = String(parseFloat(w3.utils.hexToNumberString('0x' + input.slice(74,138))) / 10000)
+          depositStateResult.data.coin_value = String(parseFloat(w3.utils.hexToNumberString('0x' + input.slice(74,138))) / 100000000)
         } else {
           depositStateResult.data.coin_value = w3.utils.fromWei(transaction.value, 'ether')
         }

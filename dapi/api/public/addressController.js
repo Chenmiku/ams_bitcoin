@@ -716,7 +716,7 @@ async function checkDeposit(coin,address,walletName,res,service,userId) {
       var contractInstance = new w3.eth.Contract(tokenAbi, contractAddress, { from: address });
       //console.log(contractInstance)
       await contractInstance.methods.balanceOf(address).call().then(function(val){
-        token_balance = String(parseFloat(w3.utils.toWei(val, 'wei')) / 10000)
+        token_balance = String(parseFloat(w3.utils.toWei(val, 'wei')) / 100000000)
       })
       .catch(function(err){
         re.errorResponse(err, res, 500);
