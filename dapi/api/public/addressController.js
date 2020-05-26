@@ -490,7 +490,8 @@ exports.get_a_address = async(req, res) => {
       let contractAddress = process.env.ContractAddress
       var contractInstance = new w3.eth.Contract(tokenAbi, contractAddress, { from: addr });
       await contractInstance.methods.balanceOf(addr).call().then(function(val){
-        new_address.token_balance = String(parseFloat(w3.utils.toWei(val, 'wei')) / 10000)
+        console.log(val)
+        new_address.token_balance = String(parseFloat(w3.utils.toWei(val, 'wei')) / 100000000)
       })
       .catch(function(err){
         re.errorResponse(err, res, 500);
