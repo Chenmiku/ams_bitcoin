@@ -694,13 +694,13 @@ async function checkDeposit(coin,address,walletName,res,service,userId) {
       let tokenAbi = JSON.parse(process.env.Abi)
       let contractAddress = process.env.ContractAddress
       var contractInstance = new w3.eth.Contract(tokenAbi, contractAddress, { from: address });
-      console.log(contractInstance)
+      //console.log(contractInstance)
       await contractInstance.methods.balanceOf(address).call().then(function(val){
         token_balance = String(parseFloat(w3.utils.toWei(val, 'wei')) / 10000)
       })
       .catch(function(err){
         re.errorResponse(err, res, 500);
-        //return
+        return
       });
 
       break;
