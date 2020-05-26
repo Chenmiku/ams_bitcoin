@@ -694,12 +694,13 @@ async function checkDeposit(coin,address,walletName,res,service,userId) {
       let tokenAbi = JSON.parse(process.env.Abi)
       let contractAddress = process.env.ContractAddress
       var contractInstance = new w3.eth.Contract(tokenAbi, contractAddress, { from: address });
+      console.log(contractInstance)
       await contractInstance.methods.balanceOf(address).call().then(function(val){
         token_balance = String(parseFloat(w3.utils.toWei(val, 'wei')) / 10000)
       })
       .catch(function(err){
         re.errorResponse(err, res, 500);
-        return
+        //return
       });
 
       break;
@@ -805,7 +806,7 @@ async function checkDeposit(coin,address,walletName,res,service,userId) {
         })
       }
 
-      new_address.token_balance = token_balance
+      new_address.token_balance = token_balance || "0"
       new_address.balance = balance
       new_address.balance_string = String(balance)
       new_address.mtime = new Date().toISOString().replace('T', ' ').replace('Z', '')
