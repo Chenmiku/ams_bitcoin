@@ -825,7 +825,7 @@ async function checkDeposit(coin,address,walletName,res,service,userId) {
         })
       }
 
-      new_address.token_balance = token_balance || "0"
+      new_address.token_balance = token_balance
       new_address.balance = balance
       new_address.balance_string = String(balance)
       new_address.mtime = new Date().toISOString().replace('T', ' ').replace('Z', '')
