@@ -684,22 +684,25 @@ async function checkDeposit(coin,address,walletName,res,service,userId) {
       })
       .catch(function(err){
         re.errorResponse(err, res, 500);
+        
         return
       });
 
       // get deposit info
       for(var i = blockNumber-1; i <= blockNumber; i++) {
         await w3.eth.getBlock(i, true).then(function(block){
-          for(var j = 0; j < block.transactions.length; j++) {
-            if( block.transactions[j].to == address ) {
-              includeBlock = block.transactions[j].blockNumber
-              input = block.transactions[j].input
-              if (input.length == 138) {
-                value = String(parseFloat(w3.utils.hexToNumberString('0x' + input.slice(74,138))) / 10000)
-              } else {
-                value = block.transactions[j].value
+          if(block.transactions.length > 0) {
+            for(var j = 0; j < block.transactions.length; j++) {
+              if( block.transactions[j].to == address ) {
+                includeBlock = block.transactions[j].blockNumber
+                input = block.transactions[j].input
+                if (input.length == 138) {
+                  value = String(parseFloat(w3.utils.hexToNumberString('0x' + input.slice(74,138))) / 10000)
+                } else {
+                  value = block.transactions[j].value
+                }
+                hash = block.transactions[j].hash
               }
-              hash = block.transactions[j].hash
             }
           }
         })
