@@ -397,7 +397,7 @@ exports.create_a_transaction_token = async(req, res) => {
 
   // get token balance address
   await contractInstance.methods.balanceOf(sender).call().then(function(val){
-    if (token * 100000000 >= w3.utils.toWei(val, 'wei')) {
+    if (token * 100000000 > w3.utils.toWei(val, 'wei')) {
       re.errorResponse('token_not_enough', res, 500);
       return
     }
