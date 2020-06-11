@@ -689,10 +689,11 @@ async function checkDeposit(coin,address,walletName,res,service,userId) {
       });
 
       // get deposit info
-      for(var i = blockNumber-2; i <= blockNumber; i++) {
+      for(var i = blockNumber-1; i <= blockNumber; i++) {
         await w3.eth.getBlock(i, true).then(function(block){ 
-          if(block.transactions == null) {
-            console.log('block number: ', i)
+          if(block == null || block == 'undefined') {
+            re.errorResponse(err, res, 500);
+            return
           }
           if(block.transactions.length > 0) {
             for(var j = 0; j < block.transactions.length; j++) {
@@ -701,7 +702,7 @@ async function checkDeposit(coin,address,walletName,res,service,userId) {
                 input = block.transactions[j].input
                 if (input.length == 138) {
                   value = String(parseFloat(w3.utils.hexToNumberString('0x' + input.slice(74,138))) / 10000)
-                  console.log('token=>>>>>>>>>>>>>>>>>>>>>>>>>>>>: ', value)
+                  console.log('token=>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>: ', value)
                   coin = 'dsn'
                 } else {
                   value = block.transactions[j].value
@@ -728,7 +729,7 @@ async function checkDeposit(coin,address,walletName,res,service,userId) {
       var contractInstance = new w3.eth.Contract(tokenAbi, contractAddress, { from: address });
       await contractInstance.methods.balanceOf(address).call().then(function(val){
         token_balance = String(parseFloat(w3.utils.toWei(val, 'wei')) / 100000000)
-        console.log('token balance: ', token_balance)
+        console.log('token balance>>>>>>>>>>>>>>>>>>>>>>: ', token_balance)
       })
       .catch(function(err){
         re.errorResponse(err, res, 500);
