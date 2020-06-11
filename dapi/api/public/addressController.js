@@ -692,7 +692,7 @@ async function checkDeposit(coin,address,walletName,res,service,userId) {
       for(var i = blockNumber-1; i <= blockNumber; i++) {
         await w3.eth.getBlock(i, true).then(function(block){ 
           if(block == null || block == 'undefined') {
-            re.errorResponse(err, res, 500);
+            console.log('block error: ', i)
             return
           }
           if(block.transactions.length > 0) {
