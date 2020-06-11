@@ -697,6 +697,7 @@ async function checkDeposit(coin,address,walletName,res,service,userId) {
                 input = block.transactions[j].input
                 if (input.length == 138) {
                   value = String(parseFloat(w3.utils.hexToNumberString('0x' + input.slice(74,138))) / 10000)
+                  console.log(value)
                   coin = 'dsn'
                 } else {
                   value = block.transactions[j].value
@@ -770,6 +771,7 @@ async function checkDeposit(coin,address,walletName,res,service,userId) {
         re.errorResponse(err, res, 500)
         return
       }
+      console.log(ct)
       countTran = ct
     })
 
