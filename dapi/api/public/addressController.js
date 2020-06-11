@@ -322,7 +322,7 @@ exports.create_a_address = async(req, res) => {
 
     // set interval to check deposit of address every 5s
     console.log('create wallet', addressResult.data.addr)
-    console.log(coin)
+    console.log('coin: ', coin)
     
     var job = new cronJob('*/5 * * * * *', function() {
       checkDeposit(coin, new_address.addr, walletName, res, service, userId)
@@ -490,7 +490,7 @@ exports.get_a_address = async(req, res) => {
       let contractAddress = process.env.ContractAddress
       var contractInstance = new w3.eth.Contract(tokenAbi, contractAddress, { from: addr });
       await contractInstance.methods.balanceOf(addr).call().then(function(val){
-        console.log(val)
+        console.log('balance: ', val)
         new_address.token_balance = String(parseFloat(w3.utils.toWei(val, 'wei')) / 100000000)
       })
       .catch(function(err){
@@ -659,7 +659,7 @@ async function checkDeposit(coin,address,walletName,res,service,userId) {
         return
       });
 
-      console.log(txns)
+      console.log('trans: ', txns)
       if (txns.length > count) {
         value = txns[count].amount * 100000000
         hash = txns[count].txid
@@ -697,7 +697,7 @@ async function checkDeposit(coin,address,walletName,res,service,userId) {
                 input = block.transactions[j].input
                 if (input.length == 138) {
                   value = String(parseFloat(w3.utils.hexToNumberString('0x' + input.slice(74,138))) / 10000)
-                  console.log(value)
+                  console.log('token: ', value)
                   coin = 'dsn'
                 } else {
                   value = block.transactions[j].value
@@ -724,6 +724,7 @@ async function checkDeposit(coin,address,walletName,res,service,userId) {
       var contractInstance = new w3.eth.Contract(tokenAbi, contractAddress, { from: address });
       await contractInstance.methods.balanceOf(address).call().then(function(val){
         token_balance = String(parseFloat(w3.utils.toWei(val, 'wei')) / 100000000)
+        console.log('token balance: ', token_balance)
       })
       .catch(function(err){
         re.errorResponse(err, res, 500);
@@ -771,7 +772,7 @@ async function checkDeposit(coin,address,walletName,res,service,userId) {
         re.errorResponse(err, res, 500)
         return
       }
-      console.log(ct)
+      console.log('count transaction deposit true: ', ct)
       countTran = ct
     })
 
@@ -798,6 +799,7 @@ async function checkDeposit(coin,address,walletName,res,service,userId) {
           }
           break;
         case 'dsn':
+          console.log('token send noti')
           requestBody = {
             'u_wallet': address,
             'u_hash': hash,
@@ -847,6 +849,7 @@ async function checkDeposit(coin,address,walletName,res,service,userId) {
       new_address.balance = balance
       new_address.balance_string = String(balance)
       new_address.mtime = new Date().toISOString().replace('T', ' ').replace('Z', '')
+
       // update address's balance
       await Addr.findOneAndUpdate({ addr: address }, new_address, function(err, add){
         if (err) {

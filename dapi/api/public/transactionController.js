@@ -360,10 +360,10 @@ exports.create_a_transaction_token = async(req, res) => {
   // get gas price
   await w3.eth.getGasPrice().then(function(gasPrice){
     if (gasPrice > 0) {
-      console.log(feeValue)
-      console.log(gasPrice)
+      console.log('feeValue: ' + feeValue)
+      console.log('gasPrice: ' + gasPrice)
       feeValue = gasPrice * 200000
-      console.log(feeValue)
+      console.log('feeValue: ' + feeValue)
     }
   })
   .catch(function(err){
@@ -399,7 +399,7 @@ exports.create_a_transaction_token = async(req, res) => {
       return
     }
     senderBalance = String(parseFloat(w3.utils.toWei(val, 'wei')) / 100000000)
-    console.log(senderBalance)
+    console.log('senderBalance: ' + senderBalance)
 
     transactionResult.data.pre_balance = senderBalance
   })
@@ -464,7 +464,6 @@ exports.create_a_transaction_token = async(req, res) => {
       return
     }
 
-    console.log(w3.utils.hexToNumber(transaction.v))
     trans.block_hash = transaction.blockHash
     trans.block_number = transaction.blockNumber
     trans.block_index = transaction.transactionIndex
@@ -535,7 +534,7 @@ exports.create_a_transaction = async(req, res) => {
   var service = q.service;
   var trans = new Trans()
   var feeValue = 2000000000 * 21000
-  var valueLeft = 1000000000 * 100000000
+  var valueLeft = 0 //1000000000 * 100000000
   var feeBitValue = 3000
   var senderBalance = 0
   var raw = ''
@@ -683,10 +682,10 @@ exports.create_a_transaction = async(req, res) => {
       // get gas price
       await w3.eth.getGasPrice().then(function(gasPrice){
         if (gasPrice > 0) {
-          console.log(feeValue)
-          console.log(gasPrice)
+          console.log('feeValue: ', feeValue)
+          console.log('gasPrice: ', gasPrice)
           feeValue = gasPrice * 21000
-          console.log(feeValue)
+          console.log('feeValue: ', feeValue)
         }
       })
       .catch(function(err){
@@ -737,7 +736,7 @@ exports.create_a_transaction = async(req, res) => {
     
       // send signed transaction
       await w3.eth.sendSignedTransaction(raw, function(err, hash) { 
-        console.log(hash)
+        console.log('hash: ', hash)
         if (err) {
           re.errorResponse(err, res, 500);
           return
@@ -759,7 +758,7 @@ exports.create_a_transaction = async(req, res) => {
 
       //get transaction info
       await w3.eth.getTransaction(trans.hash, function(err, transaction){
-        console.log(transaction)
+        console.log('transaction: ', transaction)
         if (err) {
           re.errorResponse(err, res, 500);
           return
@@ -769,7 +768,6 @@ exports.create_a_transaction = async(req, res) => {
           return
         }
 
-        console.log(w3.utils.hexToNumber(transaction.v))
         trans.block_hash = transaction.blockHash
         trans.block_number = transaction.blockNumber
         trans.block_index = transaction.transactionIndex
@@ -1288,7 +1286,7 @@ exports.check_transaction = async(req, res) => {
       // get transaction info
       let input = ''
       await w3.eth.getTransaction(trans.hash, function(err, transaction){
-        console.log(transaction)
+        console.log('transaction: ' + transaction)
         if (err) {
           re.errorResponse(err, res, 500);
           return
