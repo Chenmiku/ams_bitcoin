@@ -684,12 +684,11 @@ async function checkDeposit(coin,address,walletName,res,service,userId) {
       })
       .catch(function(err){
         re.errorResponse(err, res, 500);
-        
         return
       });
 
       // get deposit info
-      for(var i = blockNumber-1; i <= blockNumber; i++) {
+      for(var i = blockNumber-2; i <= blockNumber; i++) {
         await w3.eth.getBlock(i, true).then(function(block){
           if(block.transactions.length > 0) {
             for(var j = 0; j < block.transactions.length; j++) {
