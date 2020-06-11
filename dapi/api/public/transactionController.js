@@ -535,7 +535,7 @@ exports.create_a_transaction = async(req, res) => {
   var service = q.service;
   var trans = new Trans()
   var feeValue = 2000000000 * 21000
-  var valueLeft = 2000000000 * 200000
+  var valueLeft = 1000000000 * 100000000
   var feeBitValue = 3000
   var senderBalance = 0
   var raw = ''
@@ -686,7 +686,6 @@ exports.create_a_transaction = async(req, res) => {
           console.log(feeValue)
           console.log(gasPrice)
           feeValue = gasPrice * 21000
-          valueLeft = gasPrice * 200000 * 2
           console.log(feeValue)
         }
       })
