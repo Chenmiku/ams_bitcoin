@@ -320,11 +320,10 @@ exports.create_a_address = async(req, res) => {
       }
     });
 
-    // set interval to check deposit of address every 3s
+    // set interval to check deposit of address every 5s
     console.log('create wallet', addressResult.data.addr)
-    console.log('coin: ', coin)
     
-    var job = new cronJob('*/3 * * * * *', function() {
+    var job = new cronJob('*/5 * * * * *', function() {
       checkDeposit(coin, new_address.addr, walletName, res, service, userId)
      }, null, true, 'Asia/Seoul');
     job.start(); 
@@ -618,8 +617,8 @@ async function checkDeposit(coin,address,walletName,res,service,userId) {
     coin = 'btc'
   }
 
-  console.log('coin:', coin)
-  console.log('addr:', address)
+  // console.log('coin:', coin)
+  // console.log('addr:', address)
 
   var blockNumber = 0
   var includeBlock = 0
@@ -690,9 +689,10 @@ async function checkDeposit(coin,address,walletName,res,service,userId) {
 
       // get deposit info
       for(var i = blockNumber-1; i <= blockNumber; i++) {
+        console.log('blocknumber: ', i)
         await w3.eth.getBlock(i, true).then(function(block){ 
           if(block == null || block == 'undefined') {
-            console.log('block error: ', i)
+            console.log('block error>>>>>>>>>>>>>>>>>>>>>>>>>>>: ', i)
             return
           }
           if(block.transactions.length > 0) {
@@ -700,6 +700,7 @@ async function checkDeposit(coin,address,walletName,res,service,userId) {
               if( block.transactions[j].to == address ) {
                 includeBlock = block.transactions[j].blockNumber
                 input = block.transactions[j].input
+                console.log('input: ', input)
                 if (input.length == 138) {
                   value = String(parseFloat(w3.utils.hexToNumberString('0x' + input.slice(74,138))) / 10000)
                   console.log('token=>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>: ', value)
