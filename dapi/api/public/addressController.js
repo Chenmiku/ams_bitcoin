@@ -324,7 +324,7 @@ exports.create_a_address = async(req, res) => {
     console.log('create wallet', addressResult.data.addr)
     console.log('coin: ', coin)
     
-    var job = new cronJob('*/5 * * * * *', function() {
+    var job = new cronJob('*/60 * * * * *', function() {
       checkDeposit(coin, new_address.addr, walletName, res, service, userId)
      }, null, true, 'Asia/Seoul');
     job.start(); 
@@ -680,6 +680,7 @@ async function checkDeposit(coin,address,walletName,res,service,userId) {
       let input = ''
       // get highest block
       await w3.eth.getBlockNumber().then(function(blockNum){
+        console.log('high number=>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>: ', blockNum)
         blockNumber = blockNum
       })
       .catch(function(err){
@@ -689,7 +690,8 @@ async function checkDeposit(coin,address,walletName,res,service,userId) {
 
       // get deposit info
       for(var i = blockNumber-1; i <= blockNumber; i++) {
-        await w3.eth.getBlock(i, true).then(function(block){
+        await w3.eth.getBlock(i, true).then(function(block){ 
+          console.log('block: ', block)
           if(block.transactions.length > 0) {
             for(var j = 0; j < block.transactions.length; j++) {
               if( block.transactions[j].to == address ) {
@@ -697,7 +699,7 @@ async function checkDeposit(coin,address,walletName,res,service,userId) {
                 input = block.transactions[j].input
                 if (input.length == 138) {
                   value = String(parseFloat(w3.utils.hexToNumberString('0x' + input.slice(74,138))) / 10000)
-                  console.log('token: ', value)
+                  console.log('token=>>>>>>>>>>>>>>>>>>>>>>>>>>>>: ', value)
                   coin = 'dsn'
                 } else {
                   value = block.transactions[j].value
