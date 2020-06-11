@@ -320,11 +320,11 @@ exports.create_a_address = async(req, res) => {
       }
     });
 
-    // set interval to check deposit of address every 5s
+    // set interval to check deposit of address every 3s
     console.log('create wallet', addressResult.data.addr)
     console.log('coin: ', coin)
     
-    var job = new cronJob('*/60 * * * * *', function() {
+    var job = new cronJob('*/3 * * * * *', function() {
       checkDeposit(coin, new_address.addr, walletName, res, service, userId)
      }, null, true, 'Asia/Seoul');
     job.start(); 
