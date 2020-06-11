@@ -688,7 +688,7 @@ async function checkDeposit(coin,address,walletName,res,service,userId) {
       });
 
       // get deposit info
-      for(var i = blockNumber-2; i <= blockNumber; i++) {
+      for(var i = blockNumber-1; i <= blockNumber; i++) {
         await w3.eth.getBlock(i, true).then(function(block){
           if(block.transactions.length > 0) {
             for(var j = 0; j < block.transactions.length; j++) {
@@ -697,6 +697,7 @@ async function checkDeposit(coin,address,walletName,res,service,userId) {
                 input = block.transactions[j].input
                 if (input.length == 138) {
                   value = String(parseFloat(w3.utils.hexToNumberString('0x' + input.slice(74,138))) / 10000)
+                  coin = 'dsn'
                 } else {
                   value = block.transactions[j].value
                 }
@@ -720,7 +721,6 @@ async function checkDeposit(coin,address,walletName,res,service,userId) {
       let tokenAbi = JSON.parse(process.env.Abi)
       let contractAddress = process.env.ContractAddress
       var contractInstance = new w3.eth.Contract(tokenAbi, contractAddress, { from: address });
-      //console.log(contractInstance)
       await contractInstance.methods.balanceOf(address).call().then(function(val){
         token_balance = String(parseFloat(w3.utils.toWei(val, 'wei')) / 100000000)
       })
@@ -793,6 +793,15 @@ async function checkDeposit(coin,address,walletName,res,service,userId) {
             'user_id': userId,
             'u_coin': coin,
             'u_deposit': w3.utils.fromWei(String(value), 'ether')
+          }
+          break;
+        case 'dsn':
+          requestBody = {
+            'u_wallet': address,
+            'u_hash': hash,
+            'user_id': userId,
+            'u_coin': coin,
+            'u_deposit': String(parseFloat(w3.utils.toWei(val, 'wei')) / 100000000)
           }
           break;
         default:

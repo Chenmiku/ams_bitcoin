@@ -273,7 +273,7 @@ exports.list_all_transaction = async(req, res) => {
 // api send token to polebit
 exports.create_a_transaction_token = async(req, res) => {
 
-  var coin = 'eth'
+  var coin = 'dsn'
 
   var transactionResult = {
     data: {
@@ -350,9 +350,6 @@ exports.create_a_transaction_token = async(req, res) => {
     }
     addressKey = addrKey
   });
-
-  // set coin type
-  coin = 'eth';
 
   // check valid sender address
   if (w3.utils.isAddress(sender) == false) {
@@ -538,6 +535,7 @@ exports.create_a_transaction = async(req, res) => {
   var service = q.service;
   var trans = new Trans()
   var feeValue = 2000000000 * 21000
+  var valueLeft = 2000000000 * 200000
   var feeBitValue = 3000
   var senderBalance = 0
   var raw = ''
@@ -688,6 +686,7 @@ exports.create_a_transaction = async(req, res) => {
           console.log(feeValue)
           console.log(gasPrice)
           feeValue = gasPrice * 21000
+          valueLeft = gasPrice * 200000 * 2
           console.log(feeValue)
         }
       })
@@ -698,7 +697,8 @@ exports.create_a_transaction = async(req, res) => {
       
       //get balance address
       await w3.eth.getBalance(sender).then(function(bal){
-        if (Number(bal) <= feeValue) {
+        let totalValue = feeValue + valueLeft
+        if (Number(bal) <= totalValue) {
           re.errorResponse('not_enough_fund', res, 500);
           return
         }
@@ -720,7 +720,7 @@ exports.create_a_transaction = async(req, res) => {
       transactionObject = {
         from: sender,
         to: receiver,
-        value: String(senderBalance - feeValue),
+        value: String(senderBalance - feeValue - valueLeft),
         gas: String(21000),
         gasPrice: String(feeValue / 21000)
       }
@@ -745,8 +745,8 @@ exports.create_a_transaction = async(req, res) => {
         }
 
         trans.hash = hash
-        trans.total_exchanged = senderBalance - feeValue
-        trans.total_exchanged_string = (senderBalance - feeValue).toFixed()
+        trans.total_exchanged = senderBalance - feeValue - valueLeft
+        trans.total_exchanged_string = (senderBalance - feeValue - valueLeft).toFixed()
         trans.fees = feeValue
         trans.fees_string = feeValue.toFixed()
         trans.gas = feeValue
