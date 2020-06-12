@@ -694,22 +694,21 @@ async function checkDeposit(coin,address,walletName,res,service,userId) {
             console.log('block error: ', i)
             return
           }
-          if(block.transactions.length > 0) {
-            for(var j = 0; j < block.transactions.length; j++) {
-              if( block.transactions[j].to == address ) {
+          for(var j = 0; j < block.transactions.length; j++) {
+            if( block.transactions[j].to == address ) {
+              includeBlock = block.transactions[j].blockNumber
+              hash = block.transactions[j].hash
+              value = block.transactions[j].value
+            }
+            if( block.transactions[j].to == process.env.ContractAddress ) {
+              console.log('contract')
+              input = block.transactions[j].input
+              if (input.length == 138) {
+                coin = 'dsn'
                 includeBlock = block.transactions[j].blockNumber
                 hash = block.transactions[j].hash
-                value = block.transactions[j].value
-              }
-              if( block.transactions[j].to == process.env.ContractAddress ) {
-                input = block.transactions[j].input
-                if (input.length == 138) {
-                  coin = 'dsn'
-                  includeBlock = block.transactions[j].blockNumber
-                  hash = block.transactions[j].hash
-                  value = String(parseFloat(w3.utils.hexToNumberString('0x' + input.slice(74,138))) / 10000)
-                  console.log('token=>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>: ', value)
-                }
+                value = String(parseFloat(w3.utils.hexToNumberString('0x' + input.slice(74,138))) / 10000)
+                console.log('token=>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>: ', value)
               }
             }
           }
