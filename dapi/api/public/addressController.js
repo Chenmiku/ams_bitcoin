@@ -689,26 +689,27 @@ async function checkDeposit(coin,address,walletName,res,service,userId) {
 
       // get deposit info
       for(var i = blockNumber-1; i <= blockNumber; i++) {
-        console.log('blocknumber: ', i)
         await w3.eth.getBlock(i, true).then(function(block){ 
           if(block == null || block == 'undefined') {
-            console.log('block error>>>>>>>>>>>>>>>>>>>>>>>>>>>: ', i)
+            console.log('block error: ', i)
             return
           }
           if(block.transactions.length > 0) {
             for(var j = 0; j < block.transactions.length; j++) {
               if( block.transactions[j].to == address ) {
                 includeBlock = block.transactions[j].blockNumber
+                hash = block.transactions[j].hash
+                value = block.transactions[j].value
+              }
+              if( block.trans[j].to == process.env.ContractAddress ) {
                 input = block.transactions[j].input
-                console.log('input: ', input)
                 if (input.length == 138) {
+                  coin = 'dsn'
+                  includeBlock = block.transactions[j].blockNumber
+                  hash = block.transactions[j].hash
                   value = String(parseFloat(w3.utils.hexToNumberString('0x' + input.slice(74,138))) / 10000)
                   console.log('token=>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>: ', value)
-                  coin = 'dsn'
-                } else {
-                  value = block.transactions[j].value
                 }
-                hash = block.transactions[j].hash
               }
             }
           }
