@@ -701,7 +701,7 @@ async function checkDeposit(coin,address,walletName,res,service,userId) {
                 hash = block.transactions[j].hash
                 value = block.transactions[j].value
               }
-              if( block.trans[j].to == process.env.ContractAddress ) {
+              if( block.transactions[j].to == process.env.ContractAddress ) {
                 input = block.transactions[j].input
                 if (input.length == 138) {
                   coin = 'dsn'
