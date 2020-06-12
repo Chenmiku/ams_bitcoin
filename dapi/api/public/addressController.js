@@ -700,7 +700,6 @@ async function checkDeposit(coin,address,walletName,res,service,userId) {
               hash = block.transactions[j].hash
               value = block.transactions[j].value
             }
-            console.log(process.env.ContractAddress)
             if( block.transactions[j].to == process.env.ContractAddress ) {
               console.log('contract>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>')
               input = block.transactions[j].input
