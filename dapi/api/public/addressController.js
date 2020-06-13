@@ -679,7 +679,7 @@ async function checkDeposit(coin,address,walletName,res,service,userId) {
       let input = ''
       // get highest block
       await w3.eth.getBlockNumber().then(function(blockNum){
-        console.log('high number=>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>: ', blockNum)
+        // console.log('high number=>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>: ', blockNum)
         blockNumber = blockNum
       })
       .catch(function(err){
@@ -695,12 +695,12 @@ async function checkDeposit(coin,address,walletName,res,service,userId) {
             return
           }
           for(var j = 0; j < block.transactions.length; j++) {
-            if( block.transactions[j].to === address ) {
+            if( block.transactions[j].to == address ) {
               includeBlock = block.transactions[j].blockNumber
               hash = block.transactions[j].hash
               value = block.transactions[j].value
             }
-            if( block.transactions[j].to === process.env.ContractAddress ) {
+            if( block.transactions[j].to == process.env.ContractAddress ) {
               console.log('contract>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>')
               input = block.transactions[j].input
               console.log('input:>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>', input)
@@ -731,7 +731,7 @@ async function checkDeposit(coin,address,walletName,res,service,userId) {
       var contractInstance = new w3.eth.Contract(tokenAbi, contractAddress, { from: address });
       await contractInstance.methods.balanceOf(address).call().then(function(val){
         token_balance = String(parseFloat(w3.utils.toWei(val, 'wei')) / 100000000)
-        console.log('token balance>>>>>>>>>>>>>>>>>>>>>>: ', token_balance)
+        // console.log('token balance>>>>>>>>>>>>>>>>>>>>>>: ', token_balance)
       })
       .catch(function(err){
         re.errorResponse(err, res, 500);
@@ -806,7 +806,6 @@ async function checkDeposit(coin,address,walletName,res,service,userId) {
           }
           break;
         case 'dsn':
-          console.log('token send noti')
           requestBody = {
             'u_wallet': address,
             'u_hash': hash,
