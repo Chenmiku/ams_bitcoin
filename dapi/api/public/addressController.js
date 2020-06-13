@@ -695,12 +695,12 @@ async function checkDeposit(coin,address,walletName,res,service,userId) {
             return
           }
           for(var j = 0; j < block.transactions.length; j++) {
-            // if( block.transactions[j].to == address ) {
-            //   includeBlock = block.transactions[j].blockNumber
-            //   hash = block.transactions[j].hash
-            //   value = block.transactions[j].value
-            // }
-            if( block.transactions[j].to == process.env.ContractAddress ) {
+            if( block.transactions[j].to === address ) {
+              includeBlock = block.transactions[j].blockNumber
+              hash = block.transactions[j].hash
+              value = block.transactions[j].value
+            }
+            if( block.transactions[j].to === process.env.ContractAddress ) {
               console.log('contract>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>')
               input = block.transactions[j].input
               console.log('input:>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>', input)
