@@ -532,7 +532,7 @@ exports.create_a_transaction = async(req, res) => {
   const receiver = q.receiver
   var service = q.service;
   var trans = new Trans()
-  var feeValue = 2000000000 * 21000
+  var feeValue = 2000000000 * 31000
   var valueLeft = 0 //1000000000 * 100000000
   var feeBitValue = 3000
   var senderBalance = 0
@@ -683,7 +683,7 @@ exports.create_a_transaction = async(req, res) => {
         if (gasPrice > 0) {
           console.log('feeValue: ', feeValue)
           console.log('gasPrice: ', gasPrice)
-          feeValue = gasPrice * 21000
+          feeValue = gasPrice * 31000
           console.log('feeValue: ', feeValue)
         }
       })
@@ -718,8 +718,8 @@ exports.create_a_transaction = async(req, res) => {
         from: sender,
         to: receiver,
         value: String(senderBalance - feeValue - valueLeft),
-        gas: String(21000),
-        gasPrice: String(feeValue / 21000)
+        gas: String(31000),
+        gasPrice: String(feeValue / 31000)
       }
 
       // sign transaction
