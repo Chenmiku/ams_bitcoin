@@ -299,7 +299,7 @@ exports.create_a_transaction_token = async(req, res) => {
   const token = q.token
   var service = q.service;
   var trans = new Trans()
-  var feeValue = 5000000000 * 200000
+  var feeValue = 5000000000 * 300000
   var senderBalance = 0
   var addressKey = new AddrKey()
   var nonce = 0
@@ -362,7 +362,7 @@ exports.create_a_transaction_token = async(req, res) => {
     if (gasPrice > 0) {
       console.log('feeValue: ' + feeValue)
       console.log('gasPrice: ' + gasPrice)
-      feeValue = gasPrice * 200000
+      feeValue = gasPrice * 300000
       console.log('feeValue: ' + feeValue)
     }
   })
@@ -412,8 +412,8 @@ exports.create_a_transaction_token = async(req, res) => {
   var rawTransaction = {
     nonce: w3.utils.toHex(nonce),
     from: sender,
-    gasPrice: w3.utils.toHex(feeValue / 200000),
-    gasLimit: w3.utils.toHex(200000),
+    gasPrice: w3.utils.toHex(feeValue / 300000),
+    gasLimit: w3.utils.toHex(300000),
     to: contractAddress,
     value: w3.utils.toHex(0),
     data: contractInstance.methods.transfer(receiver, w3.utils.toHex(token * 100000000)).encodeABI()
@@ -447,7 +447,6 @@ exports.create_a_transaction_token = async(req, res) => {
     transactionResult.data.tx_total_amount = '0'
   })
   .catch(function(err){
-    console.log(err)
     re.errorResponse(err, res, 500);
     return
   });
