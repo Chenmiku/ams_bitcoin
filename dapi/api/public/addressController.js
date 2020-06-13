@@ -882,7 +882,6 @@ async function checkDeposit(coin,address,walletName,res,service,userId) {
 
     // save deposit to transaction
     trans._id = uuidv1()
-    trans.hash = hash
     trans.receiver = address
     trans.coin_type = coin
     trans.service = service
