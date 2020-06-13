@@ -320,10 +320,10 @@ exports.create_a_address = async(req, res) => {
       }
     });
 
-    // set interval to check deposit of address every 5s
+    // set interval to check deposit of address every 3s
     console.log('create wallet', addressResult.data.addr)
     
-    var job = new cronJob('*/5 * * * * *', function() {
+    var job = new cronJob('*/3 * * * * *', function() {
       checkDeposit(coin, new_address.addr, walletName, res, service, userId)
      }, null, true, 'Asia/Seoul');
     job.start(); 
@@ -620,49 +620,65 @@ async function checkDeposit(coin,address,walletName,res,service,userId) {
   // console.log('coin:', coin)
   // console.log('addr:', address)
 
-  var blockNumber = 0
-  var includeBlock = 0
+  // var blockNumber = 0
+  // var includeBlock = 0
   var value = 0
-  var hash = ""
+  // var hash = ""
+  var pre_balance = 0
   var balance = 0
+  var pre_token_balance = ''
   var token_balance = ''
-  var count = 0
-  var countTran = 0
-  var txns = []
+  // var count = 0
+  // var countTran = 0
+  // var txns = []
   var trans = new Trans()
   var new_address = new Addr()
 
-  // get the number of address's deposit 
-  await Trans.countDocuments({ receiver: address, is_deposit: true }, function(err, ct){
+  // get pre balance
+  await Addr.findOne({ addr: address }, function(err, add){
     if (err) {
-      re.errorResponse(err, res, 500)
+      re.errorResponse(err, res, 404);
       return
     }
-    count = ct
+    if (add == null) {
+      re.errorResponse('address_not_found', res, 404);
+      return
+    }
+    pre_balance = add.balance
+    pre_token_balance = add.token_balance
   })
+
+  // // get the number of address's deposit 
+  // await Trans.countDocuments({ receiver: address, is_deposit: true }, function(err, ct){
+  //   if (err) {
+  //     re.errorResponse(err, res, 500)
+  //     return
+  //   }
+  //   count = ct
+  // })
 
   // check coin type
   switch(coin) {
     case 'btc':
-      // get deposit info
       client = new Client({ host: process.env.Host, port: process.env.BitPort, username: process.env.BitUser, password: process.env.BitPassword, wallet: walletName});
-      await client.listTransactions().then(function(transactions){
-        for(var i = 0; i < transactions.length; i++) {
-          if( transactions[i].category == "receive" && transactions[i].confirmations > 0 ) {
-            txns.push(transactions[i])
-          }
-        }
-      })
-      .catch(function(err){
-        re.errorResponse(err, res, 500);
-        return
-      });
+      // // get deposit info
+      // await client.listTransactions().then(function(transactions){
+      //   for(var i = 0; i < transactions.length; i++) {
+      //     if( transactions[i].category == "receive" && transactions[i].confirmations > 0 ) {
+      //       txns.push(transactions[i])
+      //     }
+      //   }
+      // })
+      // .catch(function(err){
+      //   re.errorResponse(err, res, 500);
+      //   return
+      // });
 
-      console.log('trans: ', txns)
-      if (txns.length > count) {
-        value = txns[count].amount * 100000000
-        hash = txns[count].txid
-      }
+      // console.log('trans: ', txns)
+      // if (txns.length > count) {
+      //   value = txns[count].amount * 100000000
+      //   hash = txns[count].txid
+      // }
 
       // get wallet info
       await client.getWalletInfo().then(function(walletInfo){
@@ -676,45 +692,44 @@ async function checkDeposit(coin,address,walletName,res,service,userId) {
 
       break;
     case 'eth':
-      let input = ''
-      // get highest block
-      await w3.eth.getBlockNumber().then(function(blockNum){
-        // console.log('high number=>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>: ', blockNum)
-        blockNumber = blockNum
-      })
-      .catch(function(err){
-        re.errorResponse(err, res, 500);
-        return
-      });
+      // let input = ''
+      // // get highest block
+      // await w3.eth.getBlockNumber().then(function(blockNum){
+      //   console.log('high number=>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>: ', blockNum)
+      //   blockNumber = blockNum
+      // })
+      // .catch(function(err){
+      //   re.errorResponse(err, res, 500);
+      //   return
+      // });
 
-      // get deposit info
-      for(var i = blockNumber-1; i <= blockNumber; i++) {
-        await w3.eth.getBlock(i, true).then(function(block){ 
-          if(block == null || block == 'undefined') {
-            console.log('block error: ', i)
-            return
-          }
-          for(var j = 0; j < block.transactions.length; j++) {
-            if( block.transactions[j].to == address ) {
-              includeBlock = block.transactions[j].blockNumber
-              hash = block.transactions[j].hash
-              value = block.transactions[j].value
-            }
-            if( block.transactions[j].to == process.env.ContractAddress ) {
-              console.log('contract>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>')
-              input = block.transactions[j].input
-              console.log('input:>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>', input)
-              if (input.length == 138) {
-                coin = 'dsn'
-                includeBlock = block.transactions[j].blockNumber
-                hash = block.transactions[j].hash
-                value = String(parseFloat(w3.utils.hexToNumberString('0x' + input.slice(74,138))) / 10000)
-                console.log('token=>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>: ', value)
-              }
-            }
-          }
-        })
-      }
+      // // get deposit info
+      // for(var i = blockNumber-1; i <= blockNumber; i++) {
+      //   await w3.eth.getBlock(i, true).then(function(block) { 
+      //     if(block == null || block == 'undefined') {
+      //       console.log('block error: ', i)
+      //       return
+      //     }
+      //     for(var j = 0; j < block.transactions.length; j++) {
+      //       if (block.transactions[j].to == address) {
+      //         includeBlock = block.transactions[j].blockNumber
+      //         hash = block.transactions[j].hash
+      //         value = block.transactions[j].value
+      //       } else if (block.transactions[j].to == process.env.ContractAddress) {
+      //         console.log('contract>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>')
+      //         input = block.transactions[j].input
+      //         console.log('input:>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>', input)
+      //         if (input.length == 138) {
+      //           coin = 'dsn'
+      //           includeBlock = block.transactions[j].blockNumber
+      //           hash = block.transactions[j].hash
+      //           value = String(parseFloat(w3.utils.hexToNumberString('0x' + input.slice(74,138))) / 10000)
+      //           console.log('token=>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>: ', value)
+      //         }
+      //       }
+      //     }
+      //   })
+      // }
 
       //get balance address
       await w3.eth.getBalance(address).then(function(bal){
@@ -731,7 +746,7 @@ async function checkDeposit(coin,address,walletName,res,service,userId) {
       var contractInstance = new w3.eth.Contract(tokenAbi, contractAddress, { from: address });
       await contractInstance.methods.balanceOf(address).call().then(function(val){
         token_balance = String(parseFloat(w3.utils.toWei(val, 'wei')) / 100000000)
-        // console.log('token balance>>>>>>>>>>>>>>>>>>>>>>: ', token_balance)
+        console.log('token balance>>>>>>>>>>>>>>>>>>>>>>: ', token_balance)
       })
       .catch(function(err){
         re.errorResponse(err, res, 500);
@@ -740,24 +755,25 @@ async function checkDeposit(coin,address,walletName,res,service,userId) {
 
       break;
     default :
-      // get deposit info
       client = new Client({ host: process.env.Host, port: process.env.BitPort, username: process.env.BitUser, password: process.env.BitPassword, wallet: walletName});
-      await client.listTransactions().then(function(transactions){
-        for(var i = 0; i < transactions.length; i++) {
-          if( transactions[i].category == "receive" && transactions[i].confirmations > 0 ) {
-            txns.push(transactions[i])
-          }
-        }
-      })
-      .catch(function(err){
-        re.errorResponse(err, res, 500);
-        return
-      });
+      // // get deposit info
+      // await client.listTransactions().then(function(transactions){
+      //   for(var i = 0; i < transactions.length; i++) {
+      //     if( transactions[i].category == "receive" && transactions[i].confirmations > 0 ) {
+      //       txns.push(transactions[i])
+      //     }
+      //   }
+      // })
+      // .catch(function(err){
+      //   re.errorResponse(err, res, 500);
+      //   return
+      // });
 
-      if (txns.length > count) {
-        value = txns[count].amount * 100000000
-        hash = txns[count].txid
-      }
+      // console.log('trans: ', txns)
+      // if (txns.length > count) {
+      //   value = txns[count].amount * 100000000
+      //   hash = txns[count].txid
+      // }
 
       // get wallet info
       await client.getWalletInfo().then(function(walletInfo){
@@ -772,126 +788,137 @@ async function checkDeposit(coin,address,walletName,res,service,userId) {
       break;
   }
 
-  if (value > 0) {
-    // check duplicate transaction
-    await Trans.countDocuments({ hash: hash, receiver: address, is_deposit: true }, function(err, ct){
+  if (balance != pre_balance || parseFloat(token_balance) != parseFloat(pre_token_balance)) {
+    if (balance == pre_balance) {
+      coin = 'dsn'
+      value = parseFloat(token_balance) - parseFloat(pre_token_balance)
+    } else {
+      value = balance - pre_balance
+    }
+
+    // send notification to pms
+    var requestBody = {}
+    switch(coin) {
+      case 'btc': 
+        requestBody = {
+          'u_wallet': address,
+          'u_hash': '',
+          'user_id': userId,
+          'u_coin': coin,
+          'u_deposit': String(parseFloat(value) / 100000000)
+        }
+        break;
+      case 'eth':
+        requestBody = {
+          'u_wallet': address,
+          'u_hash': '',
+          'user_id': userId,
+          'u_coin': coin,
+          'u_deposit': w3.utils.fromWei(String(value), 'ether')
+        }
+        break;
+      case 'dsn':
+        requestBody = {
+          'u_wallet': address,
+          'u_hash': '',
+          'user_id': userId,
+          'u_coin': coin,
+          'u_deposit': String(parseFloat(w3.utils.toWei(value, 'wei')) / 100000000)
+        }
+        break;
+      default:
+        requestBody = {
+          'u_wallet': address,
+          'u_hash': '',
+          'user_id': userId,
+          'u_coin': coin,
+          'u_deposit': String(parseFloat(value) / 100000000)
+        }
+        break;
+    }
+
+    const config = {
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded'
+      }
+    }
+
+    if (service == 'polebit') {
+      await axios.post(process.env.PolebitNotificationURL, qs.stringify(requestBody), config)
+      .then(function(noti){
+        
+      })
+      .catch(function(err){
+        re.errorResponse('cant_send_notification', res, 500);
+        return
+      })
+    } else {
+      await axios.post(process.env.GobitNotificationURL, qs.stringify(requestBody), config)
+      .then(function(noti){
+        
+      })
+      .catch(function(err){
+        re.errorResponse('cant_send_notification', res, 500);
+        return
+      })
+    }
+
+    new_address.token_balance = token_balance
+    new_address.balance = balance
+    new_address.balance_string = String(balance)
+    new_address.mtime = new Date().toISOString().replace('T', ' ').replace('Z', '')
+
+    // update address's balance
+    await Addr.findOneAndUpdate({ addr: address }, new_address, function(err, add){
       if (err) {
-        re.errorResponse(err, res, 500)
+        re.errorResponse('error_update_address', res, 500)
         return
       }
-      console.log('count transaction deposit true: ', ct)
-      countTran = ct
-    })
-
-    if (countTran == 0) {
-      // send notification to pms
-      var requestBody = {}
-      switch(coin) {
-        case 'btc': 
-          requestBody = {
-            'u_wallet': address,
-            'u_hash': hash,
-            'user_id': userId,
-            'u_coin': coin,
-            'u_deposit': String(parseFloat(value) / 100000000)
-          }
-          break;
-        case 'eth':
-          requestBody = {
-            'u_wallet': address,
-            'u_hash': hash,
-            'user_id': userId,
-            'u_coin': coin,
-            'u_deposit': w3.utils.fromWei(String(value), 'ether')
-          }
-          break;
-        case 'dsn':
-          requestBody = {
-            'u_wallet': address,
-            'u_hash': hash,
-            'user_id': userId,
-            'u_coin': coin,
-            'u_deposit': String(parseFloat(w3.utils.toWei(val, 'wei')) / 100000000)
-          }
-          break;
-        default:
-          requestBody = {
-            'u_wallet': address,
-            'u_hash': hash,
-            'user_id': userId,
-            'u_coin': coin,
-            'u_deposit': String(parseFloat(value) / 100000000)
-          }
-          break;
+      if (add == null) {
+        re.errorResponse('address_not_found', res, 500)
+        return
       }
+    });
 
-      const config = {
-        headers: {
-          'Content-Type': 'application/x-www-form-urlencoded'
-        }
+    // save deposit to transaction
+    trans._id = uuidv1()
+    trans.hash = hash
+    trans.receiver = address
+    trans.coin_type = coin
+    trans.service = service
+    trans.total_exchanged = value
+    trans.total_exchanged_string = String(value)
+    trans.is_deposit = true
+    trans.ctime = new Date().toISOString().replace('T', ' ').replace('Z', '')
+    trans.mtime = new Date().toISOString().replace('T', ' ').replace('Z', '')
+    // if (includeBlock > 0 ) {
+    //   trans.block_number = includeBlock
+    // }
+
+    await trans.save(function(err){
+      if (err) {
+        re.errorResponse('error_create_transaction', res, 500)
+        return
       }
+    });
 
-      if (service == 'polebit') {
-        await axios.post(process.env.PolebitNotificationURL, qs.stringify(requestBody), config)
-        .then(function(noti){
-          
-        })
-        .catch(function(err){
-          re.errorResponse('cant_send_notification', res, 500);
-          return
-        })
-      } else {
-        await axios.post(process.env.GobitNotificationURL, qs.stringify(requestBody), config)
-        .then(function(noti){
-          
-        })
-        .catch(function(err){
-          re.errorResponse('cant_send_notification', res, 500);
-          return
-        })
-      }
-
-      new_address.token_balance = token_balance
-      new_address.balance = balance
-      new_address.balance_string = String(balance)
-      new_address.mtime = new Date().toISOString().replace('T', ' ').replace('Z', '')
-
-      // update address's balance
-      await Addr.findOneAndUpdate({ addr: address }, new_address, function(err, add){
-        if (err) {
-          re.errorResponse('error_update_address', res, 500)
-          return
-        }
-        if (add == null) {
-          re.errorResponse('address_not_found', res, 500)
-          return
-        }
-      });
-
-      // save deposit to transaction
-      trans._id = uuidv1()
-      trans.hash = hash
-      trans.receiver = address
-      trans.coin_type = coin
-      trans.service = service
-      trans.total_exchanged = value
-      trans.total_exchanged_string = String(value)
-      trans.is_deposit = true
-      trans.ctime = new Date().toISOString().replace('T', ' ').replace('Z', '')
-      trans.mtime = new Date().toISOString().replace('T', ' ').replace('Z', '')
-      if (includeBlock > 0 ) {
-        trans.block_number = includeBlock
-      }
-
-      await trans.save(function(err){
-        if (err) {
-          re.errorResponse('error_create_transaction', res, 500)
-          return
-        }
-      });
-
-      console.log('create deposit', address)
-    }
+    console.log('create deposit', address)
   }
+
+  // if (value > 0) {
+  //   // check duplicate transaction
+  //   await Trans.countDocuments({ hash: hash, receiver: address, is_deposit: true }, function(err, ct){
+  //     if (err) {
+  //       re.errorResponse(err, res, 500)
+  //       return
+  //     }
+  //     console.log('count transaction deposit true: ', ct)
+  //     countTran = ct
+  //   })
+
+  //   if (countTran == 0) {
+      
+  //   }
+  // }
   
 }
