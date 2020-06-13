@@ -823,7 +823,7 @@ async function checkDeposit(coin,address,walletName,res,service,userId) {
           'u_hash': '',
           'user_id': userId,
           'u_coin': coin,
-          'u_deposit': String(parseFloat(w3.utils.toWei(value, 'wei')) / 100000000)
+          'u_deposit': String(parseFloat(w3.utils.toWei(String(value), 'wei')) / 100000000)
         }
         break;
       default:
