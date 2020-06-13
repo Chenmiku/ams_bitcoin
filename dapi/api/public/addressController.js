@@ -626,8 +626,8 @@ async function checkDeposit(coin,address,walletName,res,service,userId) {
   // var hash = ""
   var pre_balance = 0
   var balance = 0
-  var pre_token_balance = ''
-  var token_balance = ''
+  var pre_token_balance = '0'
+  var token_balance = '0'
   // var count = 0
   // var countTran = 0
   // var txns = []
@@ -882,6 +882,7 @@ async function checkDeposit(coin,address,walletName,res,service,userId) {
 
     // save deposit to transaction
     trans._id = uuidv1()
+    // trans.hash = hash
     trans.receiver = address
     trans.coin_type = coin
     trans.service = service
