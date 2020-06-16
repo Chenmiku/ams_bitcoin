@@ -789,6 +789,7 @@ async function checkDeposit(coin,address,walletName,res,service,userId) {
   }
 
   if (balance != pre_balance || parseFloat(token_balance) != parseFloat(pre_token_balance)) {
+
     if (balance == pre_balance) {
       coin = 'dsn'
       value = parseFloat(token_balance) - parseFloat(pre_token_balance)
@@ -837,13 +838,30 @@ async function checkDeposit(coin,address,walletName,res,service,userId) {
         break;
     }
 
-    const config = {
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded'
-      }
-    }
+    var jwt_token = ''
 
     if (service == 'polebit') {
+      let requestLogin = {
+        'email': process.env.PolebitEmail,
+        'pw': process.env.PolebitPassword
+      }
+
+      await axios.post(process.env.PolebitLogin, qs.stringify(requestLogin)) 
+      .then(function(account) {
+        jwt_token = account.resp.jwt
+      })
+      .catch(function(err){
+        re.errorResponse('cant_login_to_polebit', res, 500);
+        return
+      })
+
+      let config = {
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+          'Authorization': jwt_token
+        }
+      }
+
       await axios.post(process.env.PolebitNotificationURL, qs.stringify(requestBody), config)
       .then(function(noti){
         
@@ -853,6 +871,28 @@ async function checkDeposit(coin,address,walletName,res,service,userId) {
         return
       })
     } else {
+      let requestLogin = {
+        'email': process.env.GobitEmail,
+        'pw': process.env.GobitPassword
+      }
+      await axios.post(process.env.GobitLogin, qs.stringify(requestLogin))
+      .then(function(account){
+        console.log('account >>>>>>>>>>>>>>>>>>>>>', account)
+        jwt_token = account.resp.jwt
+        console.log('jwt_token >>>>>>>>>>>>>>>>>>>', jwt_token)
+      })
+      .catch(function(err){
+        re.errorResponse('cant_login_to_gobit', res, 500);
+        return
+      })
+
+      let config = {
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+          'Authorization': jwt_token
+        }
+      }
+
       await axios.post(process.env.GobitNotificationURL, qs.stringify(requestBody), config)
       .then(function(noti){
         
