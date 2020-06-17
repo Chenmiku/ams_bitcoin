@@ -848,7 +848,7 @@ async function checkDeposit(coin,address,walletName,res,service,userId) {
 
       await axios.post(process.env.PolebitLogin, qs.stringify(requestLogin)) 
       .then(function(account) {
-        jwt_token = account.resp.jwt
+        jwt_token = account.data.resp.jwt
       })
       .catch(function(err){
         re.errorResponse('cant_login_to_polebit', res, 500);
@@ -877,8 +877,7 @@ async function checkDeposit(coin,address,walletName,res,service,userId) {
       }
       await axios.post(process.env.GobitLogin, qs.stringify(requestLogin))
       .then(function(account){
-        console.log('account >>>>>>>>>>>>>>>>>>>>>', account)
-        jwt_token = account.resp.jwt
+        jwt_token = account.data.resp.jwt
         console.log('jwt_token >>>>>>>>>>>>>>>>>>>', jwt_token)
       })
       .catch(function(err){
