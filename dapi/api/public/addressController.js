@@ -847,27 +847,27 @@ async function checkDeposit(coin,address,walletName,res,service,userId) {
       }
 
       await axios.post(process.env.PolebitLogin, qs.stringify(requestLogin)) 
-      .then(function(account) {
+      .then(async function(account) {
         jwt_token = account.data.resp.jwt
+
+        let config = {
+          headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+            'Authorization': jwt_token
+          }
+        }
+  
+        await axios.post(process.env.PolebitNotificationURL, qs.stringify(requestBody), config)
+        .then(function(noti){
+          
+        })
+        .catch(function(err){
+          re.errorResponse('cant_send_notification', res, 500);
+          return
+        })
       })
       .catch(function(err){
         re.errorResponse('cant_login_to_polebit', res, 500);
-        return
-      })
-
-      let config = {
-        headers: {
-          'Content-Type': 'application/x-www-form-urlencoded',
-          'Authorization': jwt_token
-        }
-      }
-
-      await axios.post(process.env.PolebitNotificationURL, qs.stringify(requestBody), config)
-      .then(function(noti){
-        
-      })
-      .catch(function(err){
-        re.errorResponse('cant_send_notification', res, 500);
         return
       })
     } else {
@@ -876,30 +876,30 @@ async function checkDeposit(coin,address,walletName,res,service,userId) {
         'pw': process.env.GobitPassword
       }
       await axios.post(process.env.GobitLogin, qs.stringify(requestLogin))
-      .then(function(account){
+      .then(async function(account){
         jwt_token = account.data.resp.jwt
         console.log('jwt_token >>>>>>>>>>>>>>>>>>>', jwt_token)
+        
+        let config = {
+          headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+            'Authorization': jwt_token
+          }
+        }
+  
+        await axios.post(process.env.GobitNotificationURL, qs.stringify(requestBody), config)
+        .then(function(noti){
+          
+        })
+        .catch(function(err){
+          re.errorResponse('cant_send_notification', res, 500);
+          return
+        });
       })
       .catch(function(err){
         re.errorResponse('cant_login_to_gobit', res, 500);
         return
-      })
-
-      let config = {
-        headers: {
-          'Content-Type': 'application/x-www-form-urlencoded',
-          'Authorization': jwt_token
-        }
-      }
-
-      await axios.post(process.env.GobitNotificationURL, qs.stringify(requestBody), config)
-      .then(function(noti){
-        
-      })
-      .catch(function(err){
-        re.errorResponse('cant_send_notification', res, 500);
-        return
-      })
+      });
     }
 
     new_address.token_balance = token_balance
