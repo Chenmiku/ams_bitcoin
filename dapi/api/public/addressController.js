@@ -788,7 +788,7 @@ async function checkDeposit(coin,address,walletName,res,service,userId) {
       break;
   }
 
-  if (balance != pre_balance || parseFloat(token_balance) != parseFloat(pre_token_balance)) {
+  if (balance > pre_balance || parseFloat(token_balance) > parseFloat(pre_token_balance)) {
 
     if (balance == pre_balance) {
       coin = 'dsn'
