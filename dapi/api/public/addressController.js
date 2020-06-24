@@ -323,7 +323,7 @@ exports.create_a_address = async(req, res) => {
     // set interval to check deposit of address every 3s
     console.log('create wallet', addressResult.data.addr)
     
-    var job = new cronJob('*/3 * * * * *', function() {
+    var job = new cronJob('*/10 * * * *', function() {
       checkDeposit(coin, new_address.addr, walletName, res, service, userId)
      }, null, true, 'Asia/Seoul');
     job.start(); 
@@ -800,7 +800,7 @@ async function checkDeposit(coin,address,walletName,res,service,userId) {
     // send notification to pms
     var requestBody = {}
     switch(coin) {
-      case 'btc': 
+      case 'btc':
         requestBody = {
           'u_wallet': address,
           'u_hash': '',
