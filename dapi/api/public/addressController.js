@@ -304,6 +304,7 @@ exports.create_a_address = async(req, res) => {
     await new_address.save(function(err, addr) {
       if(err) {
         re.errorResponse('error_create_address', res, 500);
+        return
       } else {
         addressResult.data.addr = addr.addr
         addressResult.data.balance = "0"
@@ -329,6 +330,7 @@ exports.create_a_address = async(req, res) => {
     job.start(); 
   } else {
     re.errorResponse('address_is_null', res, 500);
+    return
   }
 };
 
@@ -588,6 +590,7 @@ exports.get_a_address = async(req, res) => {
     }
     if (ad == null) {
       re.errorResponse('address_not_found', res, 404);
+      return
     } else {
       addressResult.data.addr = addr
       addressResult.data.final_transaction = ad.final_transaction
@@ -803,7 +806,7 @@ async function checkDeposit(coin,address,walletName,res,service,userId) {
       case 'btc':
         requestBody = {
           'u_wallet': address,
-          'u_hash': '',
+          'u_hash': randomString.generate(30),
           'user_id': userId,
           'u_coin': coin,
           'u_deposit': String(parseFloat(value) / 100000000)
@@ -812,7 +815,7 @@ async function checkDeposit(coin,address,walletName,res,service,userId) {
       case 'eth':
         requestBody = {
           'u_wallet': address,
-          'u_hash': '',
+          'u_hash': randomString.generate(30),
           'user_id': userId,
           'u_coin': coin,
           'u_deposit': w3.utils.fromWei(String(value), 'ether')
@@ -821,7 +824,7 @@ async function checkDeposit(coin,address,walletName,res,service,userId) {
       case 'dsn':
         requestBody = {
           'u_wallet': address,
-          'u_hash': '',
+          'u_hash': randomString.generate(30),
           'user_id': userId,
           'u_coin': coin,
           'u_deposit': String(value)
@@ -830,7 +833,7 @@ async function checkDeposit(coin,address,walletName,res,service,userId) {
       default:
         requestBody = {
           'u_wallet': address,
-          'u_hash': '',
+          'u_hash': randomString.generate(30),
           'user_id': userId,
           'u_coin': coin,
           'u_deposit': String(parseFloat(value) / 100000000)

@@ -491,6 +491,7 @@ exports.create_a_transaction_token = async(req, res) => {
   await trans.save(function(err){
     if (err) {
       re.errorResponse('error_create_transaction', res, 500)
+      return
     } else {
       transactionResult.data.confirm = false
       transactionResult.data.message = "transaction_pending"
@@ -886,6 +887,7 @@ exports.create_a_transaction = async(req, res) => {
   await trans.save(function(err){
     if (err) {
       re.errorResponse('error_create_transaction', res, 500)
+      return
     } else {
       transactionResult.data.confirm = false
       transactionResult.data.message = "transaction_pending"
