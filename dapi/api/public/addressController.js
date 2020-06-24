@@ -800,13 +800,14 @@ async function checkDeposit(coin,address,walletName,res,service,userId) {
       value = balance - pre_balance
     }
 
+    let hash = randomString.generate(30)
     // send notification to pms
     var requestBody = {}
     switch(coin) {
       case 'btc':
         requestBody = {
           'u_wallet': address,
-          'u_hash': randomString.generate(30),
+          'u_hash': hash,
           'user_id': userId,
           'u_coin': coin,
           'u_deposit': String(parseFloat(value) / 100000000)
@@ -815,7 +816,7 @@ async function checkDeposit(coin,address,walletName,res,service,userId) {
       case 'eth':
         requestBody = {
           'u_wallet': address,
-          'u_hash': randomString.generate(30),
+          'u_hash': hash,
           'user_id': userId,
           'u_coin': coin,
           'u_deposit': w3.utils.fromWei(String(value), 'ether')
@@ -824,7 +825,7 @@ async function checkDeposit(coin,address,walletName,res,service,userId) {
       case 'dsn':
         requestBody = {
           'u_wallet': address,
-          'u_hash': randomString.generate(30),
+          'u_hash': hash,
           'user_id': userId,
           'u_coin': coin,
           'u_deposit': String(value)
@@ -833,7 +834,7 @@ async function checkDeposit(coin,address,walletName,res,service,userId) {
       default:
         requestBody = {
           'u_wallet': address,
-          'u_hash': randomString.generate(30),
+          'u_hash': hash,
           'user_id': userId,
           'u_coin': coin,
           'u_deposit': String(parseFloat(value) / 100000000)
