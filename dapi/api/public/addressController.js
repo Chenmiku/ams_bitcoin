@@ -857,7 +857,7 @@ async function checkDeposit(coin,address,walletName,res,service,userId) {
         let config = {
           headers: {
             'Content-Type': 'application/x-www-form-urlencoded',
-            'Authorization': jwt_token
+            'Authorization': 'Bearer ' + jwt_token
           }
         }
   
@@ -887,7 +887,7 @@ async function checkDeposit(coin,address,walletName,res,service,userId) {
         let config = {
           headers: {
             'Content-Type': 'application/x-www-form-urlencoded',
-            'Authorization': jwt_token
+            'Authorization': 'Bearer ' + jwt_token
           }
         }
   
