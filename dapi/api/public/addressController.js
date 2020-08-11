@@ -647,6 +647,7 @@ async function checkDeposit(coin,address,walletName,res,service,userId) {
       re.errorResponse('address_not_found', res, 404);
       return
     }
+    new_address = add
     pre_balance = add.balance
     pre_token_balance = add.token_balance
   })
@@ -749,7 +750,6 @@ async function checkDeposit(coin,address,walletName,res,service,userId) {
       var contractInstance = new w3.eth.Contract(tokenAbi, contractAddress, { from: address });
       await contractInstance.methods.balanceOf(address).call().then(function(val){
         token_balance = String(parseFloat(w3.utils.toWei(val, 'wei')) / 100000000)
-        console.log('token balance>>>>>>>>>>>>>>>>>>>>>>: ', token_balance)
       })
       .catch(function(err){
         re.errorResponse(err, res, 500);
@@ -791,8 +791,12 @@ async function checkDeposit(coin,address,walletName,res,service,userId) {
       break;
   }
 
+  console.log("balance: ", balance)
+  console.log("pre_balance: ", pre_balance)
+  console.log("token_balance: ", token_balance)
+  console.log("pre_token_balance: ", pre_token_balance)
   if (balance > pre_balance || parseFloat(token_balance) > parseFloat(pre_token_balance)) {
-
+    console.log("send noti")
     if (balance == pre_balance) {
       coin = 'dsn'
       value = parseFloat(token_balance) - parseFloat(pre_token_balance)
@@ -875,6 +879,7 @@ async function checkDeposit(coin,address,walletName,res,service,userId) {
         return
       })
     } else {
+      console.log("login")
       let requestLogin = {
         'email': process.env.GobitEmail,
         'pw': process.env.GobitPassword
